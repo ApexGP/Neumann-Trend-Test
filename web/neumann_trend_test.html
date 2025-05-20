@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>诺依曼趋势测试</title>
+    <style>
+      /* Basic style settings */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #2c3e50;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .input-panel {
+        flex: 1;
+        min-width: 300px;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .result-panel {
+        flex: 2;
+        min-width: 400px;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      textarea,
+      select,
+      button {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: white;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      .result-message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+      }
+      .has-trend {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .no-trend {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .loading {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+      .spinner {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #4caf50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1>诺依曼趋势测试</h1>
+      <p>
+        一种用于评估数据集是否存在系统性趋势的统计方法，常用于药物稳定性研究和质量控制。
+      </p>
+    </header>
+
+    <div class="container">
+      <div class="input-panel">
+        <h2>输入数据</h2>
+
+        <div class="form-group">
+          <label for="dataInput">数据点 (每行一个值，或CSV格式):</label>
+          <textarea
+            id="dataInput"
+            placeholder="例如：
+100
+110
+120
+130
+140
+150
+
+或者CSV格式 (时间,值):
+0,100
+1,110
+2,120
+3,130
+4,140
+5,150"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="confidenceLevel">置信水平:</label>
+          <select id="confidenceLevel">
+            <option value="0.90">90%</option>
+            <option value="0.95" selected>95%</option>
+            <option value="0.975">97.5%</option>
+            <option value="0.99">99%</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="useDefaultTimePoints">
+            <input
+              type="checkbox"
+              id="useDefaultTimePoints"
+              checked
+              style="width: auto"
+            />
+            使用默认时间点 (0, 1, 2, ...)
+          </label>
+        </div>
+
+        <div class="form-group timepoints-input" style="display: none">
+          <label for="timeInput">时间点 (每行一个值):</label>
+          <textarea
+            id="timeInput"
+            placeholder="例如：
+0
+1
+2
+3
+4
+5"
+          ></textarea>
+        </div>
+
+        <div class="form-control">
+          <button id="runTestBtn">运行测试</button>
+        </div>
+
+        <hr />
+
+        <h3>数据集管理</h3>
+
+        <div class="form-group">
+          <label for="datasetName">数据集名称:</label>
+          <input
+            type="text"
+            id="datasetName"
+            placeholder="输入名称以保存或加载数据集"
+          />
+        </div>
+
+        <div class="form-group">
+          <button id="saveDatasetBtn">保存数据集</button>
+        </div>
+
+        <div class="form-group">
+          <label for="datasetSelect">已保存的数据集:</label>
+          <select id="datasetSelect">
+            <option value="">-- 选择数据集 --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <button id="loadDatasetBtn">加载数据集</button>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <h2>测试结果</h2>
+
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <p>正在计算...</p>
+        </div>
+
+        <div id="results" style="display: none">
+          <table id="resultTable">
+            <thead>
+              <tr>
+                <th>数据点</th>
+                <th>时间点</th>
+                <th>PG值</th>
+                <th>W(P)阈值</th>
+                <th>趋势判断</th>
+              </tr>
+            </thead>
+            <tbody id="resultTableBody"></tbody>
+          </table>
+
+          <div id="summaryResults">
+            <h3>汇总结果</h3>
+            <p>最小PG值: <span id="minPG">-</span></p>
+            <p>最大PG值: <span id="maxPG">-</span></p>
+            <p>平均PG值: <span id="avgPG">-</span></p>
+          </div>
+
+          <div id="resultMessage" class="result-message">
+            <h3>测试结论</h3>
+            <p id="conclusion"></p>
+          </div>
+        </div>
+
+        <div id="noDataMessage">
+          <p>请在左侧输入数据并运行测试</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 获取DOM元素
+        const dataInput = document.getElementById("dataInput");
+        const timeInput = document.getElementById("timeInput");
+        const confidenceLevel = document.getElementById("confidenceLevel");
+        const useDefaultTimePoints = document.getElementById(
+          "useDefaultTimePoints"
+        );
+        const timePointsDiv = document.querySelector(".timepoints-input");
+        const runTestBtn = document.getElementById("runTestBtn");
+        const loading = document.getElementById("loading");
+        const results = document.getElementById("results");
+        const noDataMessage = document.getElementById("noDataMessage");
+        const resultTableBody = document.getElementById("resultTableBody");
+        const minPGEl = document.getElementById("minPG");
+        const maxPGEl = document.getElementById("maxPG");
+        const avgPGEl = document.getElementById("avgPG");
+        const conclusion = document.getElementById("conclusion");
+        const resultMessage = document.getElementById("resultMessage");
+        const datasetName = document.getElementById("datasetName");
+        const saveDatasetBtn = document.getElementById("saveDatasetBtn");
+        const datasetSelect = document.getElementById("datasetSelect");
+        const loadDatasetBtn = document.getElementById("loadDatasetBtn");
+
+        // 切换时间点输入区域的显示
+        useDefaultTimePoints.addEventListener("change", function () {
+          timePointsDiv.style.display = this.checked ? "none" : "block";
+        });
+
+        // 运行测试按钮点击事件
+        runTestBtn.addEventListener("click", function () {
+          // 解析数据输入
+          const data = parseInputData(dataInput.value);
+
+          if (data.length < 4) {
+            alert("错误：至少需要4个数据点才能进行诺依曼趋势测试。");
+            return;
+          }
+
+          // 准备时间点数据
+          let timePoints;
+          if (useDefaultTimePoints.checked) {
+            timePoints = Array.from({ length: data.length }, (_, i) => i);
+          } else {
+            timePoints = parseInputData(timeInput.value);
+
+            if (timePoints.length !== data.length) {
+              alert("错误：时间点数量必须与数据点数量一致。");
+              return;
+            }
+          }
+
+          // 显示加载状态
+          loading.style.display = "block";
+          results.style.display = "none";
+          noDataMessage.style.display = "none";
+
+          // 准备请求数据
+          const requestData = {
+            data: data,
+            time: timePoints,
+            confidenceLevel: parseFloat(confidenceLevel.value),
+          };
+
+          // 发送请求到API
+          fetch("/api/neumann_test", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          })
+            .then((response) => response.json())
+            .then((result) => {
+              if (result.success) {
+                // 显示结果
+                displayResults(result);
+              } else {
+                alert("错误：" + result.error);
+                noDataMessage.style.display = "block";
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("请求失败，请检查服务器状态。");
+              noDataMessage.style.display = "block";
+            })
+            .finally(() => {
+              loading.style.display = "none";
+            });
+        });
+
+        // 保存数据集按钮点击事件
+        saveDatasetBtn.addEventListener("click", function () {
+          if (!datasetName.value.trim()) {
+            alert("请输入数据集名称");
+            return;
+          }
+
+          const data = parseInputData(dataInput.value);
+
+          if (data.length < 1) {
+            alert("请先输入数据");
+            return;
+          }
+
+          // 准备时间点数据
+          let timePoints;
+          if (useDefaultTimePoints.checked) {
+            timePoints = Array.from({ length: data.length }, (_, i) => i);
+          } else {
+            timePoints = parseInputData(timeInput.value);
+
+            if (timePoints.length !== data.length) {
+              alert("错误：时间点数量必须与数据点数量一致。");
+              return;
+            }
+          }
+
+          // 准备请求数据
+          const requestData = {
+            name: datasetName.value,
+            data: data,
+            time: timePoints,
+            description: "通过Web界面创建的数据集",
+          };
+
+          // 发送请求到API
+          fetch("/api/dataset", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          })
+            .then((response) => response.json())
+            .then((result) => {
+              if (result.success) {
+                alert("数据集保存成功");
+                loadDatasets(); // 刷新数据集列表
+              } else {
+                alert("保存失败：" + (result.error || "未知错误"));
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("请求失败，请检查服务器状态。");
+            });
+        });
+
+        // 加载数据集按钮点击事件
+        loadDatasetBtn.addEventListener("click", function () {
+          const selectedDataset = datasetSelect.value;
+
+          if (!selectedDataset) {
+            alert("请选择一个数据集");
+            return;
+          }
+
+          // 准备请求数据
+          const requestData = {
+            name: selectedDataset,
+          };
+
+          // 发送请求到API
+          fetch("/api/dataset", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          })
+            .then((response) => response.json())
+            .then((result) => {
+              if (result.success) {
+                // 填充数据到输入框
+                dataInput.value = result.data.join("\n");
+                datasetName.value = result.name;
+
+                // 处理时间点
+                const hasDefaultTimePoints = isDefaultTimePoints(result.time);
+                useDefaultTimePoints.checked = hasDefaultTimePoints;
+                timePointsDiv.style.display = hasDefaultTimePoints
+                  ? "none"
+                  : "block";
+
+                if (!hasDefaultTimePoints) {
+                  timeInput.value = result.time.join("\n");
+                }
+
+                alert("数据集加载成功");
+              } else {
+                alert("加载失败：" + (result.error || "未知错误"));
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("请求失败，请检查服务器状态。");
+            });
+        });
+
+        // 页面加载时获取数据集列表
+        loadDatasets();
+
+        // 函数：加载数据集列表
+        function loadDatasets() {
+          fetch("/api/datasets")
+            .then((response) => response.json())
+            .then((result) => {
+              if (result.success) {
+                // 清空现有选项
+                datasetSelect.innerHTML =
+                  '<option value="">-- 选择数据集 --</option>';
+
+                // 添加新选项
+                result.datasets.forEach((dataset) => {
+                  const option = document.createElement("option");
+                  option.value = dataset;
+                  option.textContent = dataset;
+                  datasetSelect.appendChild(option);
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Error loading datasets:", error);
+            });
+        }
+
+        // 函数：解析输入数据
+        function parseInputData(inputText) {
+          const data = [];
+          const lines = inputText.trim().split(/\r?\n/);
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+
+            // 检查是否为CSV格式（包含逗号）
+            if (line.includes(",")) {
+              const parts = line.split(",");
+              if (parts.length >= 2) {
+                const value = parseFloat(parts[1]);
+                if (!isNaN(value)) {
+                  data.push(value);
+                }
+              }
+            } else {
+              // 尝试直接解析为数字
+              const value = parseFloat(line);
+              if (!isNaN(value)) {
+                data.push(value);
+              }
+            }
+          }
+
+          return data;
+        }
+
+        // 函数：检查是否为默认时间点
+        function isDefaultTimePoints(timePoints) {
+          if (!timePoints || timePoints.length === 0) return true;
+
+          for (let i = 0; i < timePoints.length; i++) {
+            if (timePoints[i] !== i) {
+              return false;
+            }
+          }
+
+          return true;
+        }
+
+        // 函数：显示测试结果
+        function displayResults(result) {
+          // 清空表格
+          resultTableBody.innerHTML = "";
+
+          // 填充表格
+          for (const item of result.results) {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+              <td>${item.dataPoint}</td>
+              <td>${item.timePoint}</td>
+              <td>${item.pgValue.toFixed(4)}</td>
+              <td>${item.wpThreshold.toFixed(4)}</td>
+              <td>${item.hasTrend ? "是" : "否"}</td>
+            `;
+
+            resultTableBody.appendChild(row);
+          }
+
+          // 更新汇总结果
+          minPGEl.textContent = result.minPG.toFixed(4);
+          maxPGEl.textContent = result.maxPG.toFixed(4);
+          avgPGEl.textContent = result.avgPG.toFixed(4);
+
+          // 更新结论
+          if (result.overallTrend) {
+            conclusion.textContent =
+              "数据存在显著趋势，可能表明测试样品在所测量的时间内存在系统性变化。";
+            resultMessage.className = "result-message has-trend";
+          } else {
+            conclusion.textContent =
+              "数据无显著趋势，测试样品在所测量的时间内保持稳定。";
+            resultMessage.className = "result-message no-trend";
+          }
+
+          // 显示结果区域
+          results.style.display = "block";
+          noDataMessage.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>
