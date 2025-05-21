@@ -1,0 +1,57 @@
+CompileFlags:
+  Add: [
+      # 基本包含路径
+      -I.,
+      -I./include,
+      -I./src,
+
+      # 更精确的源代码路径
+      -I./src/core,
+      -I./src/cli,
+      -I./src/web,
+
+      # 依赖库路径
+      -I./build/mingw-release/_deps/ftxui-src/include,
+      -I./build/mingw-release/_deps/crow-src/include,
+      -I./build/mingw-release/_deps/json-src/include,
+      -I./build/mingw-release/_deps/ftxui-build/include,
+      -I./build/mingw-release/_deps/crow-build/include,
+      -I./build/mingw-release/_deps/json-build/include,
+      -I./build/msvc-release/_deps/ftxui-src/include,
+      -I./build/msvc-release/_deps/crow-src/include,
+      -I./build/msvc-release/_deps/json-src/include,
+      -I./build/msvc-release/_deps/ftxui-build/include,
+      -I./build/msvc-release/_deps/crow-build/include,
+      -I./build/msvc-release/_deps/json-build/include,
+      -I./_deps/ftxui-src/include,
+      -I./_deps/crow-src/include,
+      -I./_deps/json-src/include,
+      -IC:/vcpkg/installed/x64-mingw-static/include,
+
+      # 系统库路径
+      -IC:/Users/Domin/scoop/apps/mingw/current/include,
+      -IC:/Users/Domin/scoop/apps/mingw/current/include/c++/15.1.0,
+
+      # 额外配置
+      -std=c++17,
+      -Wall,
+    ]
+  Compiler: g++
+
+Index:
+  Background: Build
+
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: [performance-*, bugprone-*, modernize-*, readability-*]
+    Remove: [modernize-use-trailing-return-type, readability-identifier-length]
+
+InlayHints:
+  Enabled: Yes
+  DeducedTypes: Yes
+  ParameterNames: Yes
+  TypeNameLimit: 40
+
+Hover:
+  ShowAKA: Yes
