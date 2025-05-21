@@ -19,73 +19,288 @@
 - 可视化结果展示趋势判断
 - 支持导出结果到文本或 CSV 文件
 
-## 构建说明
+## 依赖项安装
 
-### 依赖项
+本项目依赖以下库：
 
-- C++17 兼容的编译器
-- CMake 3.10 或更高版本
-- 以下依赖库会自动下载（如果未安装）：
-  - nlohmann/json: 用于 JSON 处理
-  - Crow: 用于 Web 服务器
-  - FTXUI: 用于终端 UI
-  - Catch2: 用于单元测试
+- nlohmann/json: 用于 JSON 处理
+- FTXUI: 用于终端 UI
+- Crow: 用于 Web 服务器
+- Catch2: 用于单元测试（可选，仅测试需要）
 
-### 构建步骤
+### Windows 平台依赖安装
 
-#### Windows
+Windows 平台**强烈推荐**使用 vcpkg 包管理器安装所有依赖：
 
-Windows 平台提供两种构建方式：使用 MSVC 或 MinGW。
+1. **安装 vcpkg**
 
-```cmd
-# 使用 MSVC 构建 (默认)
-build.bat
+   ```cmd
+   git clone https://github.com/microsoft/vcpkg.git
+   cd vcpkg
+   .\bootstrap-vcpkg.bat
+   ```
 
-# 使用 MinGW 构建
-build.bat mingw
-```
+2. **设置环境变量（可选）**
 
-#### Linux/MacOS
+   推荐设置 `VCPKG_ROOT` 环境变量指向 vcpkg 安装目录，但现在构建脚本能够自动搜索常见安装位置：
+
+   ```cmd
+   # 临时设置（当前命令行会话）
+   set VCPKG_ROOT=C:\path\to\vcpkg
+
+   # 或永久设置（通过系统属性）
+   setx VCPKG_ROOT C:\path\to\vcpkg
+   ```
+
+   > **注意**：如果不设置环境变量，构建系统会自动尝试在常见位置查找 vcpkg，但为了稳定性，仍建议手动设置。
+
+3. **安装依赖**
+
+   **使用 MSVC 编译器时**：
+
+   ```cmd
+   vcpkg install nlohmann-json:x64-windows
+   vcpkg install ftxui:x64-windows
+   vcpkg install crow:x64-windows
+   vcpkg install catch2:x64-windows
+   ```
+
+   **使用 MinGW 编译器时**：
+
+   ```cmd
+   vcpkg install nlohmann-json:x64-mingw-static
+   vcpkg install ftxui:x64-mingw-static
+   vcpkg install crow:x64-mingw-static
+   vcpkg install catch2:x64-mingw-static
+   ```
+
+### Linux 平台依赖安装
+
+1. **安装 nlohmann/json**
+
+   Ubuntu/Debian:
+
+   ```bash
+   sudo apt install nlohmann-json3-dev
+   ```
+
+   Fedora:
+
+   ```bash
+   sudo dnf install nlohmann-json-devel
+   ```
+
+   Arch Linux:
+
+   ```bash
+   sudo pacman -S nlohmann-json
+   ```
+
+2. **安装 FTXUI**
+
+   FTXUI 通常需要手动构建：
+
+   ```bash
+   git clone https://github.com/ArthurSonzogni/FTXUI
+   cd FTXUI
+   mkdir build && cd build
+   cmake .. -DFTXUI_BUILD_EXAMPLES=OFF -DFTXUI_BUILD_DOCS=OFF
+   make -j$(nproc)
+   sudo make install
+   ```
+
+3. **安装 Crow**
+
+   Crow 通常需要手动构建：
+
+   ```bash
+   git clone https://github.com/CrowCpp/Crow
+   cd Crow
+   mkdir build && cd build
+   cmake ..
+   make -j$(nproc)
+   sudo make install
+   ```
+
+4. **安装 Catch2** (可选)
+
+   Ubuntu/Debian:
+
+   ```bash
+   sudo apt install catch2
+   ```
+
+   Fedora:
+
+   ```bash
+   sudo dnf install catch-devel
+   ```
+
+   Arch Linux:
+
+   ```bash
+   sudo pacman -S catch2
+   ```
+
+   或手动构建：
+
+   ```bash
+   git clone https://github.com/catchorg/Catch2.git
+   cd Catch2
+   mkdir build && cd build
+   cmake .. -DBUILD_TESTING=OFF
+   make -j$(nproc)
+   sudo make install
+   ```
+
+### macOS 平台依赖安装
+
+使用 Homebrew 安装：
 
 ```bash
-# 创建构建目录并构建项目
-./build.sh
+brew install nlohmann-json
+brew install catch2
+# FTXUI 和 Crow 需手动构建，方法同 Linux
 ```
+
+## 构建说明
+
+确保已安装所有依赖库后，可以进行项目构建。
+
+### Windows
+
+项目在 Windows 平台上支持两种编译器：MSVC（Visual Studio）和 MinGW（GCC）。
+构建脚本会提供交互式选择，或者可以通过参数直接指定编译器。
+
+```cmd
+# 交互式选择构建工具链（推荐初次构建时使用）
+build.bat
+
+# 使用MinGW编译器构建Release版本
+build.bat mingw
+
+# 使用Visual Studio (MSVC)编译器构建Release版本
+build.bat msvc
+
+# 构建Debug版本
+build.bat mingw debug
+build.bat msvc debug
+
+# 清理后重新构建
+build.bat clean mingw
+```
+
+### Linux/macOS
+
+```bash
+# 构建Release版本
+./build.sh
+
+# 构建Debug版本
+./build.sh debug
+
+# 清理后重新构建
+./build.sh clean
+```
+
+### 检查依赖项
+
+如果构建失败，可以使用依赖检查工具查看依赖项是否正确安装：
+
+```cmd
+# Windows
+check-deps.bat
+
+# 只检查特定工具链的依赖
+check-deps.bat --toolchain msvc
+check-deps.bat --toolchain mingw
+
+# 启用调试模式显示更多信息
+check-deps.bat --debug
+```
+
+这将显示系统中的依赖项安装状态和环境配置。检查工具现在能够自动搜索多个位置查找 vcpkg 和相关依赖库。
 
 ### 高级构建配置
 
-#### 自定义 MinGW 工具链
+项目使用 CMake 预设(CMake Presets)进行构建配置，详细预设配置可在`CMakePresets.json`文件中查看。对于更高级的控制，可以直接使用 CMake 命令：
 
-在 Windows 上使用 MinGW 构建时，系统会按以下顺序查找 MinGW 安装路径：
+```bash
+# 手动配置
+cmake --preset=mingw-release
 
-1. 环境变量 `MINGW_ROOT`
-2. Scoop 安装路径 (`%SCOOP%/apps/mingw/current`)
-3. 常见安装路径 (`C:/MinGW`, `C:/msys64/mingw64`, 等)
-
-您也可以手动指定 MinGW 工具链配置：
-
-```cmd
-# 使用自定义 MinGW 工具链文件
-cmake -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=mingw-toolchain.cmake ..
+# 手动构建
+cmake --build --preset=mingw-release
 ```
 
-#### 配置 clangd 语言服务器
+## 最新构建系统改进
 
-项目会自动生成 `compile_commands.json` 文件，支持 clangd 语言服务器。在 VSCode 中，您可以：
+本项目最近对构建系统进行了以下改进：
 
-1. 安装 clangd 扩展
-2. 确保 `build` 目录中的 `compile_commands.json` 文件存在
-3. 若使用 MinGW，请在 `settings.json` 中添加:
+1. **智能依赖项检测**：
 
-```json
-{
-  "clangd.arguments": [
-    "--background-index",
-    "--compile-commands-dir=${workspaceFolder}/build",
-    "--query-driver=<MinGW路径>/bin/g++.exe"
-  ]
-}
-```
+   - 自动搜索多个位置查找 vcpkg，即使环境变量未设置
+   - 提供更详细的错误信息和安装建议
+   - 智能检测特定工具链所需的 triplet
+   - 添加`--debug`模式显示详细信息
+
+2. **工具链集成**：
+
+   - 更好地支持 MSVC 和 MinGW 工具链切换
+   - 优化 Ninja 构建系统集成
+   - 自动检测并适应不同环境
+
+3. **构建脚本优化**：
+
+   - 交互式工具链选择
+   - 命令行参数支持
+   - 直观的构建状态反馈
+
+4. **CMake 配置改进**：
+
+   - 更灵活的 vcpkg 工具链集成
+   - 添加额外的库路径查找逻辑
+   - 改进 triplet 配置
+
+5. **开发工具集成**：
+   - 优化 clangd 配置，提供更准确的代码智能提示
+   - 自动配置索引路径，支持多种构建目录结构
+   - 改进跨平台 IDE 支持，统一开发体验
+   - VSCode 集成增强，提供开箱即用的开发环境
+
+这些改进使得项目更容易在不同环境下构建，特别是对于 Windows 用户来说，不再需要手动修改构建文件或环境变量来适应不同的工具链。
+
+## IDE 开发环境设置
+
+本项目提供了开箱即用的 IDE 开发环境配置，特别优化了 VS Code 和其他支持 clangd 的编辑器：
+
+### VS Code 配置
+
+项目已预配置 VS Code 开发环境：
+
+1. **安装推荐扩展**：
+
+   - C/C++ Extension Pack
+   - clangd (推荐使用 clangd 而非原生 C/C++扩展提供智能提示)
+
+2. **clangd 配置**：
+
+   - 项目根目录的`.clangd`文件已优化配置，提供准确的代码导航和补全
+   - 自动适配不同构建环境(MSVC/MinGW)的包含路径
+   - 支持跨平台开发环境
+
+3. **使用方法**：
+   - 首次打开项目时，VS Code 会提示安装推荐扩展
+   - 运行构建脚本生成`compile_commands.json`
+   - clangd 会自动索引项目，提供代码导航和智能提示
+
+### 其他编辑器
+
+对于其他支持 clangd 的编辑器(如 CLion、Vim、Emacs)：
+
+1. 确保编辑器已配置使用 clangd 语言服务器
+2. 运行构建脚本生成`compile_commands.json`
+3. 使用项目根目录的`.clangd`配置文件
 
 ## 使用说明
 

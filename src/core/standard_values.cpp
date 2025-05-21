@@ -33,15 +33,62 @@ StandardValues &StandardValues::getInstance() {
 
 bool StandardValues::loadFromFile(const std::string &filename) {
   try {
-    // 打开并读取JSON文件
-    std::ifstream file(filename);
-    if (!file.is_open()) {
+    // 检查文件是否存在
+    std::ifstream checkFile(filename);
+    if (!checkFile.is_open()) {
       std::cerr << "无法打开标准值文件: " << filename << std::endl;
-      return false;
+
+      // 尝试创建标准值文件
+      try {
+        std::cout << "尝试创建标准值文件..." << std::endl;
+        std::ofstream outFile(filename);
+        if (outFile.is_open()) {
+          // 创建基本的标准值JSON
+          json basicValues;
+
+          // 添加0.95置信水平的默认值
+          json level95;
+          level95["4"] = 0.7805;
+          level95["5"] = 0.8204;
+          level95["6"] = 0.8902;
+          level95["7"] = 0.9359;
+
+          basicValues["0.95"] = level95;
+
+          // 写入文件
+          outFile << basicValues.dump(2); // 缩进为2空格
+          outFile.close();
+
+          std::cout << "已创建基本标准值文件: " << filename << std::endl;
+        } else {
+          std::cerr << "无法创建标准值文件。将使用内置默认值。" << std::endl;
+          return false;
+        }
+      } catch (const std::exception &e) {
+        std::cerr << "创建标准值文件失败: " << e.what()
+                  << "。将使用内置默认值。" << std::endl;
+        return false;
+      }
+
+      // 重新尝试打开文件
+      checkFile = std::ifstream(filename);
+      if (!checkFile.is_open()) {
+        std::cerr << "仍然无法打开标准值文件。将使用内置默认值。" << std::endl;
+        return false;
+      }
     }
 
+    // 打开并读取JSON文件
+    std::ifstream file(filename);
     json data;
-    file >> data;
+
+    try {
+      file >> data;
+    } catch (const json::parse_error &e) {
+      std::cerr << "标准值文件JSON解析错误: " << e.what() << std::endl;
+      std::cerr << "将使用内置默认值。" << std::endl;
+      return false;
+    }
 
     // 清除现有数据
     wpValues.clear();
@@ -73,9 +120,16 @@ bool StandardValues::loadFromFile(const std::string &filename) {
     // 排序置信水平
     std::sort(confidenceLevels.begin(), confidenceLevels.end());
 
+    std::cout << "成功加载标准值文件: " << filename << std::endl;
+    std::cout << "  支持的置信水平: " << confidenceLevels.size() << " 个"
+              << std::endl;
+    std::cout << "  样本大小范围: " << minSampleSize << "-" << maxSampleSize
+              << std::endl;
+
     return true;
   } catch (const std::exception &e) {
     std::cerr << "加载标准值文件时出错: " << e.what() << std::endl;
+    std::cerr << "将使用内置默认值。" << std::endl;
     return false;
   }
 }

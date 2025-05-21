@@ -16,9 +16,9 @@ namespace neumann {
 namespace web {
 
 // PIMPL实现类
-class WebServer::Impl {
+class WebServerImpl {
 public:
-  Impl(int port, const std::string &webRootDir)
+  WebServerImpl(int port, const std::string &webRootDir)
       : app(), port(port), webRootDir(webRootDir) {}
 
   crow::SimpleApp app;
@@ -29,14 +29,71 @@ public:
 
 WebServer::WebServer(int port, const std::string &webRootDir)
     : port(port), webRootDir(webRootDir), running(false),
-      impl(new Impl(port, webRootDir)) {
+      impl(new WebServerImpl(port, webRootDir)) {
   // 确保Web资源目录存在
+  std::string absoluteWebDir = webRootDir;
+
+  // 尝试获取当前工作目录
+  std::string workingDir;
+  try {
+    workingDir = fs::current_path().string();
+    std::cout << "当前工作目录: " << workingDir << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "警告: 无法获取当前工作目录: " << e.what() << std::endl;
+  }
+
   if (!fs::exists(webRootDir)) {
     std::cerr << "警告: Web资源目录不存在: " << webRootDir << std::endl;
+
+    // 尝试创建目录
+    try {
+      std::cout << "尝试创建Web资源目录..." << std::endl;
+      fs::create_directory(webRootDir);
+      std::cout << "已创建Web资源目录: " << webRootDir << std::endl;
+    } catch (const std::exception &e) {
+      std::cerr << "错误: 无法创建Web资源目录: " << e.what() << std::endl;
+    }
+  }
+
+  // 检查是否有索引页面文件
+  std::string indexFile = webRootDir + "/neumann_trend_test.html";
+  if (!fs::exists(indexFile)) {
+    std::cerr << "警告: 未找到Web界面文件: " << indexFile << std::endl;
+
+    // 尝试创建简单的占位页面
+    try {
+      std::ofstream file(indexFile);
+      if (file.is_open()) {
+        file << "<!DOCTYPE html>\n";
+        file << "<html>\n";
+        file << "<head>\n";
+        file << "  <meta charset=\"UTF-8\">\n";
+        file << "  <title>诺依曼趋势测试</title>\n";
+        file << "</head>\n";
+        file << "<body>\n";
+        file << "  <h1>诺依曼趋势测试服务器</h1>\n";
+        file << "  <p>服务器正在运行，但未找到正式的Web界面文件。</p>\n";
+        file << "</body>\n";
+        file << "</html>\n";
+        file.close();
+        std::cout << "已创建基本Web界面文件: " << indexFile << std::endl;
+      } else {
+        std::cerr << "错误: 无法创建Web界面文件" << std::endl;
+      }
+    } catch (const std::exception &e) {
+      std::cerr << "错误: 创建Web界面文件失败: " << e.what() << std::endl;
+    }
   }
 
   // 初始化路由
   initializeRoutes();
+}
+
+// 添加析构函数
+WebServer::~WebServer() {
+  if (running) {
+    stop();
+  }
 }
 
 void WebServer::start(bool background) {
@@ -45,17 +102,24 @@ void WebServer::start(bool background) {
     return;
   }
 
+  // 检查环境变量中是否有指定的绑定地址
+  const char *bindAddr = std::getenv("CROW_BINDADDR");
+  std::string bindAddress =
+      bindAddr ? bindAddr : "0.0.0.0"; // 默认绑定到所有地址
+
   // 启动服务器
-  std::cout << "启动Web服务器，监听端口: " << port << std::endl;
+  std::cout << "启动Web服务器，监听地址: " << bindAddress << ":" << port
+            << std::endl;
   std::cout << "Web界面访问URL: " << getUrl() << std::endl;
 
   if (background) {
     // 在后台线程中启动
-    impl->serverThread =
-        std::thread([this]() { impl->app.port(port).multithreaded().run(); });
+    impl->serverThread = std::thread([this, bindAddress]() {
+      impl->app.bindaddr(bindAddress).port(port).multithreaded().run();
+    });
   } else {
     // 在当前线程中启动
-    impl->app.port(port).run();
+    impl->app.bindaddr(bindAddress).port(port).run();
   }
 
   running = true;

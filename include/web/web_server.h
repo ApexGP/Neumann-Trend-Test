@@ -6,6 +6,9 @@
 namespace neumann {
 namespace web {
 
+// 前向声明Impl类
+class WebServerImpl;
+
 /**
  * @brief Web服务器类
  *
@@ -19,6 +22,11 @@ public:
    * @param webRootDir Web资源文件目录
    */
   WebServer(int port = 8080, const std::string &webRootDir = "web");
+
+  /**
+   * @brief 析构函数
+   */
+  ~WebServer();
 
   /**
    * @brief 启动Web服务器
@@ -54,8 +62,7 @@ private:
   bool running;
 
   // 服务器实现（使用PIMPL模式以隐藏Crow依赖）
-  class Impl;
-  std::unique_ptr<Impl> impl;
+  std::unique_ptr<WebServerImpl> impl;
 
   // 初始化路由
   void initializeRoutes();

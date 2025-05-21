@@ -1,135 +1,197 @@
 @echo off
-echo ===== 构建诺依曼趋势测试工具 =====
+echo ===== 诺依曼趋势测试工具构建系统 =====
+echo.
 
-:: 设置默认构建工具链
-set BUILD_SYSTEM=Visual Studio 17 2022
-set BUILD_ARCH=-A x64
-set USE_MINGW=0
-set CONFIG=Release
+:: 初始化默认值
 set CLEAN_BUILD=0
-set USE_VCPKG=0
-set INSTALL_DEPS=0
+set VERBOSE=0
+set TOOL_CHAIN=
+set BUILD_TYPE=release
+set SKIP_INTERACTIVE=0
 
-:: 检查命令行参数
-if "%1"=="clean" (
+:: 处理命令行参数
+:parse_args
+if "%1"=="" goto end_parse_args
+
+if /i "%1"=="clean" (
     set CLEAN_BUILD=1
-    echo 清理构建目录...
-    if exist "build" rmdir /s /q build
     shift
+    goto parse_args
 )
 
-if "%1"=="mingw" (
-    set BUILD_SYSTEM=MinGW Makefiles
-    set BUILD_ARCH=
-    set USE_MINGW=1
-    set CONFIG=
-    echo 使用MinGW工具链构建...
-    set NEUMANN_USE_MINGW=1
+if /i "%1"=="verbose" (
+    set VERBOSE=1
     shift
+    goto parse_args
+)
+
+if /i "%1"=="msvc" (
+    set TOOL_CHAIN=msvc
+    set SKIP_INTERACTIVE=1
+    shift
+    goto parse_args
+)
+
+if /i "%1"=="mingw" (
+    set TOOL_CHAIN=mingw
+    set SKIP_INTERACTIVE=1
+    shift
+    goto parse_args
+)
+
+if /i "%1"=="debug" (
+    set BUILD_TYPE=debug
+    shift
+    goto parse_args
+)
+
+if /i "%1"=="release" (
+    set BUILD_TYPE=release
+    shift
+    goto parse_args
+)
+
+echo [警告] 未知参数: %1
+shift
+goto parse_args
+
+:end_parse_args
+
+:: 判断是否需要进行工具链交互式选择
+if "%TOOL_CHAIN%"=="" (
+    if "%SKIP_INTERACTIVE%"=="0" (
+        goto interactive_select
+    )
+)
+
+goto start_build
+
+:: 交互式选择构建工具链
+:interactive_select
+echo 请选择构建工具链:
+echo 1) MSVC (Visual Studio)
+echo 2) MinGW (GCC)
+echo.
+set /p CHOICE="请输入你的选择 (1/2): "
+
+if "%CHOICE%"=="1" (
+    set TOOL_CHAIN=msvc
+    echo 你选择了MSVC工具链
+) else if "%CHOICE%"=="2" (
+    set TOOL_CHAIN=mingw
+    echo 你选择了MinGW工具链
 ) else (
-    echo 使用MSVC工具链构建...
+    echo [错误] 无效的选择: %CHOICE%
+    exit /b 1
 )
 
-:: 检查是否使用vcpkg和是否安装依赖
-if "%1"=="vcpkg" (
-    set USE_VCPKG=1
-    echo 使用vcpkg管理依赖...
-    shift
-) else if "%1"=="install-deps" (
-    set INSTALL_DEPS=1
-    echo 将安装项目依赖...
-    shift
-)
+echo.
 
-:: 如果指定安装依赖或使用vcpkg且安装依赖
-if "%INSTALL_DEPS%"=="1" (
-    :: 检查VCPKG_ROOT环境变量
-    if defined VCPKG_ROOT (
-        echo 使用vcpkg安装依赖...
-        echo 正在安装FTXUI库...
-        call "%VCPKG_ROOT%\vcpkg" install ftxui:x64-windows
-        if errorlevel 1 (
-            echo 警告: FTXUI安装失败，将尝试从GitHub下载。
-        ) else (
-            echo FTXUI安装成功。
-        )
-        
-        echo 正在安装Crow库...
-        call "%VCPKG_ROOT%\vcpkg" install crow:x64-windows
-        if errorlevel 1 (
-            echo 警告: Crow安装失败，将尝试从GitHub下载。
-        ) else (
-            echo Crow安装成功。
-        )
-    ) else (
-        echo 错误: 未设置VCPKG_ROOT环境变量，无法安装依赖。
-        echo 请设置VCPKG_ROOT环境变量或手动安装依赖。
+:: 检查对应编译器是否可用
+if "%TOOL_CHAIN%"=="msvc" (
+    where cl.exe >nul 2>&1
+    if errorlevel 1 (
+        echo [错误] 未找到MSVC编译器(cl.exe)
+        echo 请安装Visual Studio或确保已在开发者命令提示符中运行此脚本
+        exit /b 1
+    )
+) else if "%TOOL_CHAIN%"=="mingw" (
+    where gcc.exe >nul 2>&1
+    if errorlevel 1 (
+        echo [错误] 未找到MinGW编译器(gcc.exe)
+        echo 请安装MinGW或确保将其bin目录添加到PATH环境变量中
         exit /b 1
     )
 )
 
-if not exist "build" mkdir build
-cd build
+:start_build
+:: 设置CMake预设名称
+set PRESET=%TOOL_CHAIN%-%BUILD_TYPE%
 
-:: 构建命令
-set CMAKE_CMD=cmake .. -G "%BUILD_SYSTEM%" %BUILD_ARCH%
+:: 输出配置信息
+echo.
+echo 构建配置:
+echo - 工具链: %TOOL_CHAIN%
+echo - 构建类型: %BUILD_TYPE%
+echo - CMake预设: %PRESET%
 
-:: 如果使用vcpkg，添加vcpkg工具链文件
-if "%USE_VCPKG%"=="1" (
-    :: 检查VCPKG_ROOT环境变量
-    if defined VCPKG_ROOT (
-        echo 使用VCPKG_ROOT环境变量: %VCPKG_ROOT%
-        set CMAKE_CMD=%CMAKE_CMD% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
-        
-        :: 如果启用vcpkg但没有显式安装依赖，自动安装
-        if "%INSTALL_DEPS%"=="0" (
-            echo 检查是否需要安装依赖...
-            call "%VCPKG_ROOT%\vcpkg" list | findstr "ftxui" > nul
-            if errorlevel 1 (
-                echo FTXUI未安装，正在安装...
-                call "%VCPKG_ROOT%\vcpkg" install ftxui:x64-windows
-            ) else (
-                echo FTXUI已安装。
-            )
-            
-            call "%VCPKG_ROOT%\vcpkg" list | findstr "crow" > nul
-            if errorlevel 1 (
-                echo Crow未安装，正在安装...
-                call "%VCPKG_ROOT%\vcpkg" install crow:x64-windows
-            ) else (
-                echo Crow已安装。
-            )
-        )
-    ) else (
-        echo 警告: 未找到VCPKG_ROOT环境变量，请确保已正确安装vcpkg或手动安装依赖
+:: 检查依赖 (单独调用依赖检查脚本)
+echo 检查依赖项...
+call check-deps.bat --quiet --toolchain %TOOL_CHAIN%
+if errorlevel 1 (
+    echo.
+    echo [错误] 依赖检查失败，请安装缺少的依赖项后再试
+    exit /b 1
+)
+echo [成功] 所有依赖检查通过
+
+:: 如果需要清理构建目录
+if "%CLEAN_BUILD%"=="1" (
+    echo 清理构建目录: build/%PRESET%
+    if exist "build/%PRESET%" rmdir /s /q "build/%PRESET%"
+)
+
+:: 创建构建目录
+if not exist "build/%PRESET%" mkdir "build/%PRESET%"
+
+:: 检查 Ninja 是否可用 (对MinGW构建有帮助)
+if "%TOOL_CHAIN%"=="mingw" (
+    where ninja.exe >nul 2>&1
+    if errorlevel 1 (
+        echo [警告] 未找到Ninja构建工具，构建可能较慢
+        echo 建议通过以下方式安装Ninja:
+        echo   scoop install ninja
+        echo   或
+        echo   choco install ninja
     )
 )
 
-echo 配置项目...
-%CMAKE_CMD% %~1 %~2 %~3 %~4
-
-echo 编译项目...
-cmake --build . --config Release
-
-echo 运行测试...
-ctest -C Release
-
+:: 配置项目
 echo.
-if "%USE_MINGW%"=="1" (
-    echo 构建完成。可执行文件位于 build\bin 目录中。
+echo 配置项目...
+if "%VERBOSE%"=="1" (
+    cmake --preset=%PRESET% --log-level=VERBOSE
 ) else (
-    echo 构建完成。可执行文件位于 build\bin\%CONFIG% 目录中。
+    cmake --preset=%PRESET%
 )
+
+if errorlevel 1 (
+    echo.
+    echo [错误] 配置失败
+    exit /b 1
+)
+
+:: 构建项目
+echo.
+echo 编译项目...
+if "%VERBOSE%"=="1" (
+    cmake --build --preset=%PRESET% --verbose
+) else (
+    cmake --build --preset=%PRESET%
+)
+
+if errorlevel 1 (
+    echo.
+    echo [错误] 构建失败
+    exit /b 1
+)
+
+:: 运行测试
+echo.
+echo 运行测试...
+ctest --preset=%PRESET%
+
+:: 显示成功信息
+echo.
+echo 构建完成。可执行文件位于 build/%PRESET%/bin 目录中。
 echo - neumann_cli_app.exe: 命令行界面应用
 echo - neumann_web_app.exe: Web界面应用
 echo.
 echo 用法:
-echo - build.bat        : 使用MSVC构建
-echo - build.bat mingw  : 使用MinGW构建
-echo - build.bat vcpkg  : 使用MSVC构建，通过vcpkg管理依赖
-echo - build.bat mingw vcpkg : 使用MinGW构建，通过vcpkg管理依赖
-echo - build.bat install-deps : 安装项目依赖
-echo - build.bat clean [mingw] [vcpkg]: 清理后重新构建
-echo.
-
-cd ..
+echo - build.bat                     : 交互式选择构建工具链 (默认Release)
+echo - build.bat mingw               : 使用MinGW构建Release版本
+echo - build.bat msvc                : 使用MSVC构建Release版本
+echo - build.bat [toolchain] debug   : 构建Debug版本
+echo - build.bat clean [其他选项]     : 清理后重新构建
+echo - build.bat verbose [其他选项]   : 显示详细构建信息
+echo. 
