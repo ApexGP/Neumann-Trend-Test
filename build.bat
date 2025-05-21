@@ -183,7 +183,7 @@ ctest --preset=%PRESET%
 
 :: 显示成功信息
 echo.
-echo 构建完成。可执行文件位于 build/%PRESET%/bin 目录中。
+echo 构建完成。可执行文件位于 bin 目录中。
 echo - neumann_cli_app.exe: 命令行界面应用
 echo - neumann_web_app.exe: Web界面应用
 echo.

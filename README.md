@@ -19,7 +19,15 @@
 - 可视化结果展示趋势判断
 - 支持导出结果到文本或 CSV 文件
 
-## 依赖项安装
+## 下载预编译版本
+
+对于不想自行构建的用户，可以直接下载预编译的发布版：
+
+1. 访问 [项目发布页](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
+2. 下载最新的 `NeumannTrendTest-v1.2.0.zip` 文件
+3. 解压后运行 `start-web-app.bat` 即可使用
+
+## 从源码编译 | Build from source
 
 本项目依赖以下库：
 
@@ -255,12 +263,14 @@ cmake --build --preset=mingw-release
    - 交互式工具链选择
    - 命令行参数支持
    - 直观的构建状态反馈
+   - 输出结构优化，二进制文件统一存放在根目录的 bin 文件夹
 
 4. **CMake 配置改进**：
 
    - 更灵活的 vcpkg 工具链集成
    - 添加额外的库路径查找逻辑
    - 改进 triplet 配置
+   - 统一输出目录结构，便于直接调用生成的程序
 
 5. **开发工具集成**：
    - 优化 clangd 配置，提供更准确的代码智能提示
@@ -331,6 +341,8 @@ cmake --build --preset=mingw-release
 ```
 
 启动 Web 服务器后，在浏览器中访问 http://localhost:8080 使用 Web 界面。
+
+> **注意**: 所有可执行文件现在都会直接生成在项目根目录的 bin 文件夹中，无需再从 build 目录寻找。
 
 ## 数据格式
 

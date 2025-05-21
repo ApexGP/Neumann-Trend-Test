@@ -38,12 +38,16 @@ if not exist "web\neumann_trend_test.html" (
     )
 )
 
-REM 查找构建目录中的web应用程序
+REM 查找web应用程序
 set WEB_APP=""
 
-if exist "build\mingw-release\bin\neumann_web_app.exe" (
+if exist "bin\neumann_web_app.exe" (
+    set WEB_APP=bin\neumann_web_app.exe
+) else if exist "build\mingw-release\bin\neumann_web_app.exe" (
+    echo 警告: 使用旧版本的构建输出路径
     set WEB_APP=build\mingw-release\bin\neumann_web_app.exe
 ) else if exist "build\msvc-release\bin\neumann_web_app.exe" (
+    echo 警告: 使用旧版本的构建输出路径
     set WEB_APP=build\msvc-release\bin\neumann_web_app.exe
 ) else if exist "bin\Release\neumann_web.exe" (
     set WEB_APP=bin\Release\neumann_web.exe

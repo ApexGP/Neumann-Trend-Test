@@ -1,6 +1,7 @@
 # 构建目录
 build/
 bin/
+lib/
 
 # 编辑器和IDE文件
 # .vscode/

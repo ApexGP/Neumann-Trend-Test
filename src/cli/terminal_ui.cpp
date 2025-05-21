@@ -512,8 +512,8 @@ void TerminalUI::showAbout() {
   std::cout << "===== 关于 =====" << std::endl;
   std::cout << std::endl;
 
-  std::cout << "诺依曼趋势测试工具 v1.0.0" << std::endl;
-  std::cout << "Copyright © 2023" << std::endl;
+  std::cout << "诺依曼趋势测试工具 v1.2.0" << std::endl;
+  std::cout << "Copyright © 2025" << std::endl;
   std::cout << std::endl;
 
   std::cout
