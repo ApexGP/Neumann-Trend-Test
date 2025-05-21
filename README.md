@@ -19,13 +19,30 @@
 - 可视化结果展示趋势判断
 - 支持导出结果到文本或 CSV 文件
 
-## 下载预编译版本
+## 预编译版本
 
-对于不想自行构建的用户，可以直接下载预编译的发布版：
+为方便不想自行编译的用户，我们提供了预编译的发布版本：
 
-1. 访问 [项目发布页](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
-2. 下载最新的 `NeumannTrendTest-v1.2.0.zip` 文件
-3. 解压后运行 `start-web-app.bat` 即可使用
+### 下载预编译版本
+
+1. 访问[项目发布页](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
+2. 下载最新的`NeumannTrendTest-v1.2.0.zip`文件
+3. 解压文件到任意位置
+4. 运行其中的`start-web-app.bat`或`start-cli-app.bat`开始使用
+
+### 预编译版本内容
+
+发布包包含以下内容：
+
+- 已编译的应用程序(bin 目录)
+- 必要的配置文件和资源
+- 启动脚本
+- 示例数据文件
+
+### 系统要求
+
+- Windows 7/8/10/11 64 位
+- 无需额外安装依赖(静态链接)
 
 ## 从源码编译 | Build from source
 
@@ -317,20 +334,34 @@ cmake --build --preset=mingw-release
 ### 命令行界面
 
 ```bash
-# 启动交互式终端界面
+# 使用启动脚本运行命令行界面（推荐方式）
+start-cli-app.bat
+# Linux/macOS用户
+./start-cli-app.sh
+
+# 直接使用可执行文件
 ./bin/neumann_cli_app
 
-# 直接处理CSV文件
+# 处理CSV文件
+start-cli-app.bat -f data.csv
+# 或直接调用
 ./bin/neumann_cli_app -f data.csv
 
 # 查看帮助
+start-cli-app.bat -h
+# 或直接调用
 ./bin/neumann_cli_app -h
 ```
 
 ### Web 界面
 
 ```bash
-# 启动Web服务器（默认端口8080）
+# 使用启动脚本运行Web界面（推荐方式）
+start-web-app.bat
+# Linux/macOS用户
+./start-web-app.sh
+
+# 直接使用可执行文件
 ./bin/neumann_web_app
 
 # 指定端口和Web资源目录
@@ -342,7 +373,10 @@ cmake --build --preset=mingw-release
 
 启动 Web 服务器后，在浏览器中访问 http://localhost:8080 使用 Web 界面。
 
-> **注意**: 所有可执行文件现在都会直接生成在项目根目录的 bin 文件夹中，无需再从 build 目录寻找。
+> **注意**:
+>
+> - 所有可执行文件现在都会直接生成在项目根目录的 bin 文件夹中，无需再从 build 目录寻找
+> - 推荐使用启动脚本，它会自动处理路径和必要的配置
 
 ## 数据格式
 
