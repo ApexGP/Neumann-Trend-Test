@@ -26,15 +26,23 @@ CompileFlags:
       -I./_deps/ftxui-src/include,
       -I./_deps/crow-src/include,
       -I./_deps/json-src/include,
+
+      # vcpkg 依赖库路径
       -IC:/vcpkg/installed/x64-mingw-static/include,
+      -IC:/vcpkg/installed/x64-windows/include,
+      -ID:/RTlibs/vcpkg/installed/x64-mingw-static/include/**,
+      -ID:/RTlibs/vcpkg/installed/x64-windows/include/**,
 
       # 系统库路径
+      -IC:/Users/Domin/scoop/apps/mingw/current/x86_64-w64-mingw32/include,
       -IC:/Users/Domin/scoop/apps/mingw/current/include,
       -IC:/Users/Domin/scoop/apps/mingw/current/include/c++/15.1.0,
 
       # 额外配置
       -std=c++17,
       -Wall,
+      -march=native,
+      -msse2,
     ]
   Compiler: g++
 
@@ -43,15 +51,21 @@ Index:
 
 Diagnostics:
   UnusedIncludes: Strict
+  Suppress:
+    [
+      "definition of builtin function",
+      "unknown attribute",
+      "no member named .*_align_t in the global namespace",
+    ]
   ClangTidy:
     Add: [performance-*, bugprone-*, modernize-*, readability-*]
     Remove: [modernize-use-trailing-return-type, readability-identifier-length]
 
 InlayHints:
-  Enabled: Yes
-  DeducedTypes: Yes
-  ParameterNames: Yes
+  Enabled: true
+  DeducedTypes: true
+  ParameterNames: true
   TypeNameLimit: 40
 
 Hover:
-  ShowAKA: Yes
+  ShowAKA: true

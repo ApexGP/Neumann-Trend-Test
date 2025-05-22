@@ -12,7 +12,7 @@ fi
 
 if [ ! -f "data/standard_values.json" ]; then
     echo "警告：标准值文件不存在，将创建空文件..."
-    echo "{}" > data/standard_values.json
+    echo "{}" >data/standard_values.json
 fi
 
 # 查找CLI应用程序
@@ -46,4 +46,4 @@ echo "-----------------------------------------"
 # 启动应用程序
 $CLI_APP "$@"
 
-read -p "按回车键继续..." KEY 
+read -p "按回车键继续..." KEY
