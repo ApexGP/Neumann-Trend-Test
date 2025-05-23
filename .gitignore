@@ -2,6 +2,7 @@
 build/
 bin/
 lib/
+release/
 
 # 编辑器和IDE文件
 # .vscode/

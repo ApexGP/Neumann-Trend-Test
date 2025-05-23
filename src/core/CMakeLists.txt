@@ -5,6 +5,7 @@ set(CORE_SOURCES
     i18n.cpp
     config.cpp
     error_handler.cpp
+    excel_reader.cpp
 )
 
 # 创建核心库

@@ -1,6 +1,6 @@
 {
   "autoSaveResults": true,
-  "dataDirectory": "data",
+  "dataDirectory": "D:\\projectRoot\\Code\\algorithm\\c_cpp\\Neumann-Trend-Test\\bin\\data",
   "defaultConfidenceLevel": 0.95,
   "defaultWebPort": 8080,
   "enableColorOutput": true,

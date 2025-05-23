@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <set>
 #include <sstream>
 
 using json = nlohmann::json;
@@ -212,10 +213,18 @@ std::vector<std::string> DataManager::getDataSetNames()
 {
     std::vector<std::string> names;
 
+    // 定义需要过滤的系统文件
+    std::set<std::string> systemFiles = {"standard_values", "translations", "config"};
+
     try {
         for (const auto &entry : fs::directory_iterator(dataDir)) {
             if (entry.path().extension() == ".json") {
-                names.push_back(entry.path().stem().string());
+                std::string filename = entry.path().stem().string();
+
+                // 过滤系统文件
+                if (systemFiles.find(filename) == systemFiles.end()) {
+                    names.push_back(filename);
+                }
             }
         }
     }

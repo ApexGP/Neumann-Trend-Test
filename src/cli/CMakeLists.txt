@@ -1,6 +1,7 @@
 set(CLI_SOURCES
     terminal_ui.cpp
     cli_app.cpp
+    terminal_utils.cpp
 )
 
 # 创建CLI库
@@ -10,6 +11,9 @@ add_library(neumann_cli STATIC ${CLI_SOURCES})
 target_include_directories(neumann_cli PUBLIC 
     ${CMAKE_SOURCE_DIR}/include
 )
+
+# 链接核心库
+target_link_libraries(neumann_cli PUBLIC neumann_core)
 
 # 设置FTXUI查找选项
 set(FTXUI_QUIET ON)

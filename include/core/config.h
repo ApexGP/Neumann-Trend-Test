@@ -75,6 +75,9 @@ public:
     // 获取配置文件路径
     std::string getConfigFilePath() const;
 
+    // 设置配置文件路径
+    void setConfigFilePath(const std::string &path);
+
 private:
     // 私有构造函数
     Config();

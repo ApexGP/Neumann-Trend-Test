@@ -12,19 +12,97 @@ namespace neumann {
 
 StandardValues::StandardValues() : minSampleSize(std::numeric_limits<int>::max()), maxSampleSize(0)
 {
-    // 添加标准值的基本数据（如果未找到JSON文件，则使用这些）
-    // 这些数据来自Neumann Trend Test标准表，置信水平0.95
+    // 添加标准值的完整数据（如果未找到JSON文件，则使用这些）
+    // 这些数据来自Neumann Trend Test标准表
+
+    // 0.90置信水平
+    std::map<int, double> values90;
+    values90[4] = 0.6675;
+    values90[5] = 0.7131;
+    values90[6] = 0.7835;
+    values90[7] = 0.8371;
+    values90[8] = 0.8796;
+    values90[9] = 0.9178;
+    values90[10] = 0.9318;
+    values90[11] = 0.9394;
+    values90[12] = 0.9471;
+    values90[13] = 0.9548;
+    values90[14] = 0.9625;
+    values90[15] = 0.9677;
+    values90[16] = 0.9705;
+    values90[17] = 0.9734;
+    values90[18] = 0.9763;
+    values90[19] = 0.9791;
+    values90[20] = 0.982;
+    wpValues[0.90] = values90;
+
+    // 0.95置信水平
     std::map<int, double> values95;
     values95[4] = 0.7805;
     values95[5] = 0.8204;
     values95[6] = 0.8902;
     values95[7] = 0.9359;
+    values95[8] = 0.9483;
+    values95[9] = 0.9608;
+    values95[10] = 0.9685;
+    values95[11] = 0.9733;
+    values95[12] = 0.9782;
+    values95[13] = 0.983;
+    values95[14] = 0.9879;
+    values95[15] = 0.9903;
+    values95[16] = 0.9915;
+    values95[17] = 0.9928;
+    values95[18] = 0.994;
+    values95[19] = 0.9953;
+    values95[20] = 0.9965;
     wpValues[0.95] = values95;
+
+    // 0.975置信水平
+    std::map<int, double> values975;
+    values975[4] = 0.8423;
+    values975[5] = 0.8821;
+    values975[6] = 0.9185;
+    values975[7] = 0.9534;
+    values975[8] = 0.9635;
+    values975[9] = 0.9695;
+    values975[10] = 0.9756;
+    values975[11] = 0.9784;
+    values975[12] = 0.9813;
+    values975[13] = 0.9841;
+    values975[14] = 0.987;
+    values975[15] = 0.9886;
+    values975[16] = 0.9904;
+    values975[17] = 0.9923;
+    values975[18] = 0.9941;
+    values975[19] = 0.9959;
+    values975[20] = 0.9978;
+    wpValues[0.975] = values975;
+
+    // 0.99置信水平
+    std::map<int, double> values99;
+    values99[4] = 0.9027;
+    values99[5] = 0.9282;
+    values99[6] = 0.9525;
+    values99[7] = 0.9721;
+    values99[8] = 0.9757;
+    values99[9] = 0.9794;
+    values99[10] = 0.9831;
+    values99[11] = 0.9856;
+    values99[12] = 0.9881;
+    values99[13] = 0.9905;
+    values99[14] = 0.993;
+    values99[15] = 0.994;
+    values99[16] = 0.995;
+    values99[17] = 0.996;
+    values99[18] = 0.997;
+    values99[19] = 0.998;
+    values99[20] = 0.999;
+    wpValues[0.99] = values99;
 
     // 更新缓存值
     minSampleSize = 4;
-    maxSampleSize = 7;
-    confidenceLevels.push_back(0.95);
+    maxSampleSize = 20;
+    confidenceLevels = {0.90, 0.95, 0.975, 0.99};
 }
 
 StandardValues &StandardValues::getInstance()
@@ -46,23 +124,98 @@ bool StandardValues::loadFromFile(const std::string &filename)
                 std::cout << "尝试创建标准值文件..." << std::endl;
                 std::ofstream outFile(filename);
                 if (outFile.is_open()) {
-                    // 创建基本的标准值JSON
-                    json basicValues;
+                    // 创建完整的标准值JSON - 基于Neumann Trend Test标准表
+                    json completeValues;
 
-                    // 添加0.95置信水平的默认值
+                    // 0.90置信水平
+                    json level90;
+                    level90["4"] = 0.6675;
+                    level90["5"] = 0.7131;
+                    level90["6"] = 0.7835;
+                    level90["7"] = 0.8371;
+                    level90["8"] = 0.8796;
+                    level90["9"] = 0.9178;
+                    level90["10"] = 0.9318;
+                    level90["11"] = 0.9394;
+                    level90["12"] = 0.9471;
+                    level90["13"] = 0.9548;
+                    level90["14"] = 0.9625;
+                    level90["15"] = 0.9677;
+                    level90["16"] = 0.9705;
+                    level90["17"] = 0.9734;
+                    level90["18"] = 0.9763;
+                    level90["19"] = 0.9791;
+                    level90["20"] = 0.982;
+                    completeValues["0.90"] = level90;
+
+                    // 0.95置信水平
                     json level95;
                     level95["4"] = 0.7805;
                     level95["5"] = 0.8204;
                     level95["6"] = 0.8902;
                     level95["7"] = 0.9359;
+                    level95["8"] = 0.9483;
+                    level95["9"] = 0.9608;
+                    level95["10"] = 0.9685;
+                    level95["11"] = 0.9733;
+                    level95["12"] = 0.9782;
+                    level95["13"] = 0.983;
+                    level95["14"] = 0.9879;
+                    level95["15"] = 0.9903;
+                    level95["16"] = 0.9915;
+                    level95["17"] = 0.9928;
+                    level95["18"] = 0.994;
+                    level95["19"] = 0.9953;
+                    level95["20"] = 0.9965;
+                    completeValues["0.95"] = level95;
 
-                    basicValues["0.95"] = level95;
+                    // 0.975置信水平
+                    json level975;
+                    level975["4"] = 0.8423;
+                    level975["5"] = 0.8821;
+                    level975["6"] = 0.9185;
+                    level975["7"] = 0.9534;
+                    level975["8"] = 0.9635;
+                    level975["9"] = 0.9695;
+                    level975["10"] = 0.9756;
+                    level975["11"] = 0.9784;
+                    level975["12"] = 0.9813;
+                    level975["13"] = 0.9841;
+                    level975["14"] = 0.987;
+                    level975["15"] = 0.9886;
+                    level975["16"] = 0.9904;
+                    level975["17"] = 0.9923;
+                    level975["18"] = 0.9941;
+                    level975["19"] = 0.9959;
+                    level975["20"] = 0.9978;
+                    completeValues["0.975"] = level975;
+
+                    // 0.99置信水平
+                    json level99;
+                    level99["4"] = 0.9027;
+                    level99["5"] = 0.9282;
+                    level99["6"] = 0.9525;
+                    level99["7"] = 0.9721;
+                    level99["8"] = 0.9757;
+                    level99["9"] = 0.9794;
+                    level99["10"] = 0.9831;
+                    level99["11"] = 0.9856;
+                    level99["12"] = 0.9881;
+                    level99["13"] = 0.9905;
+                    level99["14"] = 0.993;
+                    level99["15"] = 0.994;
+                    level99["16"] = 0.995;
+                    level99["17"] = 0.996;
+                    level99["18"] = 0.997;
+                    level99["19"] = 0.998;
+                    level99["20"] = 0.999;
+                    completeValues["0.99"] = level99;
 
                     // 写入文件
-                    outFile << basicValues.dump(2);  // 缩进为2空格
+                    outFile << completeValues.dump(2);  // 缩进为2空格
                     outFile.close();
 
-                    std::cout << "已创建基本标准值文件: " << filename << std::endl;
+                    std::cout << "已创建完整标准值文件: " << filename << std::endl;
                 } else {
                     std::cerr << "无法创建标准值文件。将使用内置默认值。" << std::endl;
                     return false;

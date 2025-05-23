@@ -223,4 +223,9 @@ void Config::setAutoSaveResults(bool autoSave)
     autoSaveResults = autoSave;
 }
 
+void Config::setConfigFilePath(const std::string &path)
+{
+    configFilePath = path;
+}
+
 }  // namespace neumann

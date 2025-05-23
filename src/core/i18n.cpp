@@ -132,16 +132,26 @@ void I18n::initializeBuiltinTranslations()
     zh["menu.new_test"] = "运行新的诺依曼趋势测试";
     zh["menu.load_data"] = "加载数据集";
     zh["menu.import_csv"] = "从CSV导入数据";
+    zh["menu.import_excel"] = "从Excel导入数据";
     zh["menu.help"] = "帮助";
     zh["menu.about"] = "关于";
     zh["menu.exit"] = "退出";
     zh["menu.settings"] = "设置";
     zh["menu.language"] = "语言设置";
+    zh["menu.back"] = "返回";
 
     zh["input.data_points"] = "请输入数据点 (用空格分隔):";
     zh["input.time_points"] = "请输入时间点 (用空格分隔):";
     zh["input.confidence_level"] = "请选择置信水平:";
-    zh["input.filename"] = "请输入文件名:";
+    zh["input.filename"] = "请输入文件路径";
+    zh["input.exit_hint"] = "输入 'q' 或直接按回车退出";
+
+    zh["load.no_datasets"] = "没有可用的数据集。";
+    zh["load.available_datasets"] = "可用数据集:";
+    zh["load.select_dataset"] = "请选择数据集";
+
+    zh["prompt.press_enter"] = "按Enter键继续...";
+    zh["prompt.select_option"] = "请选择操作";
 
     zh["result.no_trend"] = "无趋势";
     zh["result.has_trend"] = "有趋势";
@@ -210,16 +220,26 @@ void I18n::initializeBuiltinTranslations()
     en["menu.new_test"] = "Run New Neumann Trend Test";
     en["menu.load_data"] = "Load Dataset";
     en["menu.import_csv"] = "Import Data from CSV";
+    en["menu.import_excel"] = "Import Data from Excel";
     en["menu.help"] = "Help";
     en["menu.about"] = "About";
     en["menu.exit"] = "Exit";
     en["menu.settings"] = "Settings";
     en["menu.language"] = "Language Settings";
+    en["menu.back"] = "Back";
 
     en["input.data_points"] = "Please enter data points (separated by spaces):";
     en["input.time_points"] = "Please enter time points (separated by spaces):";
     en["input.confidence_level"] = "Please select confidence level:";
     en["input.filename"] = "Please enter filename:";
+    en["input.exit_hint"] = "Enter 'q' or press Enter to exit";
+
+    en["load.no_datasets"] = "No datasets available.";
+    en["load.available_datasets"] = "Available datasets:";
+    en["load.select_dataset"] = "Please select a dataset";
+
+    en["prompt.press_enter"] = "Press Enter to continue...";
+    en["prompt.select_option"] = "Please select an option";
 
     en["result.no_trend"] = "No Trend";
     en["result.has_trend"] = "Has Trend";

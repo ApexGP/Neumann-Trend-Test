@@ -84,6 +84,9 @@ private:
     // 从CSV导入数据
     void importFromCSV();
 
+    // 从Excel导入数据
+    void importFromExcel();
+
     // 运行诺依曼测试
     void runNeumannTest();
 
@@ -95,6 +98,12 @@ private:
 
     // 显示语言选择菜单
     void showLanguageMenu();
+
+    // 显示置信度配置菜单
+    void showConfidenceLevelMenu();
+
+    // 显示右上角状态信息
+    void displayStatusBar();
 
     // 询问用户输入数据
     std::vector<double> promptForData(const std::string &prompt);

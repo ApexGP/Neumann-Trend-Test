@@ -41,10 +41,15 @@ int main(int argc, char **argv)
         std::signal(SIGINT, signalHandler);
         std::signal(SIGTERM, signalHandler);
 
+        // 获取可执行文件所在目录
+        fs::path exePath = fs::canonical(argv[0]);
+        fs::path exeDir = exePath.parent_path();
+        fs::path releaseDir = exeDir.parent_path();  // 从bin目录上升到release目录
+
         // 解析命令行参数
-        int port = 8080;                 // 默认端口
-        std::string webRootDir = "web";  // 默认Web资源目录
-        std::string dataDir = "data";    // 默认数据目录
+        int port = 8080;                                         // 默认端口
+        std::string webRootDir = (releaseDir / "web").string();  // release文件结构下的Web资源目录
+        std::string dataDir = (releaseDir / "data").string();    // release文件结构下的数据目录
 
         for (int i = 1; i < argc; ++i) {
             std::string arg = argv[i];
@@ -93,24 +98,43 @@ int main(int argc, char **argv)
             }
         }
 
-        // 确保Web资源目录存在
+        // 检查Web资源目录（如果不存在，尝试使用开发时的web目录）
         if (!fs::exists(webRootDir)) {
-            std::cout << "Web资源目录不存在，正在创建: " << webRootDir << std::endl;
-            try {
-                fs::create_directory(webRootDir);
-            }
-            catch (const std::exception &e) {
-                std::cerr << "错误: 无法创建Web资源目录: " << e.what() << std::endl;
-                std::cerr << "可能需要管理员权限或当前用户无写入权限" << std::endl;
-                return 1;
+            std::string fallbackWebDir = "web";
+            if (fs::exists(fallbackWebDir)) {
+                webRootDir = fallbackWebDir;
+                std::cout << "使用开发Web资源目录: " << webRootDir << std::endl;
+            } else {
+                std::cout << "Web资源目录不存在，正在创建: " << webRootDir << std::endl;
+                try {
+                    fs::create_directory(webRootDir);
+                }
+                catch (const std::exception &e) {
+                    std::cerr << "错误: 无法创建Web资源目录: " << e.what() << std::endl;
+                    std::cerr << "可能需要管理员权限或当前用户无写入权限" << std::endl;
+                    return 1;
+                }
             }
         }
 
-        // 标准值文件路径
-        std::string standardValuesFile = dataDir + "/standard_values.json";
+        // 标准值文件路径（优先从ref目录，回退到开发目录）
+        std::string standardValuesFile = (releaseDir / "ref" / "standard_values.json").string();
+        std::string fallbackStandardValuesFile = dataDir + "/standard_values.json";
 
         // 加载标准值 - 注意这会创建文件如果不存在
-        if (!neumann::StandardValues::getInstance().loadFromFile(standardValuesFile)) {
+        if (fs::exists(standardValuesFile)) {
+            if (!neumann::StandardValues::getInstance().loadFromFile(standardValuesFile)) {
+                std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+            } else {
+                std::cout << "已加载标准值文件: " << standardValuesFile << std::endl;
+            }
+        } else if (fs::exists(fallbackStandardValuesFile)) {
+            if (!neumann::StandardValues::getInstance().loadFromFile(fallbackStandardValuesFile)) {
+                std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+            } else {
+                std::cout << "已加载开发标准值文件: " << fallbackStandardValuesFile << std::endl;
+            }
+        } else {
             std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
         }
 
