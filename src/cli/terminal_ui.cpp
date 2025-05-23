@@ -8,6 +8,8 @@
 #include <limits>
 #include <sstream>
 
+#include "core/config.h"
+#include "core/i18n.h"
 #include "core/standard_values.h"
 
 namespace fs = std::filesystem;
@@ -26,13 +28,13 @@ void TerminalUI::run()
     // 显示欢迎信息
     clearScreen();
     std::cout << "=====================================" << std::endl;
-    std::cout << "  诺依曼趋势测试工具 (Neumann Trend Test)" << std::endl;
+    std::cout << "  " << _("app.title") << std::endl;
     std::cout << "=====================================" << std::endl;
     std::cout << std::endl;
 
     // 加载标准值
     if (!StandardValues::getInstance().loadFromFile("data/standard_values.json")) {
-        std::cout << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+        std::cout << _("error.standard_values_not_found") << std::endl;
     }
 
     // 主循环
@@ -43,7 +45,7 @@ void TerminalUI::run()
 
     // 显示退出信息
     std::cout << std::endl;
-    std::cout << "感谢使用诺依曼趋势测试工具，再见！" << std::endl;
+    std::cout << _("status.goodbye") << std::endl;
 }
 
 void TerminalUI::initializeMenus()
@@ -51,16 +53,25 @@ void TerminalUI::initializeMenus()
     // 主菜单
     Menu mainMenu;
     mainMenu.id = "main";
-    mainMenu.title = "主菜单";
+    mainMenu.title = "menu.main";  // 存储翻译键而不是翻译文本
     mainMenu.items = {
-        {"new_test", "运行新的诺依曼趋势测试", MenuItemType::ACTION, "",
-         [this]() { runNeumannTest(); }},
-        {"load_data", "加载数据集", MenuItemType::ACTION, "", [this]() { loadDataSet(); }},
-        {"import_csv", "从CSV导入数据", MenuItemType::ACTION, "", [this]() { importFromCSV(); }},
-        {"help", "帮助", MenuItemType::ACTION, "", [this]() { showHelp(); }},
-        {"about", "关于", MenuItemType::ACTION, "", [this]() { showAbout(); }},
-        {"exit", "退出", MenuItemType::EXIT, "", nullptr}};
+        {"new_test", "menu.new_test", MenuItemType::ACTION, "", [this]() { runNeumannTest(); }},
+        {"load_data", "menu.load_data", MenuItemType::ACTION, "", [this]() { loadDataSet(); }},
+        {"import_csv", "menu.import_csv", MenuItemType::ACTION, "", [this]() { importFromCSV(); }},
+        {"settings", "menu.settings", MenuItemType::SUBMENU, "settings", nullptr},
+        {"help", "menu.help", MenuItemType::ACTION, "", [this]() { showHelp(); }},
+        {"about", "menu.about", MenuItemType::ACTION, "", [this]() { showAbout(); }},
+        {"exit", "menu.exit", MenuItemType::EXIT, "", nullptr}};
     menus[mainMenu.id] = mainMenu;
+
+    // 设置菜单
+    Menu settingsMenu;
+    settingsMenu.id = "settings";
+    settingsMenu.title = "menu.settings";  // 存储翻译键而不是翻译文本
+    settingsMenu.items = {
+        {"language", "menu.language", MenuItemType::ACTION, "", [this]() { showLanguageMenu(); }},
+        {"back", "menu.back", MenuItemType::BACK, "", nullptr}};
+    menus[settingsMenu.id] = settingsMenu;
 }
 
 void TerminalUI::displayMenu()
@@ -70,16 +81,17 @@ void TerminalUI::displayMenu()
     // 获取当前菜单
     const Menu &menu = menus[currentMenuId];
 
-    std::cout << "===== " << menu.title << " =====" << std::endl;
+    // 动态获取菜单标题的翻译文本
+    std::cout << "===== " << _(menu.title.c_str()) << " =====" << std::endl;
     std::cout << std::endl;
 
-    // 显示菜单项
+    // 显示菜单项，动态获取翻译文本
     for (size_t i = 0; i < menu.items.size(); ++i) {
-        std::cout << (i + 1) << ". " << menu.items[i].title << std::endl;
+        std::cout << (i + 1) << ". " << _(menu.items[i].title.c_str()) << std::endl;
     }
 
     std::cout << std::endl;
-    std::cout << "请选择操作 [1-" << menu.items.size() << "]: ";
+    std::cout << _("prompt.select_option") << " [1-" << menu.items.size() << "]: ";
 }
 
 void TerminalUI::handleInput()
@@ -94,8 +106,8 @@ void TerminalUI::handleInput()
     const Menu &menu = menus[currentMenuId];
 
     if (choice < 1 || choice > static_cast<int>(menu.items.size())) {
-        std::cout << "无效选择，请重试。" << std::endl;
-        std::cout << "按Enter键继续...";
+        std::cout << _("error.invalid_choice") << std::endl;
+        std::cout << _("prompt.press_enter") << std::endl;
         std::cin.get();
         return;
     }
@@ -141,7 +153,7 @@ std::vector<double> TerminalUI::promptForData(const std::string &prompt)
     std::vector<double> data;
     std::string input;
 
-    std::cout << prompt << " (用空格或逗号分隔): ";
+    std::cout << prompt << " (" << _("prompt.separator_help") << "): ";
     std::getline(std::cin, input);
 
     std::stringstream ss(input);
@@ -176,11 +188,11 @@ std::vector<double> TerminalUI::promptForTimePoints(const std::string &prompt, s
         }
     } else {
         // 询问自定义时间点
-        timePoints = promptForData("请输入时间点数据");
+        timePoints = promptForData(_("input.time_points"));
 
         // 确保时间点数量与数据点一致
         if (timePoints.size() != count) {
-            std::cout << "警告: 时间点数量与数据点数量不匹配，将使用默认时间点。" << std::endl;
+            std::cout << _("prompt.timepoint_mismatch_warning") << std::endl;
             timePoints.clear();
             for (size_t i = 0; i < count; ++i) {
                 timePoints.push_back(static_cast<double>(i));
@@ -194,28 +206,28 @@ std::vector<double> TerminalUI::promptForTimePoints(const std::string &prompt, s
 void TerminalUI::loadDataSet()
 {
     clearScreen();
-    std::cout << "===== 加载数据集 =====" << std::endl;
+    std::cout << "===== " << _("menu.load_data") << " =====" << std::endl;
     std::cout << std::endl;
 
     // 获取可用数据集
     std::vector<std::string> datasets = DataManager::getInstance().getDataSetNames();
 
     if (datasets.empty()) {
-        std::cout << "没有可用的数据集。" << std::endl;
-        std::cout << "按Enter键返回主菜单...";
+        std::cout << _("load.no_datasets") << std::endl;
+        std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
     }
 
     // 显示数据集列表
-    std::cout << "可用数据集:" << std::endl;
+    std::cout << _("load.available_datasets") << std::endl;
     for (size_t i = 0; i < datasets.size(); ++i) {
         std::cout << (i + 1) << ". " << datasets[i] << std::endl;
     }
 
     // 选择数据集
     std::cout << std::endl;
-    std::cout << "请选择数据集 [1-" << datasets.size() << "]: ";
+    std::cout << _("load.select_dataset") << " [1-" << datasets.size() << "]: ";
     int choice;
     std::cin >> choice;
 
@@ -224,8 +236,8 @@ void TerminalUI::loadDataSet()
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     if (choice < 1 || choice > static_cast<int>(datasets.size())) {
-        std::cout << "无效选择。" << std::endl;
-        std::cout << "按Enter键返回主菜单...";
+        std::cout << _("error.invalid_choice") << std::endl;
+        std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
     }
@@ -236,15 +248,15 @@ void TerminalUI::loadDataSet()
 
     // 显示数据集信息
     std::cout << std::endl;
-    std::cout << "数据集: " << dataSet.name << std::endl;
-    std::cout << "描述: " << dataSet.description << std::endl;
-    std::cout << "来源: " << dataSet.source << std::endl;
-    std::cout << "创建时间: " << dataSet.createdAt << std::endl;
-    std::cout << "数据点数量: " << dataSet.dataPoints.size() << std::endl;
+    std::cout << _("load.dataset_name") << ": " << dataSet.name << std::endl;
+    std::cout << _("load.dataset_description") << ": " << dataSet.description << std::endl;
+    std::cout << _("load.dataset_source") << ": " << dataSet.source << std::endl;
+    std::cout << _("load.dataset_created") << ": " << dataSet.createdAt << std::endl;
+    std::cout << _("load.dataset_count") << ": " << dataSet.dataPoints.size() << std::endl;
 
     // 询问是否运行测试
     std::cout << std::endl;
-    std::cout << "是否对该数据集运行诺依曼趋势测试? [y/n]: ";
+    std::cout << _("load.run_test_prompt") << " [y/n]: ";
     std::string response;
     std::getline(std::cin, response);
 
@@ -257,7 +269,7 @@ void TerminalUI::loadDataSet()
         displayTestResults(results);
     }
 
-    std::cout << "按Enter键返回主菜单...";
+    std::cout << _("prompt.press_enter");
     std::cin.get();
 }
 
@@ -341,26 +353,26 @@ void TerminalUI::importFromCSV()
 void TerminalUI::runNeumannTest()
 {
     clearScreen();
-    std::cout << "===== 运行诺依曼趋势测试 =====" << std::endl;
+    std::cout << "===== " << _("menu.new_test") << " =====" << std::endl;
     std::cout << std::endl;
 
     // 询问数据点
-    std::vector<double> dataPoints = promptForData("请输入数据点");
+    std::vector<double> dataPoints = promptForData(_("input.data_points"));
 
     if (dataPoints.size() < 4) {
-        std::cout << "错误: 需要至少4个数据点才能进行诺依曼趋势测试。" << std::endl;
-        std::cout << "按Enter键返回主菜单...";
+        std::cout << _("error.insufficient_data") << std::endl;
+        std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
     }
 
     // 询问时间点
     std::vector<double> timePoints =
-        promptForTimePoints("是否使用默认时间点 (0, 1, 2, ...)?", dataPoints.size());
+        promptForTimePoints(_("test.use_default_timepoints"), dataPoints.size());
 
     // 设置置信水平
     double confidenceLevel = 0.95;  // 默认
-    std::cout << "请输入置信水平 [0.95]: ";
+    std::cout << _("test.confidence_level_prompt") << " [0.95]: ";
     std::string input;
     std::getline(std::cin, input);
 
@@ -385,7 +397,7 @@ void TerminalUI::runNeumannTest()
 
     // 询问是否保存数据
     std::cout << std::endl;
-    std::cout << "是否保存该数据集? [y/n]: ";
+    std::cout << _("test.save_dataset_prompt") << " [y/n]: ";
     std::string response;
     std::getline(std::cin, response);
 
@@ -395,7 +407,7 @@ void TerminalUI::runNeumannTest()
         dataSet.timePoints = timePoints;
 
         // 询问数据集名称
-        std::cout << "请输入数据集名称: ";
+        std::cout << _("test.dataset_name_prompt") << ": ";
         std::getline(std::cin, dataSet.name);
 
         if (dataSet.name.empty()) {
@@ -403,11 +415,11 @@ void TerminalUI::runNeumannTest()
         }
 
         // 询问描述
-        std::cout << "请输入数据集描述: ";
+        std::cout << _("test.dataset_description_prompt") << ": ";
         std::getline(std::cin, dataSet.description);
 
         // 设置来源
-        dataSet.source = "手动输入";
+        dataSet.source = _("test.manual_input");
 
         // 设置创建时间
         auto now = std::chrono::system_clock::now();
@@ -418,31 +430,31 @@ void TerminalUI::runNeumannTest()
 
         // 保存数据集
         if (DataManager::getInstance().saveDataSet(dataSet)) {
-            std::cout << "数据集已保存。" << std::endl;
+            std::cout << _("test.dataset_saved") << std::endl;
         } else {
-            std::cout << "保存数据集失败。" << std::endl;
+            std::cout << _("test.dataset_save_failed") << std::endl;
         }
     }
 
-    std::cout << "按Enter键返回主菜单...";
+    std::cout << _("prompt.press_enter");
     std::cin.get();
 }
 
 void TerminalUI::displayTestResults(const NeumannTestResults &results)
 {
     clearScreen();
-    std::cout << "===== 诺依曼趋势测试结果 =====" << std::endl;
+    std::cout << "===== " << _("result.test_results") << " =====" << std::endl;
     std::cout << std::endl;
 
     if (results.results.empty()) {
-        std::cout << "测试未能成功完成，可能是因为数据点不足。" << std::endl;
+        std::cout << _("result.test_failed") << std::endl;
         return;
     }
 
     // 输出表头
-    std::cout << std::left << std::setw(15) << "数据点" << std::setw(15) << "时间点"
-              << std::setw(15) << "PG值" << std::setw(15) << "W(P)阈值" << std::setw(15)
-              << "趋势判断" << std::endl;
+    std::cout << std::left << std::setw(15) << _("result.data_point") << std::setw(15)
+              << _("result.time_point") << std::setw(15) << _("result.pg_value") << std::setw(15)
+              << _("result.threshold") << std::setw(15) << _("result.trend_judgment") << std::endl;
 
     std::cout << std::string(75, '-') << std::endl;
 
@@ -454,72 +466,133 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
                   << results.timePoints[dataIndex] << std::setw(15) << std::fixed
                   << std::setprecision(4) << results.results[i].pgValue << std::setw(15)
                   << results.results[i].wpThreshold << std::setw(15)
-                  << (results.results[i].hasTrend ? "是" : "否") << std::endl;
+                  << (results.results[i].hasTrend ? _("result.has_trend") : _("result.no_trend"))
+                  << std::endl;
     }
 
     std::cout << std::string(75, '-') << std::endl;
 
     // 输出汇总结果
     std::cout << std::endl;
-    std::cout << "汇总结果:" << std::endl;
-    std::cout << "整体是否存在趋势: " << (results.overallTrend ? "是" : "否") << std::endl;
-    std::cout << "最小PG值: " << std::fixed << std::setprecision(4) << results.minPG << std::endl;
-    std::cout << "最大PG值: " << results.maxPG << std::endl;
-    std::cout << "平均PG值: " << results.avgPG << std::endl;
+    std::cout << _("result.summary") << std::endl;
+    std::cout << _("result.overall_trend") << ": "
+              << (results.overallTrend ? _("result.has_trend") : _("result.no_trend")) << std::endl;
+    std::cout << _("result.min_pg") << ": " << std::fixed << std::setprecision(4) << results.minPG
+              << std::endl;
+    std::cout << _("result.max_pg") << ": " << results.maxPG << std::endl;
+    std::cout << _("result.avg_pg") << ": " << results.avgPG << std::endl;
 
     std::cout << std::endl;
-    std::cout << "诺依曼趋势测试结论:" << std::endl;
+    std::cout << _("result.conclusion") << std::endl;
     if (results.overallTrend) {
-        std::cout << "数据存在显著趋势，可能表明测试样品在所测量的时间内存在系统性变化。"
-                  << std::endl;
+        std::cout << _("result.conclusion_trend") << std::endl;
     } else {
-        std::cout << "数据无显著趋势，测试样品在所测量的时间内保持稳定。" << std::endl;
+        std::cout << _("result.conclusion_no_trend") << std::endl;
     }
 }
 
 void TerminalUI::showHelp()
 {
     clearScreen();
-    std::cout << "===== 帮助信息 =====" << std::endl;
+    std::cout << "===== " << _("help.title") << " =====" << std::endl;
     std::cout << std::endl;
 
-    std::cout << "诺依曼趋势测试是一种统计方法，用于评估数据集是否存在系统性趋势。" << std::endl;
-    std::cout << "这种测试常用于药物稳定性研究和质量控制等领域。" << std::endl;
+    std::cout << _("help.description") << std::endl;
+    std::cout << _("help.usage_areas") << std::endl;
     std::cout << std::endl;
 
-    std::cout << "使用指南:" << std::endl;
-    std::cout << "1. 运行新的诺依曼趋势测试 - 直接输入数据并执行测试" << std::endl;
-    std::cout << "2. 加载数据集 - 加载之前保存的数据集并执行测试" << std::endl;
-    std::cout << "3. 从CSV导入数据 - 从CSV文件导入数据以便测试" << std::endl;
+    std::cout << _("help.usage_guide") << std::endl;
+    std::cout << "1. " << _("help.guide_1") << std::endl;
+    std::cout << "2. " << _("help.guide_2") << std::endl;
+    std::cout << "3. " << _("help.guide_3") << std::endl;
     std::cout << std::endl;
 
-    std::cout << "注意事项:" << std::endl;
-    std::cout << "- 诺依曼趋势测试至少需要4个数据点" << std::endl;
-    std::cout << "- 标准W(P)值基于特定的统计表，用于判断趋势是否显著" << std::endl;
-    std::cout << "- 如果PG值小于或等于W(P)值，则判断为存在趋势" << std::endl;
-    std::cout << "- 默认使用95%置信水平，可以手动调整" << std::endl;
+    std::cout << _("help.notes") << std::endl;
+    std::cout << "- " << _("help.note_1") << std::endl;
+    std::cout << "- " << _("help.note_2") << std::endl;
+    std::cout << "- " << _("help.note_3") << std::endl;
+    std::cout << "- " << _("help.note_4") << std::endl;
 
     std::cout << std::endl;
-    std::cout << "按Enter键返回主菜单...";
+    std::cout << _("prompt.press_enter") << std::endl;
     std::cin.get();
 }
 
 void TerminalUI::showAbout()
 {
     clearScreen();
-    std::cout << "===== 关于 =====" << std::endl;
+    std::cout << "===== " << _("about.title") << " =====" << std::endl;
     std::cout << std::endl;
 
-    std::cout << "诺依曼趋势测试工具 v1.2.0" << std::endl;
+    std::cout << _("app.title") << " v1.2.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
-    std::cout << "本工具用于执行诺依曼趋势测试，支持数据管理、测试执行和结果分析。" << std::endl;
-    std::cout << "可广泛应用于药物稳定性研究、质量控制和时间序列分析等领域。" << std::endl;
+    std::cout << _("about.description") << std::endl;
+    std::cout << _("about.applications") << std::endl;
 
     std::cout << std::endl;
-    std::cout << "按Enter键返回主菜单...";
+    std::cout << _("prompt.press_enter") << std::endl;
     std::cin.get();
+}
+
+void TerminalUI::showLanguageMenu()
+{
+    clearScreen();
+    std::cout << "===== " << _("menu.language") << " =====" << std::endl;
+    std::cout << std::endl;
+
+    auto &i18n = I18n::getInstance();
+    std::cout << _("prompt.current_language") << ": "
+              << (i18n.getCurrentLanguage() == Language::CHINESE ? "中文" : "English") << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "1. 中文 (Chinese)" << std::endl;
+    std::cout << "2. English" << std::endl;
+    std::cout << "3. " << _("menu.back") << std::endl;
+    std::cout << std::endl;
+    std::cout << _("prompt.select_option") << " [1-3]: ";
+
+    int choice;
+    std::cin >> choice;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    switch (choice) {
+        case 1:
+            i18n.setLanguage(Language::CHINESE);
+            Config::getInstance().setLanguage(Language::CHINESE);
+            Config::getInstance().saveToFile("config.json");
+            std::cout << "语言已设置为中文" << std::endl;
+            std::cout << "按Enter键继续..." << std::endl;
+            std::cin.get();
+            // 返回主菜单
+            if (!menuStack.empty()) {
+                currentMenuId = menuStack.back();
+                menuStack.pop_back();
+            }
+            break;
+        case 2:
+            i18n.setLanguage(Language::ENGLISH);
+            Config::getInstance().setLanguage(Language::ENGLISH);
+            Config::getInstance().saveToFile("config.json");
+            std::cout << "Language set to English" << std::endl;
+            std::cout << "Press Enter to continue..." << std::endl;
+            std::cin.get();
+            // 返回主菜单
+            if (!menuStack.empty()) {
+                currentMenuId = menuStack.back();
+                menuStack.pop_back();
+            }
+            break;
+        case 3:
+            return;
+        default:
+            std::cout << _("error.invalid_choice") << std::endl;
+            std::cout << _("prompt.press_enter") << std::endl;
+            std::cin.get();
+            break;
+    }
 }
 
 }}  // namespace neumann::cli

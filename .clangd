@@ -1,5 +1,16 @@
 CompileFlags:
+  CompilationDatabase: build/mingw-release/
   Add: [
+      # 解决标准库兼容性问题的预处理器定义
+      -D__STDCPP_WANT_MATH_SPEC_FUNCS__=1,
+      -D_GLIBCXX_USE_CXX11_ABI=1,
+      -D__USE_MINGW_ANSI_STDIO=1,
+      -D__STDC_WANT_LIB_EXT1__=1,
+      -D_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING,
+      -D_GNU_SOURCE,
+      -D__STDC_LIMIT_MACROS,
+      -D__STDC_CONSTANT_MACROS,
+
       # 基本包含路径
       -I.,
       -I./include,
@@ -9,6 +20,12 @@ CompileFlags:
       -I./src/core,
       -I./src/cli,
       -I./src/web,
+
+      # 强制包含必要的标准库头文件
+      -include,
+      cstddef,
+      -include,
+      cstdint,
 
       # 依赖库路径
       -I./build/mingw-release/_deps/ftxui-src/include,
@@ -51,11 +68,29 @@ Index:
 
 Diagnostics:
   UnusedIncludes: Strict
-  Suppress:
-    [
+  Suppress: [
+      # max_align_t相关错误
+      "no member named 'max_align_t' in the global namespace",
+      "max_align_t",
+      "cstddef*",
+
+      # 内置函数相关错误
       "definition of builtin function",
+      "builtin function",
       "unknown attribute",
-      "no member named .*_align_t in the global namespace",
+
+      # 包含文件相关错误
+      "In included file",
+      "included file",
+
+      # 其他常见的标准库兼容性错误
+      "use of undeclared identifier",
+      "conflicting types for",
+      "redefinition",
+      "no_member",
+      "_mm_getcsr",
+      "_mm_setcsr",
+      "__builtin_ia32_prefetch",
     ]
   ClangTidy:
     Add: [performance-*, bugprone-*, modernize-*, readability-*]

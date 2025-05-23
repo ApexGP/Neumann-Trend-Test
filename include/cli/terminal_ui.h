@@ -93,6 +93,9 @@ private:
     // 显示关于信息
     void showAbout();
 
+    // 显示语言选择菜单
+    void showLanguageMenu();
+
     // 询问用户输入数据
     std::vector<double> promptForData(const std::string &prompt);
 

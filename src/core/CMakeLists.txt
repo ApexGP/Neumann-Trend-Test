@@ -2,6 +2,9 @@ set(CORE_SOURCES
     standard_values.cpp
     neumann_calculator.cpp
     data_manager.cpp
+    i18n.cpp
+    config.cpp
+    error_handler.cpp
 )
 
 # 创建核心库

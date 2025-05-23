@@ -8,9 +8,11 @@
 #include "core/standard_values.h"
 #include "web/web_server.h"
 
-// Windows专用头文件
+// Windows专用函数声明
 #ifdef _WIN32
-#include <windows.h>
+extern "C" {
+__declspec(dllimport) bool __stdcall SetConsoleOutputCP(unsigned int wCodePageID);
+}
 #endif
 
 namespace fs = std::filesystem;
@@ -30,7 +32,7 @@ void signalHandler(int signal)
 int main(int argc, char **argv)
 {
     try {
-// 在Windows平台上设置控制台为UTF-8模式
+        // 在Windows平台上设置控制台为UTF-8模式
 #ifdef _WIN32
         SetConsoleOutputCP(65001);
 #endif
