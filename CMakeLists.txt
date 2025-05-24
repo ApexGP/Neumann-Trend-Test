@@ -76,6 +76,35 @@ project(NeumannTrendTest
     DESCRIPTION "诺依曼趋势测试工具"
     LANGUAGES CXX)
 
+# 添加编译器定义解决标准库冲突
+add_compile_definitions(
+    __STDC_WANT_LIB_EXT1__=1
+    _SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING
+)
+
+# 全局处理标准库兼容性问题
+if(WIN32)
+    # Windows平台的标准库兼容性修复
+    add_compile_definitions(
+        _CRT_SECURE_NO_WARNINGS
+        _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+        NOMINMAX
+        WIN32_LEAN_AND_MEAN
+        _USE_MATH_DEFINES
+    )
+    
+    # 处理max_align_t问题 - 强制启用完整标准库
+    if(MINGW OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        add_compile_definitions(
+            __STDCPP_WANT_MATH_SPEC_FUNCS__=1
+            _GLIBCXX_USE_CXX11_ABI=1
+        )
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_MINGW_ANSI_STDIO=1 -std=c++17")
+    elseif(MSVC)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+    endif()
+endif()
+
 # 平台检测与工具链设置
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(STATUS "平台: Windows")
@@ -95,7 +124,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     else()
         message(STATUS "构建工具链: MSVC")
         # MSVC特定的编译选项
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /D_CRT_SECURE_NO_WARNINGS")
+        add_compile_definitions(
+            _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+        )
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "平台: Linux")

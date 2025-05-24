@@ -1,49 +1,49 @@
 #!/bin/bash
-echo "正在启动诺依曼趋势测试命令行工具..."
+echo "Starting Neumann Trend Test CLI Tool..."
 
-# 确保当前目录是项目根目录
+# Change to project root directory
 cd "$(dirname "$0")"
 
-# 检查并创建必要的目录和文件
+# Check and create necessary directories
 if [ ! -d "data" ]; then
-    echo "创建data目录..."
+    echo "Creating data directory..."
     mkdir -p data
 fi
 
 if [ ! -f "data/standard_values.json" ]; then
-    echo "警告：标准值文件不存在，将创建空文件..."
-    echo "{}" > data/standard_values.json
+    echo "Warning: Standard values file not found, creating empty file..."
+    echo "{}" >data/standard_values.json
 fi
 
-# 查找CLI应用程序
+# Find CLI application
 CLI_APP=""
 
 if [ -f "bin/neumann_cli_app" ]; then
     CLI_APP="bin/neumann_cli_app"
 elif [ -f "build/linux-release/bin/neumann_cli_app" ]; then
-    echo "警告: 使用旧版本的构建输出路径"
+    echo "Warning: Using legacy build output path"
     CLI_APP="build/linux-release/bin/neumann_cli_app"
 else
-    echo "错误: 未找到命令行应用程序可执行文件"
-    echo "请确保已成功构建项目"
-    read -p "按回车键继续..." KEY
+    echo "Error: CLI application executable not found"
+    echo "Please ensure the project has been built successfully"
+    read -p "Press Enter to continue..." KEY
     exit 1
 fi
 
-# 显示摘要信息
+# Display summary information
 echo "-----------------------------------------"
-echo "诺依曼趋势测试命令行工具启动摘要："
+echo "Neumann Trend Test CLI Tool Launcher"
 echo "-----------------------------------------"
-echo "可执行文件：$CLI_APP"
-echo "当前工作目录：$(pwd)"
-echo "数据目录：$(pwd)/data"
+echo "Executable: $CLI_APP"
+echo "Working Directory: $(pwd)"
+echo "Data Directory: $(pwd)/data"
 echo "-----------------------------------------"
-echo "可用命令行选项："
-echo "-f, --file [文件路径]    处理CSV数据文件"
-echo "-h, --help              显示帮助信息"
+echo "Available command line options:"
+echo "-f, --file [filepath]    Process CSV data file"
+echo "-h, --help              Show help information"
 echo "-----------------------------------------"
 
-# 启动应用程序
-$CLI_APP "$@"
+# Launch application
+"$CLI_APP" "$@"
 
-read -p "按回车键继续..." KEY 
+read -p "Press Enter to continue..." KEY

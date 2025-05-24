@@ -3,9 +3,13 @@ build/
 bin/
 lib/
 
+# 安装脚本
+install.bat
+
+# 发布包
+release/
+
 # 编辑器和IDE文件
-# .vscode/
-.idea/
 *.suo
 *.user
 *.sln.docstates
@@ -21,8 +25,13 @@ compile_commands.json
 *.so
 *.dylib
 
+# 数据测试文件
+data/sample*.json
+data/standard*.json
+
 # 临时文件
 *.tmp
 *.log
 .DS_Store
 Thumbs.db
+.cache/

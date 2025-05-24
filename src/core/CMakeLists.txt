@@ -2,6 +2,12 @@ set(CORE_SOURCES
     standard_values.cpp
     neumann_calculator.cpp
     data_manager.cpp
+    i18n.cpp
+    config.cpp
+    error_handler.cpp
+    excel_reader.cpp
+    data_visualization.cpp
+    batch_processor.cpp
 )
 
 # 创建核心库

@@ -1,14 +1,24 @@
 CompileFlags:
+  CompilationDatabase: build/mingw-release/
   Add: [
+      # 解决标准库兼容性问题的预处理器定义
+      -D__STDCPP_WANT_MATH_SPEC_FUNCS__=1,
+      -D_GLIBCXX_USE_CXX11_ABI=1,
+      -D__USE_MINGW_ANSI_STDIO=1,
+      -D__STDC_WANT_LIB_EXT1__=1,
+      -D_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING,
+      -D_GNU_SOURCE,
+      -D__STDC_LIMIT_MACROS,
+      -D__STDC_CONSTANT_MACROS,
+
       # 基本包含路径
       -I.,
       -I./include,
       -I./src,
 
-      # 更精确的源代码路径
-      -I./src/core,
-      -I./src/cli,
-      -I./src/web,
+      # 强制包含必要的标准库头文件
+      -include cstddef,
+      -include cstdint,
 
       # 依赖库路径
       -I./build/mingw-release/_deps/ftxui-src/include,
@@ -26,15 +36,23 @@ CompileFlags:
       -I./_deps/ftxui-src/include,
       -I./_deps/crow-src/include,
       -I./_deps/json-src/include,
+
+      # vcpkg 依赖库路径
       -IC:/vcpkg/installed/x64-mingw-static/include,
+      -IC:/vcpkg/installed/x64-windows/include,
+      -ID:/RTlibs/vcpkg/installed/x64-mingw-static/include/**,
+      -ID:/RTlibs/vcpkg/installed/x64-windows/include/**,
 
       # 系统库路径
+      -IC:/Users/Domin/scoop/apps/mingw/current/x86_64-w64-mingw32/include,
       -IC:/Users/Domin/scoop/apps/mingw/current/include,
       -IC:/Users/Domin/scoop/apps/mingw/current/include/c++/15.1.0,
 
       # 额外配置
       -std=c++17,
       -Wall,
+      -march=native,
+      -msse2,
     ]
   Compiler: g++
 
@@ -43,15 +61,39 @@ Index:
 
 Diagnostics:
   UnusedIncludes: Strict
+  Suppress: [
+      # max_align_t相关错误
+      "no member named 'max_align_t' in the global namespace",
+      "max_align_t",
+      "cstddef*",
+
+      # 内置函数相关错误
+      "definition of builtin function",
+      "builtin function",
+      "unknown attribute",
+
+      # 包含文件相关错误
+      "In included file",
+      "included file",
+
+      # 其他常见的标准库兼容性错误
+      "use of undeclared identifier",
+      "conflicting types for",
+      "redefinition",
+      "no_member",
+      "_mm_getcsr",
+      "_mm_setcsr",
+      "__builtin_ia32_prefetch",
+    ]
   ClangTidy:
     Add: [performance-*, bugprone-*, modernize-*, readability-*]
     Remove: [modernize-use-trailing-return-type, readability-identifier-length]
 
 InlayHints:
-  Enabled: Yes
-  DeducedTypes: Yes
-  ParameterNames: Yes
+  Enabled: true
+  DeducedTypes: true
+  ParameterNames: true
   TypeNameLimit: 40
 
 Hover:
-  ShowAKA: Yes
+  ShowAKA: true
