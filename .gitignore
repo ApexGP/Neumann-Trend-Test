@@ -3,8 +3,8 @@ build/
 bin/
 lib/
 
-# 发布脚本
-create-release.bat
+# 安装脚本
+install.bat
 
 # 发布包
 release/
