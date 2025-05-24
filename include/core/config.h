@@ -89,6 +89,10 @@ private:
     // 初始化默认配置
     void initializeDefaults();
 
+    // 路径转换辅助方法
+    std::string makeRelativePath(const std::string &absolutePath) const;
+    std::string makeAbsolutePath(const std::string &relativePath) const;
+
     // 配置项
     Language language;
     std::string dataDirectory;

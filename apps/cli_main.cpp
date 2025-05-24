@@ -34,26 +34,35 @@ int main(int argc, char **argv)
             std::cout << "创建配置目录: " << configDir << std::endl;
         }
 
-        // 尝试加载配置文件（优先从config目录，回退到开发目录）
+        // 尝试加载配置文件（优先从根目录config，回退到bin目录）
         std::string configFile = (fs::path(configDir) / "config.json").string();
         std::string fallbackConfigFile = (exeDir / "config.json").string();
+        std::string devConfigFile = "config/config.json";  // 开发时的路径
 
         if (fs::exists(configFile)) {
+            // 先设置配置文件路径，用于路径转换
+            config.setConfigFilePath(configFile);
             if (!config.loadFromFile(configFile)) {
                 std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
             } else {
                 std::cout << "已加载配置文件: " << configFile << std::endl;
             }
-            // 设置配置文件路径，用于后续保存
-            config.setConfigFilePath(configFile);
+        } else if (fs::exists(devConfigFile)) {
+            // 开发环境中的配置文件
+            config.setConfigFilePath(devConfigFile);
+            if (!config.loadFromFile(devConfigFile)) {
+                std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
+            } else {
+                std::cout << "已加载开发配置文件: " << devConfigFile << std::endl;
+            }
         } else if (fs::exists(fallbackConfigFile)) {
+            // 先设置配置文件路径，用于路径转换
+            config.setConfigFilePath(fallbackConfigFile);
             if (!config.loadFromFile(fallbackConfigFile)) {
                 std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
             } else {
-                std::cout << "已加载开发配置文件: " << fallbackConfigFile << std::endl;
+                std::cout << "已加载回退配置文件: " << fallbackConfigFile << std::endl;
             }
-            // 设置配置文件路径，用于后续保存
-            config.setConfigFilePath(fallbackConfigFile);
         } else {
             std::cout << "使用默认配置设置" << std::endl;
             // 即使没有配置文件，也要设置预期的保存路径
@@ -88,8 +97,9 @@ int main(int argc, char **argv)
         auto &i18n = neumann::I18n::getInstance();
         i18n.setLanguage(config.getLanguage());
 
-        // 尝试加载翻译文件（优先从config目录，回退到开发目录）
+        // 尝试加载翻译文件（优先从根目录config，回退到开发目录和data目录）
         std::string translationFile = (fs::path(configDir) / "translations.json").string();
+        std::string devTranslationFile = "config/translations.json";  // 开发时的路径
         std::string fallbackTranslationFile = "data/translations.json";
 
         bool translationsLoaded = false;
@@ -101,9 +111,16 @@ int main(int argc, char **argv)
             }
         }
 
+        if (!translationsLoaded && fs::exists(devTranslationFile)) {
+            if (i18n.loadTranslations(devTranslationFile)) {
+                std::cout << "已加载开发翻译文件: " << devTranslationFile << std::endl;
+                translationsLoaded = true;
+            }
+        }
+
         if (!translationsLoaded && fs::exists(fallbackTranslationFile)) {
             if (i18n.loadTranslations(fallbackTranslationFile)) {
-                std::cout << "已加载开发翻译文件: " << fallbackTranslationFile << std::endl;
+                std::cout << "已加载回退翻译文件: " << fallbackTranslationFile << std::endl;
                 translationsLoaded = true;
             }
         }
@@ -124,9 +141,10 @@ int main(int argc, char **argv)
             std::cout << std::endl;
         }
 
-        // 加载标准值（优先从ref目录，回退到开发目录）
+        // 加载标准值（优先从根目录ref，回退到开发目录和data目录）
         auto &standardValues = neumann::StandardValues::getInstance();
         std::string standardValuesFile = (fs::path(refDir) / "standard_values.json").string();
+        std::string devStandardValuesFile = "ref/standard_values.json";  // 开发时的路径
         std::string fallbackStandardValuesFile = "data/standard_values.json";
 
         if (fs::exists(standardValuesFile)) {
@@ -135,11 +153,17 @@ int main(int argc, char **argv)
             } else {
                 std::cout << "已加载标准值文件: " << standardValuesFile << std::endl;
             }
+        } else if (fs::exists(devStandardValuesFile)) {
+            if (!standardValues.loadFromFile(devStandardValuesFile)) {
+                std::cout << _("error.standard_values_not_found") << std::endl;
+            } else {
+                std::cout << "已加载开发标准值文件: " << devStandardValuesFile << std::endl;
+            }
         } else if (fs::exists(fallbackStandardValuesFile)) {
             if (!standardValues.loadFromFile(fallbackStandardValuesFile)) {
                 std::cout << _("error.standard_values_not_found") << std::endl;
             } else {
-                std::cout << "已加载开发标准值文件: " << fallbackStandardValuesFile << std::endl;
+                std::cout << "已加载回退标准值文件: " << fallbackStandardValuesFile << std::endl;
             }
         } else {
             std::cout << _("error.standard_values_not_found") << std::endl;

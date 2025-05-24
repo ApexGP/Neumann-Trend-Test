@@ -87,6 +87,9 @@ private:
     // 从Excel导入数据
     void importFromExcel();
 
+    // 加载样本数据文件
+    void loadSampleData();
+
     // 运行诺依曼测试
     void runNeumannTest();
 
@@ -104,6 +107,13 @@ private:
 
     // 显示右上角状态信息
     void displayStatusBar();
+
+    // 批量处理功能
+    void runBatchProcessing();
+
+    // 高级功能菜单
+    void showDataVisualization();
+    void showStatisticsAnalysis();
 
     // 询问用户输入数据
     std::vector<double> promptForData(const std::string &prompt);

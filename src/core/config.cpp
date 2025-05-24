@@ -5,6 +5,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "core/i18n.h"
+
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
@@ -13,15 +15,51 @@ namespace neumann {
 Config::Config()
 {
     initializeDefaults();
-
-    // 设置配置文件路径
-    configFilePath = "config.json";
 }
 
 Config &Config::getInstance()
 {
     static Config instance;
     return instance;
+}
+
+// 将绝对路径转换为相对于可执行文件的相对路径
+std::string Config::makeRelativePath(const std::string &absolutePath) const
+{
+    try {
+        if (configFilePath.empty()) {
+            return absolutePath;  // 如果没有配置文件路径，返回原始路径
+        }
+
+        fs::path configDir = fs::path(configFilePath).parent_path();
+        fs::path absPath = fs::absolute(absolutePath);
+        fs::path relPath = fs::relative(absPath, configDir.parent_path());  // 相对于release目录
+
+        return relPath.string();
+    }
+    catch (const std::exception &e) {
+        // 如果转换失败，返回原始路径
+        return absolutePath;
+    }
+}
+
+// 将相对路径转换为绝对路径
+std::string Config::makeAbsolutePath(const std::string &relativePath) const
+{
+    try {
+        if (configFilePath.empty()) {
+            return relativePath;  // 如果没有配置文件路径，返回原始路径
+        }
+
+        fs::path configDir = fs::path(configFilePath).parent_path();
+        fs::path absPath = configDir.parent_path() / relativePath;  // 相对于release目录
+
+        return fs::absolute(absPath).string();
+    }
+    catch (const std::exception &e) {
+        // 如果转换失败，返回原始路径
+        return relativePath;
+    }
 }
 
 bool Config::loadFromFile(const std::string &filename)
@@ -47,11 +85,15 @@ bool Config::loadFromFile(const std::string &filename)
         }
 
         if (data.contains("dataDirectory")) {
-            dataDirectory = data["dataDirectory"].get<std::string>();
+            std::string relPath = data["dataDirectory"].get<std::string>();
+            // 将相对路径转换为绝对路径
+            dataDirectory = makeAbsolutePath(relPath);
         }
 
         if (data.contains("webRootDirectory")) {
-            webRootDirectory = data["webRootDirectory"].get<std::string>();
+            std::string relPath = data["webRootDirectory"].get<std::string>();
+            // 将相对路径转换为绝对路径
+            webRootDirectory = makeAbsolutePath(relPath);
         }
 
         if (data.contains("defaultConfidenceLevel")) {
@@ -94,8 +136,9 @@ bool Config::saveToFile(const std::string &filename)
 
         // 保存所有配置项
         data["language"] = I18n::languageToString(language);
-        data["dataDirectory"] = dataDirectory;
-        data["webRootDirectory"] = webRootDirectory;
+        // 将绝对路径转换为相对路径存储
+        data["dataDirectory"] = makeRelativePath(dataDirectory);
+        data["webRootDirectory"] = makeRelativePath(webRootDirectory);
         data["defaultConfidenceLevel"] = defaultConfidenceLevel;
         data["defaultWebPort"] = defaultWebPort;
         data["showWelcomeMessage"] = showWelcomeMessage;

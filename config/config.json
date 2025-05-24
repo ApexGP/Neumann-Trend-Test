@@ -1,10 +1,10 @@
 {
   "autoSaveResults": true,
-  "dataDirectory": "D:\\projectRoot\\Code\\algorithm\\c_cpp\\Neumann-Trend-Test\\bin\\data",
+  "dataDirectory": "data",
   "defaultConfidenceLevel": 0.95,
   "defaultWebPort": 8080,
   "enableColorOutput": true,
-  "language": "en",
+  "language": "zh",
   "maxDataPoints": 1000,
   "showWelcomeMessage": true,
   "webRootDirectory": "web"

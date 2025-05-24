@@ -158,6 +158,13 @@ public:
     std::string createTableSeparator(int width, char separator = '-');
 
     /**
+     * @brief 计算字符串的显示宽度（考虑中文字符占用2个字符宽度）
+     * @param str 输入字符串
+     * @return 显示宽度
+     */
+    int getDisplayWidth(const std::string& str);
+
+    /**
      * @brief 格式化表格行
      * @param columns 列内容
      * @param widths 列宽度

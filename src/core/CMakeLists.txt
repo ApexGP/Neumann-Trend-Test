@@ -6,6 +6,8 @@ set(CORE_SOURCES
     config.cpp
     error_handler.cpp
     excel_reader.cpp
+    data_visualization.cpp
+    batch_processor.cpp
 )
 
 # 创建核心库

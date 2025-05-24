@@ -235,6 +235,36 @@ std::string TerminalUtils::createTableSeparator(int width, char separator)
     return std::string(width, separator);
 }
 
+// 计算字符串的显示宽度（考虑中文字符占用2个字符宽度）
+int TerminalUtils::getDisplayWidth(const std::string& str)
+{
+    int width = 0;
+    for (size_t i = 0; i < str.length();) {
+        unsigned char c = str[i];
+        if (c < 0x80) {
+            // ASCII字符，占用1个字符宽度
+            width += 1;
+            i += 1;
+        } else if ((c & 0xE0) == 0xC0) {
+            // UTF-8 2字节字符
+            width += 2;  // 通常是中文字符，占用2个字符宽度
+            i += 2;
+        } else if ((c & 0xF0) == 0xE0) {
+            // UTF-8 3字节字符（大部分中文）
+            width += 2;  // 中文字符占用2个字符宽度
+            i += 3;
+        } else if ((c & 0xF8) == 0xF0) {
+            // UTF-8 4字节字符
+            width += 2;  // 假设占用2个字符宽度
+            i += 4;
+        } else {
+            // 无效UTF-8序列，跳过
+            i += 1;
+        }
+    }
+    return width;
+}
+
 std::string TerminalUtils::formatTableRow(const std::vector<std::string>& columns,
                                           const std::vector<int>& widths,
                                           const std::string& alignment)
@@ -250,23 +280,31 @@ std::string TerminalUtils::formatTableRow(const std::vector<std::string>& column
         int width = widths[i];
         char align = (i < alignment.size()) ? alignment[i] : 'l';
 
-        // 截断过长的内容
-        if (static_cast<int>(content.length()) > width - 2) {
-            content = content.substr(0, width - 5) + "...";
-        }
+        // 计算实际显示宽度
+        int displayWidth = getDisplayWidth(content);
 
-        // 对齐
-        if (align == 'r') {
-            oss << std::setw(width) << std::right << content;
-        } else if (align == 'c') {
-            int padding = width - static_cast<int>(content.length());
-            int leftPad = padding / 2;
-            int rightPad = padding - leftPad;
-            oss << std::string(leftPad, ' ') << content << std::string(rightPad, ' ');
+        // 实现正确的对齐逻辑，基于显示宽度
+        if (displayWidth >= width) {
+            // 内容显示宽度超过列宽，直接输出
+            oss << content;
         } else {
-            oss << std::setw(width) << std::left << content;
+            int padding = width - displayWidth;
+
+            if (align == 'r') {
+                // 右对齐：添加左侧空格
+                oss << std::string(padding, ' ') << content;
+            } else if (align == 'c') {
+                // 中心对齐：平均分配左右空格
+                int leftPad = padding / 2;
+                int rightPad = padding - leftPad;
+                oss << std::string(leftPad, ' ') << content << std::string(rightPad, ' ');
+            } else {
+                // 左对齐：添加右侧空格
+                oss << content << std::string(padding, ' ');
+            }
         }
 
+        // 添加列间分隔符（除了最后一列）
         if (i < columns.size() - 1) {
             oss << " ";
         }

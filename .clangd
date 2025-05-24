@@ -16,16 +16,9 @@ CompileFlags:
       -I./include,
       -I./src,
 
-      # 更精确的源代码路径
-      -I./src/core,
-      -I./src/cli,
-      -I./src/web,
-
       # 强制包含必要的标准库头文件
-      -include,
-      cstddef,
-      -include,
-      cstdint,
+      -include cstddef,
+      -include cstdint,
 
       # 依赖库路径
       -I./build/mingw-release/_deps/ftxui-src/include,
