@@ -82,6 +82,16 @@
     "result.max_pg": "最大PG值",
     "result.avg_pg": "平均PG值",
 
+    "result.trend_detected": "系统性趋势变化检测到",
+    "result.data_stable": "数据保持稳定状态",
+    "result.trend_statistics": "趋势点统计",
+    "result.pg_range": "PG值范围",
+    "result.avg_pg_label": "平均PG值",
+    "result.pg_interpretation_trend": "PG < 1.0 表示存在显著趋势",
+    "result.pg_interpretation_stable": "PG ≥ 1.0 表示无显著趋势",
+    "result.trend_warning": "趋势警告",
+    "result.stability_confirmed": "稳定确认",
+
     "help.title": "帮助信息",
     "help.description": "诺依曼趋势测试是一种统计方法，用于评估数据集是否存在系统性趋势。",
     "help.usage_areas": "这种测试常用于药物稳定性研究和质量控制等领域。",
@@ -239,6 +249,19 @@
     "sample.select_file": "请选择要加载的样本文件",
     "sample.save_as_dataset": "是否将样本数据保存为数据集",
     "sample.run_test_prompt": "是否立即对该样本数据运行诺依曼趋势测试",
+    "sample.directory_not_exists": "样本文件目录不存在",
+    "sample.scan_error": "扫描样本文件时出错",
+    "sample.no_supported_files": "在目录下没有找到支持的样本文件(.csv, .txt)",
+    "sample.loading_file": "正在加载样本文件",
+    "sample.file_loaded_success": "样本文件加载成功!",
+    "sample.data_preview": "数据预览:",
+    "sample.time_label": "时间",
+    "sample.value_label": "数值",
+    "sample.total_data_points": "共 {0} 个数据点",
+    "sample.insufficient_data_info": "至少需要4个数据点才能进行诺依曼趋势测试",
+    "sample.description_prefix": "从样本文件加载",
+    "sample.source_name": "样本文件",
+    "sample.load_error": "加载样本文件时出错",
 
     "warning.config_save_failed": "配置保存失败",
 
@@ -274,7 +297,15 @@
     "statistics.datasets_with_trend": "发现趋势的数据集",
     "statistics.avg_data_points": "平均数据点数",
     "statistics.avg_pg_value": "平均PG值",
-    "statistics.pg_range": "PG值范围"
+    "statistics.pg_range": "PG值范围",
+
+    "chart.title": "诺依曼趋势测试结果",
+    "chart.pg_values": "PG 值",
+    "chart.thresholds": "阈值",
+    "chart.time_points_unit": "时间点 (单位: h)",
+    "chart.pg_value_label": "PG 值",
+    "chart.pg_distribution_title": "PG 值分布",
+    "chart.no_data": "无数据可用"
   },
 
   "en": {
@@ -359,6 +390,16 @@
     "result.min_pg": "Min PG Value",
     "result.max_pg": "Max PG Value",
     "result.avg_pg": "Avg PG Value",
+
+    "result.trend_detected": "Systematic trend change detected",
+    "result.data_stable": "Data remains stable",
+    "result.trend_statistics": "Trend point statistics",
+    "result.pg_range": "PG value range",
+    "result.avg_pg_label": "Average PG value",
+    "result.pg_interpretation_trend": "PG < 1.0 indicates significant trend",
+    "result.pg_interpretation_stable": "PG ≥ 1.0 indicates no significant trend",
+    "result.trend_warning": "Trend Warning",
+    "result.stability_confirmed": "Stability Confirmed",
 
     "help.title": "Help",
     "help.description": "Neumann Trend Test is a statistical method used to evaluate whether a dataset has systematic trends.",
@@ -517,6 +558,19 @@
     "sample.select_file": "Please select sample file to load",
     "sample.save_as_dataset": "Save sample data as dataset?",
     "sample.run_test_prompt": "Run Neumann Trend Test on this sample data immediately?",
+    "sample.directory_not_exists": "Sample file directory does not exist",
+    "sample.scan_error": "Error scanning sample files",
+    "sample.no_supported_files": "No supported sample files (.csv, .txt) found in directory",
+    "sample.loading_file": "Loading sample file",
+    "sample.file_loaded_success": "Sample file loaded successfully!",
+    "sample.data_preview": "Data Preview:",
+    "sample.time_label": "Time",
+    "sample.value_label": "Value",
+    "sample.total_data_points": "{0} total data points",
+    "sample.insufficient_data_info": "At least 4 data points are required for Neumann Trend Test",
+    "sample.description_prefix": "Loaded from sample file",
+    "sample.source_name": "Sample File",
+    "sample.load_error": "Error loading sample file",
 
     "warning.config_save_failed": "Configuration save failed",
 
@@ -552,6 +606,14 @@
     "statistics.datasets_with_trend": "Datasets with trend detected",
     "statistics.avg_data_points": "Average data point count",
     "statistics.avg_pg_value": "Average PG value",
-    "statistics.pg_range": "PG value range"
+    "statistics.pg_range": "PG value range",
+
+    "chart.title": "Neumann Trend Test Results",
+    "chart.pg_values": "PG Values",
+    "chart.thresholds": "Thresholds",
+    "chart.time_points_unit": "Time Points (Unit: h)",
+    "chart.pg_value_label": "PG Values",
+    "chart.pg_distribution_title": "PG Value Distribution",
+    "chart.no_data": "No data available"
   }
 }

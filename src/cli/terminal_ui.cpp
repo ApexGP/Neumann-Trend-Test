@@ -665,18 +665,52 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
         return;
     }
 
-    // 计算表格列宽 - 根据中文字符实际显示宽度重新设计
-    // "数据点"=6, "时间点"=6, "PG值"=6, "W(P)阈值"=8, "趋势判断"=8
-    // 考虑数据内容：数值通常8-12位，中文判断8位，留些余量
-    std::vector<int> columnWidths = {12, 10, 8, 10, 10};
-
     // 表头
     std::vector<std::string> headers = {_("result.data_point"), _("result.time_point"),
                                         _("result.pg_value"), _("result.threshold"),
                                         _("result.trend_judgment")};
 
+    // 动态计算列宽 - 考虑表头文本长度和数据内容
+    std::vector<int> columnWidths(headers.size());
+
+    // 基于表头文本长度计算初始列宽
+    for (size_t i = 0; i < headers.size(); ++i) {
+        columnWidths[i] = termUtils.getDisplayWidth(headers[i]);
+    }
+
+    // 考虑数据内容，确保列宽足够显示数据
+    for (size_t i = 0; i < results.results.size(); ++i) {
+        size_t dataIndex = i + 3;  // 从第4个数据点开始计算PG值
+
+        // 格式化数据以计算所需宽度
+        std::ostringstream dataPointStr, timePointStr, pgValueStr, thresholdStr;
+
+        dataPointStr << std::fixed << std::setprecision(2) << results.data[dataIndex];
+        timePointStr << std::fixed << std::setprecision(2) << results.timePoints[dataIndex];
+        pgValueStr << std::fixed << std::setprecision(4) << results.results[i].pgValue;
+        thresholdStr << std::fixed << std::setprecision(4) << results.results[i].wpThreshold;
+
+        std::string trendText =
+            results.results[i].hasTrend ? _("result.has_trend") : _("result.no_trend");
+
+        // 更新列宽以容纳数据内容
+        columnWidths[0] = std::max(columnWidths[0], termUtils.getDisplayWidth(dataPointStr.str()));
+        columnWidths[1] = std::max(columnWidths[1], termUtils.getDisplayWidth(timePointStr.str()));
+        columnWidths[2] = std::max(columnWidths[2], termUtils.getDisplayWidth(pgValueStr.str()));
+        columnWidths[3] = std::max(columnWidths[3], termUtils.getDisplayWidth(thresholdStr.str()));
+        columnWidths[4] = std::max(columnWidths[4], termUtils.getDisplayWidth(trendText));
+    }
+
+    // 设置最小列宽，并添加一些填充空间
+    const std::vector<int> minWidths = {8, 8, 10, 12, 10};  // 最小列宽
+    const std::vector<int> padding = {2, 2, 2, 2, 2};       // 每列的填充空间
+
+    for (size_t i = 0; i < columnWidths.size(); ++i) {
+        columnWidths[i] = std::max(columnWidths[i] + padding[i], minWidths[i]);
+    }
+
     // 显示表头 - 使用混合对齐：数值列右对齐，文本列左对齐
-    termUtils.printColor(termUtils.formatTableRow(headers, columnWidths, "rrrrr"),
+    termUtils.printColor(termUtils.formatTableRow(headers, columnWidths, "lrrrr"),
                          Color::BRIGHT_WHITE, TextStyle::BOLD);
     std::cout << std::endl;
 
@@ -709,7 +743,7 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
 
         // 根据趋势判断使用不同颜色 - 使用混合对齐与表头一致
         Color rowColor = results.results[i].hasTrend ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
-        termUtils.printColor(termUtils.formatTableRow(row, columnWidths, "rrrrr"), rowColor);
+        termUtils.printColor(termUtils.formatTableRow(row, columnWidths, "lrrrr"), rowColor);
         std::cout << std::endl;
     }
 
@@ -717,38 +751,237 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     termUtils.printColor(termUtils.createTableSeparator(tableWidth, '='), Color::CYAN);
     std::cout << std::endl << std::endl;
 
-    // 汇总结果
-    termUtils.printColor(_("result.summary"), Color::BRIGHT_YELLOW, TextStyle::BOLD);
-    std::cout << std::endl;
-
-    std::cout << _("result.overall_trend") << ": ";
-    if (results.overallTrend) {
-        termUtils.printColor(_("result.has_trend"), Color::BRIGHT_RED, TextStyle::BOLD);
-    } else {
-        termUtils.printColor(_("result.no_trend"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    }
-    std::cout << std::endl;
-
-    std::cout << _("result.min_pg") << ": " << std::fixed << std::setprecision(4) << results.minPG
-              << std::endl;
-    std::cout << _("result.max_pg") << ": " << results.maxPG << std::endl;
-    std::cout << _("result.avg_pg") << ": " << results.avgPG << std::endl;
-
-    std::cout << std::endl;
-    termUtils.printColor(_("result.conclusion"), Color::BRIGHT_YELLOW, TextStyle::BOLD);
-    std::cout << std::endl;
-
-    if (results.overallTrend) {
-        termUtils.printColor(_("result.conclusion_trend"), Color::YELLOW);
-    } else {
-        termUtils.printColor(_("result.conclusion_no_trend"), Color::GREEN);
-    }
-    std::cout << std::endl;
-
     // 添加ASCII图表显示
-    std::cout << std::endl;
     std::string asciiChart = DataVisualization::generateASCIIChart(results);
     std::cout << asciiChart << std::endl;
+
+    // 汇总结果 - 完整的闭合边框
+    int summaryWidth = 70;  // 增加边框宽度以适应内容
+
+    // 计算有趋势的数据点数量和百分比
+    int trendPointsCount = 0;
+    for (const auto &result : results.results) {
+        if (result.hasTrend) trendPointsCount++;
+    }
+    double trendPercentage = (100.0 * trendPointsCount) / results.results.size();
+
+    // 顶部边框
+    std::string topBorder = "┌─── " + _("result.summary") + " ";
+    int topTitleLength = termUtils.getDisplayWidth("┌─── " + _("result.summary") + " ");
+    for (int i = topTitleLength; i < summaryWidth - 1 + 5; ++i) {
+        topBorder += "─";
+    }
+    topBorder += "┐";
+
+    termUtils.printColor(topBorder, Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
+
+    // 整体趋势结果行
+    std::cout << "│ ";
+    termUtils.printColor(_("result.overall_trend") + ": ", Color::BRIGHT_WHITE, TextStyle::BOLD);
+    if (results.overallTrend) {
+        termUtils.printColor("⚠ " + _("result.has_trend") + " ⚠", Color::BRIGHT_RED,
+                             TextStyle::BOLD);
+    } else {
+        termUtils.printColor("✓ " + _("result.no_trend") + " ✓", Color::BRIGHT_GREEN,
+                             TextStyle::BOLD);
+    }
+    // 计算需要填充的空格数
+    std::string overallContent = _("result.overall_trend") + ": " +
+                                 (results.overallTrend ? ("⚠ " + _("result.has_trend") + " ⚠")
+                                                       : ("✓ " + _("result.no_trend") + " ✓"));
+    int overallContentWidth = termUtils.getDisplayWidth(overallContent);
+    int overallPadding = summaryWidth - overallContentWidth;
+    for (int i = 0; i < overallPadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // 状态描述行
+    std::cout << "│ ";
+    if (results.overallTrend) {
+        termUtils.printColor("📈 " + _("result.trend_detected"), Color::BRIGHT_RED);
+    } else {
+        termUtils.printColor("📊 " + _("result.data_stable"), Color::BRIGHT_GREEN);
+    }
+    // 计算填充空格
+    std::string statusContent = (results.overallTrend ? "📈 " + _("result.trend_detected")
+                                                      : "📊 " + _("result.data_stable"));
+    int statusContentWidth = termUtils.getDisplayWidth(statusContent);
+    int statusPadding = summaryWidth - statusContentWidth - 2;
+    for (int i = 0; i < statusPadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // 趋势点统计行
+    std::cout << "│ ";
+    termUtils.printColor("🔍 " + _("result.trend_statistics") + ": ", Color::BRIGHT_CYAN,
+                         TextStyle::BOLD);
+    std::cout << trendPointsCount << "/" << results.results.size() << " (";
+
+    Color percentageColor = (trendPercentage > 50)   ? Color::BRIGHT_RED
+                            : (trendPercentage > 20) ? Color::YELLOW
+                                                     : Color::BRIGHT_GREEN;
+    termUtils.printColor(std::to_string((int) trendPercentage) + "%", percentageColor,
+                         TextStyle::BOLD);
+    std::cout << ")";
+    // 计算填充空格
+    std::string statsContent = "🔍 " + _("result.trend_statistics") + ": " +
+                               std::to_string(trendPointsCount) + "/" +
+                               std::to_string(results.results.size()) + " (" +
+                               std::to_string((int) trendPercentage) + "%)";
+    int statsContentWidth = termUtils.getDisplayWidth(statsContent);
+    int statsPadding = summaryWidth - statsContentWidth - 2;
+    for (int i = 0; i < statsPadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // PG值范围行
+    std::cout << "│ ";
+    termUtils.printColor("📊 " + _("result.pg_range") + ": ", Color::BRIGHT_CYAN, TextStyle::BOLD);
+
+    // 最小PG值
+    Color minColor = (results.minPG < 1.0) ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
+    termUtils.printColor(std::to_string(results.minPG).substr(0, 6), minColor, TextStyle::BOLD);
+    std::cout << " ~ ";
+
+    // 最大PG值
+    Color maxColor = (results.maxPG < 1.0) ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
+    termUtils.printColor(std::to_string(results.maxPG).substr(0, 6), maxColor, TextStyle::BOLD);
+    // 计算填充空格
+    std::string rangeContent = "📊 " + _("result.pg_range") + ": " +
+                               std::to_string(results.minPG).substr(0, 6) + " ~ " +
+                               std::to_string(results.maxPG).substr(0, 6);
+    int rangeContentWidth = termUtils.getDisplayWidth(rangeContent);
+    int rangePadding = summaryWidth - rangeContentWidth - 2;
+    for (int i = 0; i < rangePadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // 平均PG值行
+    std::cout << "│ ";
+    termUtils.printColor("📈 " + _("result.avg_pg_label") + ": ", Color::BRIGHT_CYAN,
+                         TextStyle::BOLD);
+    Color avgColor = (results.avgPG < 1.0) ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
+    termUtils.printColor(std::to_string(results.avgPG).substr(0, 6), avgColor, TextStyle::BOLD);
+    // 计算填充空格
+    std::string avgContent =
+        "📈 " + _("result.avg_pg_label") + ": " + std::to_string(results.avgPG).substr(0, 6);
+    int avgContentWidth = termUtils.getDisplayWidth(avgContent);
+    int avgPadding = summaryWidth - avgContentWidth - 2;
+    for (int i = 0; i < avgPadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // PG值解释行
+    std::cout << "│ ";
+    termUtils.printColor("💡 ", Color::BRIGHT_YELLOW);
+    std::string interpretationText;
+    if (results.avgPG < 1.0) {
+        termUtils.printColor(_("result.pg_interpretation_trend"), Color::YELLOW);
+        interpretationText = "💡 " + _("result.pg_interpretation_trend");
+    } else {
+        termUtils.printColor(_("result.pg_interpretation_stable"), Color::GREEN);
+        interpretationText = "💡 " + _("result.pg_interpretation_stable");
+    }
+    // 计算填充空格
+    int interpretationWidth = termUtils.getDisplayWidth(interpretationText);
+    if (results.overallTrend) {
+        int interpretationPadding = summaryWidth - interpretationWidth - 2;
+        for (int i = 0; i < interpretationPadding; ++i) {
+            std::cout << " ";
+        }
+    } else {
+        int interpretationPadding = summaryWidth - interpretationWidth - 1;
+        for (int i = 0; i < interpretationPadding; ++i) {
+            std::cout << " ";
+        }
+    }
+    std::cout << "│" << std::endl;
+
+    // 底部边框
+    std::string bottomBorder = "└";
+    for (int i = 0; i < summaryWidth - 1; ++i) {
+        bottomBorder += "─";
+    }
+    bottomBorder += "┘";
+
+    termUtils.printColor(bottomBorder, Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl << std::endl;
+
+    // 结论部分 - 完整的闭合边框设计
+    int conclusionWidth = 125;  // 固定列宽
+
+    // 显示结论标题
+    if (results.overallTrend) {
+        termUtils.printColor("🔴 " + _("result.conclusion"), Color::BRIGHT_RED, TextStyle::BOLD);
+    } else {
+        termUtils.printColor("🟢 " + _("result.conclusion"), Color::BRIGHT_GREEN, TextStyle::BOLD);
+    }
+    std::cout << std::endl;
+
+    // 构建顶部边框
+    std::string conclusionTopBorder, conclusionBottomBorder;
+    Color borderColor = results.overallTrend ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
+
+    if (results.overallTrend) {
+        conclusionTopBorder = "┌─── " + _("result.trend_warning") + " ";
+        int titleLength = termUtils.getDisplayWidth("┌─── " + _("result.trend_warning") + " ");
+        for (int i = titleLength; i < conclusionWidth + 3; ++i) {
+            conclusionTopBorder += "─";
+        }
+        conclusionTopBorder += "┐";
+    } else {
+        conclusionTopBorder = "┌─── " + _("result.stability_confirmed") + " ";
+        int titleLength =
+            termUtils.getDisplayWidth("┌─── " + _("result.stability_confirmed") + " ");
+        for (int i = titleLength; i < conclusionWidth + 3; ++i) {
+            conclusionTopBorder += "─";
+        }
+        conclusionTopBorder += "┐";
+    }
+
+    // 构建底部边框
+    conclusionBottomBorder = "└";
+    for (int i = 0; i < conclusionWidth - 2; ++i) {
+        conclusionBottomBorder += "─";
+    }
+    conclusionBottomBorder += "┘";
+
+    // 显示顶部边框
+    termUtils.printColor(conclusionTopBorder, borderColor, TextStyle::BOLD);
+    std::cout << std::endl;
+
+    // 显示结论内容
+    std::cout << "│ ";
+    std::string conclusionText;
+    Color textColor;
+
+    if (results.overallTrend) {
+        conclusionText = _("result.conclusion_trend");
+        textColor = Color::YELLOW;
+    } else {
+        conclusionText = _("result.conclusion_no_trend");
+        textColor = Color::GREEN;
+    }
+
+    termUtils.printColor(conclusionText, textColor);
+
+    // 计算需要填充的空格数以保持边框对齐
+    int contentWidth = termUtils.getDisplayWidth(conclusionText);
+    int conclusionPadding = conclusionWidth - contentWidth - 3;  // 3 for "│ " and "│"
+    for (int i = 0; i < conclusionPadding; ++i) {
+        std::cout << " ";
+    }
+    std::cout << "│" << std::endl;
+
+    // 显示底部边框
+    termUtils.printColor(conclusionBottomBorder, borderColor, TextStyle::BOLD);
+    std::cout << std::endl;
 }
 
 void TerminalUI::showHelp()
@@ -846,7 +1079,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.0.0" << std::endl;
+    std::cout << " v2.1.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -1287,9 +1520,27 @@ void TerminalUI::showDataVisualization()
                 filename += ".svg";
             }
 
+            // 确保SVG输出目录存在
+            std::string svgDir = "data/svg";
+            if (!fs::exists(svgDir)) {
+                try {
+                    fs::create_directories(svgDir);
+                }
+                catch (const std::exception &e) {
+                    std::cout << _("visualization.save_failed") << ": " << e.what() << std::endl;
+                    std::cout << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+            }
+
+            // 构建完整的文件路径
+            std::string fullPath = svgDir + "/" + filename;
+
             std::string svgChart = DataVisualization::generateTrendChart(results);
-            if (DataVisualization::saveChartToFile(svgChart, filename)) {
-                std::cout << _("visualization.chart_saved") << ": " << filename << std::endl;
+            if (DataVisualization::saveChartToFile(svgChart, fullPath)) {
+                std::cout << _("visualization.chart_saved") << ": " << fullPath << std::endl;
             } else {
                 std::cout << _("visualization.save_failed") << std::endl;
             }
@@ -1394,7 +1645,7 @@ void TerminalUI::loadSampleData()
     // 检查样本目录是否存在
     if (!fs::exists(sampleDir)) {
         termUtils.printError(_("sample.directory_not_found"));
-        termUtils.printInfo("样本文件目录不存在: " + sampleDir);
+        termUtils.printInfo(_("sample.directory_not_exists") + ": " + sampleDir);
         std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
@@ -1417,7 +1668,7 @@ void TerminalUI::loadSampleData()
         }
     }
     catch (const std::exception &e) {
-        termUtils.printError("扫描样本文件时出错: " + std::string(e.what()));
+        termUtils.printError(_("sample.scan_error") + ": " + std::string(e.what()));
         std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
@@ -1425,7 +1676,7 @@ void TerminalUI::loadSampleData()
 
     if (sampleFiles.empty()) {
         termUtils.printWarning(_("sample.no_files_found"));
-        termUtils.printInfo("在 " + sampleDir + " 目录下没有找到支持的样本文件(.csv, .txt)");
+        termUtils.printInfo(_("sample.no_supported_files") + " " + sampleDir);
         std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
@@ -1495,7 +1746,8 @@ void TerminalUI::loadSampleData()
 
     // 加载选中的样本文件
     std::string selectedFile = sampleFiles[choice - 1];
-    termUtils.printInfo("正在加载样本文件: " + fs::path(selectedFile).filename().string());
+    termUtils.printInfo(_("sample.loading_file") + ": " +
+                        fs::path(selectedFile).filename().string());
 
     try {
         // 显示加载进度
@@ -1512,7 +1764,7 @@ void TerminalUI::loadSampleData()
 
         if (dataSet.dataPoints.size() < 4) {
             termUtils.printError(_("error.insufficient_data"));
-            termUtils.printInfo("至少需要4个数据点才能进行诺依曼趋势测试");
+            termUtils.printInfo(_("sample.insufficient_data_info"));
             std::cout << _("prompt.press_enter");
             std::cin.get();
             return;
@@ -1520,24 +1772,25 @@ void TerminalUI::loadSampleData()
 
         // 显示导入信息
         std::cout << std::endl;
-        termUtils.printSuccess("样本文件加载成功!");
+        termUtils.printSuccess(_("sample.file_loaded_success"));
         std::cout << _("import.data_count") << ": " << dataSet.dataPoints.size() << std::endl;
 
         // 显示前几个数据点作为预览
-        termUtils.printColor("数据预览:", Color::BRIGHT_YELLOW);
+        termUtils.printColor(_("sample.data_preview"), Color::BRIGHT_YELLOW);
         std::cout << std::endl;
         size_t previewCount = std::min(size_t(5), dataSet.dataPoints.size());
         for (size_t i = 0; i < previewCount; ++i) {
             std::cout << "  " << (i + 1) << ". ";
             if (!dataSet.timePoints.empty()) {
-                std::cout << "时间: " << std::fixed << std::setprecision(2) << dataSet.timePoints[i]
-                          << ", ";
+                std::cout << _("sample.time_label") << ": " << std::fixed << std::setprecision(2)
+                          << dataSet.timePoints[i] << ", ";
             }
-            std::cout << "数值: " << std::fixed << std::setprecision(4) << dataSet.dataPoints[i]
-                      << std::endl;
+            std::cout << _("sample.value_label") << ": " << std::fixed << std::setprecision(4)
+                      << dataSet.dataPoints[i] << std::endl;
         }
         if (dataSet.dataPoints.size() > previewCount) {
-            std::cout << "  ... (共 " << dataSet.dataPoints.size() << " 个数据点)" << std::endl;
+            std::cout << "  ... (" << _f("sample.total_data_points", dataSet.dataPoints.size())
+                      << ")" << std::endl;
         }
         std::cout << std::endl;
 
@@ -1560,8 +1813,9 @@ void TerminalUI::loadSampleData()
             }
 
             // 设置描述
-            dataSet.description = "从样本文件加载: " + filePath.filename().string();
-            dataSet.source = "样本文件";
+            dataSet.description =
+                _("sample.description_prefix") + ": " + filePath.filename().string();
+            dataSet.source = _("sample.source_name");
 
             // 设置创建时间
             auto now = std::chrono::system_clock::now();
@@ -1594,7 +1848,7 @@ void TerminalUI::loadSampleData()
         }
     }
     catch (const std::exception &e) {
-        termUtils.printError("加载样本文件时出错: " + std::string(e.what()));
+        termUtils.printError(_("sample.load_error") + ": " + std::string(e.what()));
     }
 
     std::cout << _("prompt.press_enter");

@@ -60,12 +60,31 @@ std::string I18n::getTextf(const std::string &key, Args... args) const
 {
     std::string format = getText(key);
 
-    // 简单的格式化实现（使用stringstream）
-    std::ostringstream oss;
-    ((oss << args), ...);
+    // 简单的格式化实现：将{0}, {1}, {2}等替换为对应的参数
+    std::vector<std::string> argStrings;
 
-    // 这里应该实现更完整的格式化，暂时返回基本文本
-    return format;
+    // 将所有参数转换为字符串
+    auto toString = [](const auto &arg) {
+        std::ostringstream oss;
+        oss << arg;
+        return oss.str();
+    };
+
+    // 使用折叠表达式将参数转换为字符串并添加到vector中
+    (argStrings.push_back(toString(args)), ...);
+
+    // 替换格式字符串中的占位符
+    std::string result = format;
+    for (size_t i = 0; i < argStrings.size(); ++i) {
+        std::string placeholder = "{" + std::to_string(i) + "}";
+        size_t pos = 0;
+        while ((pos = result.find(placeholder, pos)) != std::string::npos) {
+            result.replace(pos, placeholder.length(), argStrings[i]);
+            pos += argStrings[i].length();
+        }
+    }
+
+    return result;
 }
 
 bool I18n::loadTranslations(const std::string &filename)
@@ -306,5 +325,6 @@ void I18n::initializeBuiltinTranslations()
 template std::string I18n::getTextf(const std::string &key, int) const;
 template std::string I18n::getTextf(const std::string &key, double) const;
 template std::string I18n::getTextf(const std::string &key, const std::string &) const;
+template std::string I18n::getTextf(const std::string &key, size_t) const;
 
 }  // namespace neumann

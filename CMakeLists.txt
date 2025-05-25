@@ -171,7 +171,7 @@ message(STATUS "开始配置Web模块...")
 add_subdirectory(src/web)
 
 message(STATUS "开始配置应用程序...")
-add_subdirectory(apps)
+add_subdirectory(app)
 
 message(STATUS "开始配置测试...")
 add_subdirectory(tests)

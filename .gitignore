@@ -29,6 +29,9 @@ compile_commands.json
 data/sample*.json
 data/standard*.json
 
+# svg 导出文件
+data/svg/*.svg
+
 # 临时文件
 *.tmp
 *.log
