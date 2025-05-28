@@ -1,7 +1,7 @@
 {
   "autoSaveResults": true,
   "dataDirectory": "data",
-  "defaultConfidenceLevel": 0.9,
+  "defaultConfidenceLevel": 0.95,
   "defaultWebPort": 8080,
   "enableColorOutput": true,
   "language": "zh",

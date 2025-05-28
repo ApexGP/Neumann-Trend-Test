@@ -89,8 +89,8 @@
     "result.trend_statistics": "趋势点统计",
     "result.pg_range": "PG值范围",
     "result.avg_pg_label": "平均PG值",
-    "result.pg_interpretation_trend": "PG < 1.0 表示存在显著趋势",
-    "result.pg_interpretation_stable": "PG ≥ 1.0 表示无显著趋势",
+    "result.pg_interpretation_trend": "PG 折线图表示存在显著趋势",
+    "result.pg_interpretation_stable": "PG 折线图表示无显著趋势",
     "result.trend_warning": "趋势警告",
     "result.stability_confirmed": "稳定确认",
 
@@ -393,7 +393,9 @@
     "web.returning_to_menu": "返回主菜单",
     "web.server_continues_background": "Web服务器将在后台继续运行",
     "web.invalid_command": "无效命令",
-    "web.valid_commands": "有效命令: 按Enter返回主菜单，或输入'stop'停止服务器"
+    "web.valid_commands": "有效命令: 按Enter返回主菜单，或输入'stop'停止服务器",
+
+    "status.confidence": "置信度："
   },
 
   "en": {
@@ -486,8 +488,8 @@
     "result.trend_statistics": "Trend point statistics",
     "result.pg_range": "PG value range",
     "result.avg_pg_label": "Average PG value",
-    "result.pg_interpretation_trend": "PG < 1.0 indicates significant trend",
-    "result.pg_interpretation_stable": "PG ≥ 1.0 indicates no significant trend",
+    "result.pg_interpretation_trend": "PG graph indicates significant trend",
+    "result.pg_interpretation_stable": "PG graph indicates no significant trend",
     "result.trend_warning": "Trend Warning",
     "result.stability_confirmed": "Stability Confirmed",
 
@@ -790,6 +792,8 @@
     "web.returning_to_menu": "Returning to main menu",
     "web.server_continues_background": "Web server will continue running in background",
     "web.invalid_command": "Invalid command",
-    "web.valid_commands": "Valid commands: Press Enter to return to main menu, or enter 'stop' to stop server"
+    "web.valid_commands": "Valid commands: Press Enter to return to main menu, or enter 'stop' to stop server",
+
+    "status.confidence": "Confidence: "
   }
 }

@@ -34,7 +34,6 @@ NeumannTestResults NeumannCalculator::performTest(const std::vector<double> &dat
     double sumPG = 0.0;
     double minPG = std::numeric_limits<double>::max();
     double maxPG = std::numeric_limits<double>::lowest();
-    bool hasTrend = false;
 
     // 对每个可能的子集计算PG值和判断是否有趋势
     for (size_t i = 3; i < data.size(); ++i) {
@@ -45,11 +44,6 @@ NeumannTestResults NeumannCalculator::performTest(const std::vector<double> &dat
         sumPG += pgValue;
         minPG = std::min(minPG, pgValue);
         maxPG = std::max(maxPG, pgValue);
-
-        // 如果有一个测试点判断存在趋势，整体就视为存在趋势
-        if (trend) {
-            hasTrend = true;
-        }
 
         // 获取对应样本数量的标准阈值
         double wpThreshold = StandardValues::getInstance().getWPValue(i + 1, confidenceLevel);
@@ -62,6 +56,33 @@ NeumannTestResults NeumannCalculator::performTest(const std::vector<double> &dat
         result.wpThreshold = wpThreshold;
 
         results.results.push_back(result);
+    }
+
+    // 智能判断整体趋势：检查末端连续趋势点
+    bool hasTrend = false;
+    if (results.results.size() >= 2) {
+        // 检查末端连续的趋势点数量
+        int consecutiveTrendAtEnd = 0;
+        for (int i = results.results.size() - 1; i >= 0; --i) {
+            if (results.results[i].hasTrend) {
+                consecutiveTrendAtEnd++;
+            } else {
+                break;  // 遇到非趋势点就停止计数
+            }
+        }
+
+        // 如果末端连续有2个或更多趋势点，判断为存在显著趋势
+        hasTrend = (consecutiveTrendAtEnd >= 2);
+
+        // 特殊情况：如果只有少量测试点，但大部分都显示趋势，也判断为有趋势
+        if (!hasTrend && results.results.size() <= 3) {
+            int trendCount = 0;
+            for (const auto &result : results.results) {
+                if (result.hasTrend) trendCount++;
+            }
+            // 如果超过一半的点显示趋势，也判断为有趋势
+            hasTrend = (trendCount > results.results.size() / 2);
+        }
     }
 
     // 更新汇总统计信息

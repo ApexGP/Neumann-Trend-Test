@@ -148,7 +148,9 @@ void TerminalUI::displayMenu()
 
     // 显示菜单项，动态获取翻译文本
     for (size_t i = 0; i < menu.items.size(); ++i) {
-        std::cout << (i + 1) << ". " << _(menu.items[i].title.c_str()) << std::endl;
+        // 使用固定宽度格式化编号，确保对齐（支持最多99个菜单项）
+        std::cout << std::setw(2) << std::right << (i + 1) << ". " << _(menu.items[i].title.c_str())
+                  << std::endl;
     }
 
     std::cout << std::endl;
@@ -901,7 +903,7 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor("💡 ", Color::BRIGHT_YELLOW);
     std::string interpretationText;
-    if (results.avgPG < 1.0) {
+    if (results.overallTrend) {
         termUtils.printColor(_("result.pg_interpretation_trend"), Color::YELLOW);
         interpretationText = "💡 " + _("result.pg_interpretation_trend");
     } else {
@@ -916,7 +918,7 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
             std::cout << " ";
         }
     } else {
-        int interpretationPadding = summaryWidth - interpretationWidth - 1;
+        int interpretationPadding = summaryWidth - interpretationWidth - 2;
         for (int i = 0; i < interpretationPadding; ++i) {
             std::cout << " ";
         }
@@ -1577,7 +1579,7 @@ void TerminalUI::displayStatusBar()
 
     // 格式化置信度显示
     std::ostringstream confidenceText;
-    confidenceText << "Confidence: " << std::fixed << std::setprecision(2)
+    confidenceText << _("status.confidence") << std::fixed << std::setprecision(2)
                    << (confidenceLevel * 100) << "%";
 
     // 获取终端宽度（假设80字符，可以后续改进为动态获取）
