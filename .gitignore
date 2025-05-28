@@ -10,6 +10,8 @@ install.bat
 release/
 
 # 编辑器和IDE文件
+.vscode/
+.idea/
 *.suo
 *.user
 *.sln.docstates

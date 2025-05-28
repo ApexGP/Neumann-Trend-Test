@@ -1,10 +1,10 @@
 {
   "autoSaveResults": true,
   "dataDirectory": "data",
-  "defaultConfidenceLevel": 0.95,
+  "defaultConfidenceLevel": 0.9,
   "defaultWebPort": 8080,
   "enableColorOutput": true,
-  "language": "en",
+  "language": "zh",
   "maxDataPoints": 1000,
   "showWelcomeMessage": true,
   "webRootDirectory": "web"

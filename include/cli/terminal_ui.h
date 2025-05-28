@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
@@ -8,6 +9,11 @@
 
 #include "core/data_manager.h"
 #include "core/neumann_calculator.h"
+
+// 前向声明Web服务器类
+namespace neumann { namespace web {
+class WebServer;
+}}  // namespace neumann::web
 
 namespace neumann { namespace cli {
 
@@ -49,6 +55,11 @@ public:
     TerminalUI();
 
     /**
+   * @brief 析构函数
+   */
+    ~TerminalUI();
+
+    /**
    * @brief 启动UI
    */
     void run();
@@ -65,6 +76,9 @@ private:
 
     // 程序是否继续运行
     bool running;
+
+    // Web服务器实例
+    std::unique_ptr<neumann::web::WebServer> webServer;
 
     // 初始化菜单
     void initializeMenus();
@@ -92,6 +106,12 @@ private:
 
     // 运行诺依曼测试
     void runNeumannTest();
+
+    // 启动Web服务器
+    void startWebServer();
+
+    // 显示Web服务器运行界面
+    void showWebServerRunningInterface();
 
     // 显示帮助信息
     void showHelp();
@@ -123,6 +143,11 @@ private:
 
     // 显示测试结果
     void displayTestResults(const NeumannTestResults &results);
+
+    /**
+   * @brief 管理自定义置信度水平
+   */
+    void manageCustomConfidenceLevels();
 };
 
 }}  // namespace neumann::cli

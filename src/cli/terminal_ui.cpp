@@ -2,10 +2,13 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 
 #include "cli/terminal_utils.h"
@@ -15,6 +18,9 @@
 #include "core/excel_reader.h"
 #include "core/i18n.h"
 #include "core/standard_values.h"
+
+// Web服务器头文件放在最后，避免与其他头文件冲突
+#include "web/web_server.h"
 
 namespace fs = std::filesystem;
 
@@ -29,9 +35,17 @@ static bool endsWith(const std::string &str, const std::string &suffix)
     return str.substr(str.length() - suffix.length()) == suffix;
 }
 
-TerminalUI::TerminalUI() : currentMenuId("main"), running(false)
+TerminalUI::TerminalUI() : currentMenuId("main"), running(false), webServer(nullptr)
 {
     initializeMenus();
+}
+
+TerminalUI::~TerminalUI()
+{
+    // 确保Web服务器在析构时停止
+    if (webServer && webServer->isRunning()) {
+        webServer->stop();
+    }
 }
 
 void TerminalUI::run()
@@ -87,6 +101,7 @@ void TerminalUI::initializeMenus()
          [this]() { loadSampleData(); }},
         {"batch_process", "menu.batch_process", MenuItemType::ACTION, "",
          [this]() { runBatchProcessing(); }},
+        {"start_web", "menu.start_web", MenuItemType::ACTION, "", [this]() { startWebServer(); }},
         {"advanced", "menu.advanced", MenuItemType::SUBMENU, "advanced", nullptr},
         {"settings", "menu.settings", MenuItemType::SUBMENU, "settings", nullptr},
         {"help", "menu.help", MenuItemType::ACTION, "", [this]() { showHelp(); }},
@@ -777,7 +792,7 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     std::cout << std::endl;
 
     // 整体趋势结果行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor(_("result.overall_trend") + ": ", Color::BRIGHT_WHITE, TextStyle::BOLD);
     if (results.overallTrend) {
         termUtils.printColor("⚠ " + _("result.has_trend") + " ⚠", Color::BRIGHT_RED,
@@ -795,10 +810,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < overallPadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // 状态描述行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     if (results.overallTrend) {
         termUtils.printColor("📈 " + _("result.trend_detected"), Color::BRIGHT_RED);
     } else {
@@ -812,10 +828,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < statusPadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // 趋势点统计行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor("🔍 " + _("result.trend_statistics") + ": ", Color::BRIGHT_CYAN,
                          TextStyle::BOLD);
     std::cout << trendPointsCount << "/" << results.results.size() << " (";
@@ -836,10 +853,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < statsPadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // PG值范围行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor("📊 " + _("result.pg_range") + ": ", Color::BRIGHT_CYAN, TextStyle::BOLD);
 
     // 最小PG值
@@ -859,10 +877,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < rangePadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // 平均PG值行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor("📈 " + _("result.avg_pg_label") + ": ", Color::BRIGHT_CYAN,
                          TextStyle::BOLD);
     Color avgColor = (results.avgPG < 1.0) ? Color::BRIGHT_RED : Color::BRIGHT_GREEN;
@@ -875,10 +894,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < avgPadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // PG值解释行
-    std::cout << "│ ";
+    termUtils.printColor("│ ", Color::BRIGHT_CYAN, TextStyle::BOLD);
     termUtils.printColor("💡 ", Color::BRIGHT_YELLOW);
     std::string interpretationText;
     if (results.avgPG < 1.0) {
@@ -901,7 +921,8 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
             std::cout << " ";
         }
     }
-    std::cout << "│" << std::endl;
+    termUtils.printColor("│", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
 
     // 底部边框
     std::string bottomBorder = "└";
@@ -957,7 +978,11 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     std::cout << std::endl;
 
     // 显示结论内容
-    std::cout << "│ ";
+    if (results.overallTrend) {
+        termUtils.printColor("│ ", Color::BRIGHT_RED, TextStyle::BOLD);
+    } else {
+        termUtils.printColor("│ ", Color::BRIGHT_GREEN, TextStyle::BOLD);
+    }
     std::string conclusionText;
     Color textColor;
 
@@ -977,7 +1002,12 @@ void TerminalUI::displayTestResults(const NeumannTestResults &results)
     for (int i = 0; i < conclusionPadding; ++i) {
         std::cout << " ";
     }
-    std::cout << "│" << std::endl;
+    if (results.overallTrend) {
+        termUtils.printColor("│", Color::BRIGHT_RED, TextStyle::BOLD);
+    } else {
+        termUtils.printColor("│", Color::BRIGHT_GREEN, TextStyle::BOLD);
+    }
+    std::cout << std::endl;
 
     // 显示底部边框
     termUtils.printColor(conclusionBottomBorder, borderColor, TextStyle::BOLD);
@@ -1079,7 +1109,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.1.0" << std::endl;
+    std::cout << " v2.2.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -1210,9 +1240,10 @@ void TerminalUI::showConfidenceLevelMenu()
     }
 
     std::cout << (supportedLevels.size() + 1) << ". " << _("menu.custom") << std::endl;
-    std::cout << (supportedLevels.size() + 2) << ". " << _("menu.back") << std::endl;
+    std::cout << (supportedLevels.size() + 2) << ". " << _("menu.manage_custom") << std::endl;
+    std::cout << (supportedLevels.size() + 3) << ". " << _("menu.back") << std::endl;
     std::cout << std::endl;
-    std::cout << _("prompt.select_option") << " [1-" << (supportedLevels.size() + 2) << "]: ";
+    std::cout << _("prompt.select_option") << " [1-" << (supportedLevels.size() + 3) << "]: ";
 
     int choice;
     std::cin >> choice;
@@ -1227,23 +1258,289 @@ void TerminalUI::showConfidenceLevelMenu()
         newLevel = supportedLevels[choice - 1];
         levelChanged = true;
     } else if (choice == static_cast<int>(supportedLevels.size()) + 1) {
-        // 自定义置信度
-        std::cout << _("prompt.enter_confidence_level") << " (0.0-1.0): ";
-        std::string input;
-        std::getline(std::cin, input);
-        try {
-            double level = std::stod(input);
-            if (level > 0.0 && level < 1.0) {
-                newLevel = level;
-                levelChanged = true;
-            } else {
-                std::cout << _("error.invalid_confidence_level") << std::endl;
+        // 自定义置信度 - 改为选项式交互
+        std::cout << std::endl;
+        std::cout << "===== " << _("menu.custom_confidence") << " =====" << std::endl;
+        std::cout << _("custom.confidence_explanation") << std::endl;
+        std::cout << std::endl;
+
+        // 显示自定义置信度选项
+        std::cout << _("custom.select_import_method") << std::endl;
+        std::cout << "1. " << _("custom.manual_input") << std::endl;
+        std::cout << "2. " << _("custom.load_example_file") << std::endl;
+        std::cout << "3. " << _("menu.back") << std::endl;
+        std::cout << std::endl;
+        std::cout << _("prompt.select_option") << " [1-3]: ";
+
+        int methodChoice;
+        std::cin >> methodChoice;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        double customLevel = 0.0;
+        std::string filePath;
+        bool isExampleFile = false;
+
+        switch (methodChoice) {
+            case 1: {
+                // 选项1：手动输入自定义置信度
+                std::cout << std::endl;
+                std::cout << "===== " << _("custom.manual_input") << " =====" << std::endl;
+                std::cout << _("custom.file_format_info") << std::endl;
+                std::cout << std::endl;
+
+                // 输入置信度值
+                std::cout << _("prompt.enter_confidence_level") << " (0.0-1.0): ";
+                std::string input;
+                std::getline(std::cin, input);
+
+                try {
+                    customLevel = std::stod(input);
+                    if (customLevel <= 0.0 || customLevel >= 1.0) {
+                        std::cout << _("error.invalid_confidence_level") << std::endl;
+                        std::cout << _("prompt.press_enter") << std::endl;
+                        std::cin.get();
+                        return;
+                    }
+                }
+                catch (const std::exception &e) {
+                    std::cout << _("error.invalid_input") << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+
+                // 输入标准值表文件路径
+                std::cout << std::endl;
+                std::cout << _("custom.enter_file_path") << " (.json/.csv): ";
+                std::getline(std::cin, filePath);
+
+                if (filePath.empty()) {
+                    return;
+                }
+                break;
+            }
+            case 2: {
+                // 选项2：从示例文件加载
+                std::cout << std::endl;
+                std::cout << "===== " << _("custom.load_example_file") << " =====" << std::endl;
+                std::cout << std::endl;
+
+                // 扫描示例文件目录
+                std::string exampleDir = "data/sample/ConfidenceLevel";
+                std::vector<std::string> exampleFiles;
+
+                if (!fs::exists(exampleDir)) {
+                    std::cout << _("custom.example_dir_not_found") << ": " << exampleDir
+                              << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+
+                try {
+                    for (const auto &entry : fs::directory_iterator(exampleDir)) {
+                        if (entry.is_regular_file()) {
+                            std::string filename = entry.path().filename().string();
+                            std::string extension = entry.path().extension().string();
+                            std::transform(extension.begin(), extension.end(), extension.begin(),
+                                           ::tolower);
+
+                            if (extension == ".json" || extension == ".csv") {
+                                exampleFiles.push_back(entry.path().string());
+                            }
+                        }
+                    }
+                }
+                catch (const std::exception &e) {
+                    std::cout << _("custom.scan_example_error") << ": " << e.what() << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+
+                if (exampleFiles.empty()) {
+                    std::cout << _("custom.no_example_files") << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+
+                // 显示可用的示例文件
+                std::cout << _("custom.available_example_files") << std::endl;
+                for (size_t i = 0; i < exampleFiles.size(); ++i) {
+                    fs::path filePath(exampleFiles[i]);
+                    std::string filename = filePath.filename().string();
+                    std::string extension = filePath.extension().string();
+
+                    std::cout << (i + 1) << ". " << filename << " (" << extension << " "
+                              << _("custom.format") << ")";
+
+                    // 尝试从文件名推断置信度
+                    if (filename.find("90") != std::string::npos) {
+                        std::cout << " - 90% " << _("custom.confidence_level");
+                    }
+                    std::cout << std::endl;
+                }
+                std::cout << (exampleFiles.size() + 1) << ". " << _("menu.back") << std::endl;
+                std::cout << std::endl;
+                std::cout << _("prompt.select_option") << " [1-" << (exampleFiles.size() + 1)
+                          << "]: ";
+
+                int fileChoice;
+                std::cin >> fileChoice;
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                if (fileChoice == static_cast<int>(exampleFiles.size()) + 1) {
+                    return;  // 返回
+                }
+
+                if (fileChoice < 1 || fileChoice > static_cast<int>(exampleFiles.size())) {
+                    std::cout << _("error.invalid_choice") << std::endl;
+                    std::cout << _("prompt.press_enter") << std::endl;
+                    std::cin.get();
+                    return;
+                }
+
+                filePath = exampleFiles[fileChoice - 1];
+                isExampleFile = true;
+
+                // 从文件名推断置信度，或让用户输入
+                fs::path selectedFile(filePath);
+                std::string filename = selectedFile.filename().string();
+
+                if (filename.find("90") != std::string::npos) {
+                    customLevel = 0.90;
+                    std::cout << std::endl;
+                    std::cout << _("custom.detected_confidence_level") << ": 90%" << std::endl;
+                } else {
+                    std::cout << std::endl;
+                    std::cout << _("custom.enter_confidence_for_file") << " " << filename
+                              << std::endl;
+                    std::cout << _("prompt.enter_confidence_level") << " (0.0-1.0): ";
+                    std::string input;
+                    std::getline(std::cin, input);
+
+                    try {
+                        customLevel = std::stod(input);
+                        if (customLevel <= 0.0 || customLevel >= 1.0) {
+                            std::cout << _("error.invalid_confidence_level") << std::endl;
+                            std::cout << _("prompt.press_enter") << std::endl;
+                            std::cin.get();
+                            return;
+                        }
+                    }
+                    catch (const std::exception &e) {
+                        std::cout << _("error.invalid_input") << std::endl;
+                        std::cout << _("prompt.press_enter") << std::endl;
+                        std::cin.get();
+                        return;
+                    }
+                }
+
+                std::cout << _("custom.using_example_file") << ": " << filename << std::endl;
+                std::cout << _("custom.example_confidence_level") << ": " << std::fixed
+                          << std::setprecision(1) << (customLevel * 100) << "%" << std::endl;
+                break;
+            }
+            case 3:
+                return;  // 返回
+            default:
+                std::cout << _("error.invalid_choice") << std::endl;
+                std::cout << _("prompt.press_enter") << std::endl;
+                std::cin.get();
+                return;
+        }
+
+        // 现在检查是否已存在该置信度（在确定了最终的customLevel之后）
+        auto existingLevels = standardValues.getSupportedConfidenceLevels();
+        bool alreadyExists = false;
+
+        for (double level : existingLevels) {
+            if (std::abs(level - customLevel) < 0.001) {
+                alreadyExists = true;
+                break;
             }
         }
-        catch (const std::exception &e) {
-            std::cout << _("error.invalid_input") << std::endl;
+
+        if (alreadyExists) {
+            if (isExampleFile) {
+                // 示例文件自动覆盖，给出提示
+                std::cout << std::endl;
+                std::cout << _("custom.example_file_overwrite") << ": " << std::fixed
+                          << std::setprecision(1) << (customLevel * 100) << "%" << std::endl;
+            } else {
+                // 用户文件需要确认
+                std::cout << std::endl;
+                std::cout << _("warning.confidence_level_exists") << ": " << customLevel
+                          << std::endl;
+                std::cout << _("custom.overwrite_prompt") << " [y/n]: ";
+                std::string response;
+                std::getline(std::cin, response);
+                if (response.empty() || std::tolower(response[0]) != 'y') {
+                    return;
+                }
+            }
         }
+
+        // 检查文件是否存在
+        if (!fs::exists(filePath)) {
+            std::cout << _("error.file_not_found") << ": " << filePath << std::endl;
+            std::cout << _("prompt.press_enter") << std::endl;
+            std::cin.get();
+            return;
+        }
+
+        // 显示文件格式示例（仅对非示例文件显示）
+        if (!isExampleFile) {
+            std::cout << std::endl;
+            std::cout << _("custom.file_format_example") << std::endl;
+            std::cout << "JSON " << _("custom.format") << ":" << std::endl;
+            std::cout << "  {" << std::endl;
+            std::cout << "    \"4\": 0.7805," << std::endl;
+            std::cout << "    \"5\": 0.8204," << std::endl;
+            std::cout << "    \"6\": 0.8902," << std::endl;
+            std::cout << "    ..." << std::endl;
+            std::cout << "  }" << std::endl;
+            std::cout << std::endl;
+            std::cout << "CSV " << _("custom.format") << ":" << std::endl;
+            std::cout << "  n,wp_value" << std::endl;
+            std::cout << "  4,0.7805" << std::endl;
+            std::cout << "  5,0.8204" << std::endl;
+            std::cout << "  6,0.8902" << std::endl;
+            std::cout << "  ..." << std::endl;
+            std::cout << std::endl;
+
+            std::cout << _("custom.confirm_import") << " [y/n]: ";
+            std::string confirmResponse;
+            std::getline(std::cin, confirmResponse);
+
+            if (confirmResponse.empty() || std::tolower(confirmResponse[0]) != 'y') {
+                return;
+            }
+        }
+
+        // 尝试导入自定义标准值表
+        std::cout << std::endl;
+        std::cout << _("custom.importing") << "..." << std::endl;
+
+        if (standardValues.importCustomConfidenceLevel(customLevel, filePath)) {
+            newLevel = customLevel;
+            levelChanged = true;
+            std::cout << _("custom.import_success") << std::endl;
+        } else {
+            std::cout << _("custom.import_failed") << std::endl;
+            std::cout << _("custom.check_file_format") << std::endl;
+        }
+
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
     } else if (choice == static_cast<int>(supportedLevels.size()) + 2) {
+        // 管理自定义置信度
+        manageCustomConfidenceLevels();
+        return;
+    } else if (choice == static_cast<int>(supportedLevels.size()) + 3) {
         // 返回
         return;
     } else {
@@ -1640,7 +1937,7 @@ void TerminalUI::loadSampleData()
     std::cout << std::endl;
 
     // 定义样本文件目录
-    std::string sampleDir = "data/sample";
+    std::string sampleDir = "data/sample/TestSuite";
 
     // 检查样本目录是否存在
     if (!fs::exists(sampleDir)) {
@@ -1853,6 +2150,335 @@ void TerminalUI::loadSampleData()
 
     std::cout << _("prompt.press_enter");
     std::cin.get();
+}
+
+void TerminalUI::manageCustomConfidenceLevels()
+{
+    clearScreen();
+    std::cout << "===== " << _("menu.manage_custom") << " =====" << std::endl;
+    std::cout << std::endl;
+
+    auto &standardValues = StandardValues::getInstance();
+    auto supportedLevels = standardValues.getSupportedConfidenceLevels();
+
+    // 找出自定义置信度（非标准的0.95, 0.99, 0.999）
+    std::vector<double> customLevels;
+    for (double level : supportedLevels) {
+        if (std::abs(level - 0.95) > 0.001 && std::abs(level - 0.99) > 0.001 &&
+            std::abs(level - 0.999) > 0.001) {
+            customLevels.push_back(level);
+        }
+    }
+
+    if (customLevels.empty()) {
+        std::cout << _("custom.no_custom_levels") << std::endl;
+        std::cout << _("custom.add_custom_suggestion") << std::endl;
+        std::cout << std::endl;
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
+        return;
+    }
+
+    std::cout << _("custom.current_custom_levels") << std::endl;
+    for (size_t i = 0; i < customLevels.size(); ++i) {
+        double level = customLevels[i];
+        std::cout << (i + 1) << ". " << std::fixed << std::setprecision(3) << level;
+        std::cout << " (" << std::fixed << std::setprecision(1) << (level * 100) << "%)"
+                  << std::endl;
+    }
+
+    std::cout << std::endl;
+    std::cout << _("custom.select_action") << std::endl;
+    std::cout << "1. " << _("custom.view_details") << std::endl;
+    std::cout << "2. " << _("custom.delete_level") << std::endl;
+    std::cout << "3. " << _("menu.back") << std::endl;
+    std::cout << std::endl;
+    std::cout << _("prompt.select_option") << " [1-3]: ";
+
+    int action;
+    std::cin >> action;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    switch (action) {
+        case 1: {
+            // 查看详情
+            std::cout << std::endl;
+            std::cout << _("custom.select_level_to_view") << " [1-" << customLevels.size() << "]: ";
+            int levelChoice;
+            std::cin >> levelChoice;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            if (levelChoice >= 1 && levelChoice <= static_cast<int>(customLevels.size())) {
+                double selectedLevel = customLevels[levelChoice - 1];
+                std::cout << std::endl;
+                std::cout << "===== " << _("custom.level_details") << " =====" << std::endl;
+                std::cout << _("custom.confidence_level") << ": " << std::fixed
+                          << std::setprecision(3) << selectedLevel << " (" << std::setprecision(1)
+                          << (selectedLevel * 100) << "%)" << std::endl;
+                std::cout << std::endl;
+
+                // 显示部分标准值
+                std::cout << _("custom.sample_values") << ":" << std::endl;
+                std::vector<int> sampleSizes = {4, 5, 6, 7, 8, 9, 10, 15, 20};
+                for (int size : sampleSizes) {
+                    double wpValue = standardValues.getWPValue(size, selectedLevel);
+                    if (wpValue > 0) {
+                        std::cout << "  n=" << size << ": W(P)=" << std::fixed
+                                  << std::setprecision(4) << wpValue << std::endl;
+                    }
+                }
+            } else {
+                std::cout << _("error.invalid_choice") << std::endl;
+            }
+            break;
+        }
+        case 2: {
+            // 删除置信度
+            std::cout << std::endl;
+            std::cout << _("custom.select_level_to_delete") << " [1-" << customLevels.size()
+                      << "]: ";
+            int levelChoice;
+            std::cin >> levelChoice;
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            if (levelChoice >= 1 && levelChoice <= static_cast<int>(customLevels.size())) {
+                double selectedLevel = customLevels[levelChoice - 1];
+                std::cout << std::endl;
+                std::cout << _("custom.confirm_delete") << " " << std::fixed << std::setprecision(3)
+                          << selectedLevel << " [y/n]: ";
+                std::string response;
+                std::getline(std::cin, response);
+
+                if (!response.empty() && std::tolower(response[0]) == 'y') {
+                    if (standardValues.removeConfidenceLevel(selectedLevel)) {
+                        std::cout << _("custom.delete_success") << std::endl;
+                    } else {
+                        std::cout << _("custom.delete_failed") << std::endl;
+                    }
+                } else {
+                    std::cout << _("custom.delete_cancelled") << std::endl;
+                }
+            } else {
+                std::cout << _("error.invalid_choice") << std::endl;
+            }
+            break;
+        }
+        case 3:
+            return;
+        default:
+            std::cout << _("error.invalid_choice") << std::endl;
+            break;
+    }
+
+    std::cout << std::endl;
+    std::cout << _("prompt.press_enter") << std::endl;
+    std::cin.get();
+}
+
+void TerminalUI::startWebServer()
+{
+    clearScreen();
+    auto &termUtils = TerminalUtils::getInstance();
+    auto &config = Config::getInstance();
+
+    // 标题
+    termUtils.printColor("===== " + _("web.start_server") + " =====", Color::BRIGHT_CYAN,
+                         TextStyle::BOLD);
+    std::cout << std::endl << std::endl;
+
+    // 检查是否已经有Web服务器在运行
+    if (webServer && webServer->isRunning()) {
+        termUtils.printWarning(_("web.server_already_running"));
+        std::cout << _("web.current_url") << ": " << webServer->getUrl() << std::endl;
+        std::cout << std::endl;
+
+        // 提供更多选项
+        std::cout << _("web.server_running_options") << std::endl;
+        std::cout << "1. " << _("web.option_continue_background") << std::endl;
+        std::cout << "2. " << _("web.option_stop_server") << std::endl;
+        std::cout << "3. " << _("menu.back") << std::endl;
+        std::cout << std::endl;
+        std::cout << _("prompt.select_option") << " [1-3]: ";
+
+        std::string response;
+        std::getline(std::cin, response);
+
+        if (response == "2") {
+            termUtils.printInfo(_("web.stopping_server"));
+            webServer->stop();
+            webServer.reset();
+            termUtils.printSuccess(_("web.server_stopped"));
+            std::cout << _("prompt.press_enter");
+            std::cin.get();
+        } else if (response == "1") {
+            // 进入Web服务器运行状态
+            showWebServerRunningInterface();
+        }
+        // 选项3或其他输入都返回主菜单
+        return;
+    }
+
+    // 获取配置参数
+    int defaultPort = config.getDefaultWebPort();
+    std::string webRootDir = config.getWebRootDirectory();
+
+    // 询问端口设置
+    std::cout << _("web.port_prompt") << " (" << _("menu.default") << ": " << defaultPort << "): ";
+    std::string portInput;
+    std::getline(std::cin, portInput);
+
+    int port = defaultPort;
+    if (!portInput.empty()) {
+        try {
+            port = std::stoi(portInput);
+            if (port < 1024 || port > 65535) {
+                termUtils.printWarning(_("web.invalid_port_range"));
+                port = defaultPort;
+            }
+        }
+        catch (const std::exception &e) {
+            termUtils.printWarning(_("web.invalid_port_format"));
+            port = defaultPort;
+        }
+    }
+
+    // 询问Web资源目录
+    std::cout << _("web.webroot_prompt") << " (" << _("menu.default") << ": " << webRootDir
+              << "): ";
+    std::string webRootInput;
+    std::getline(std::cin, webRootInput);
+
+    if (!webRootInput.empty()) {
+        webRootDir = webRootInput;
+    }
+
+    // 检查Web资源目录是否存在
+    if (!fs::exists(webRootDir)) {
+        termUtils.printWarning(_("web.webroot_not_found") + ": " + webRootDir);
+        std::cout << _("web.create_webroot_prompt") << " [y/n]: ";
+
+        std::string createResponse;
+        std::getline(std::cin, createResponse);
+
+        if (!createResponse.empty() && std::tolower(createResponse[0]) == 'y') {
+            try {
+                fs::create_directories(webRootDir);
+                termUtils.printSuccess(_("web.webroot_created") + ": " + webRootDir);
+            }
+            catch (const std::exception &e) {
+                termUtils.printError(_("web.webroot_create_failed") + ": " + e.what());
+                std::cout << _("prompt.press_enter");
+                std::cin.get();
+                return;
+            }
+        } else {
+            termUtils.printInfo(_("web.using_default_webroot"));
+            webRootDir = "web";  // 使用默认目录
+        }
+    }
+
+    std::cout << std::endl;
+    termUtils.printInfo(_("web.starting_server"));
+    std::cout << _("web.server_port") << ": " << port << std::endl;
+    std::cout << _("web.server_webroot") << ": " << webRootDir << std::endl;
+    std::cout << std::endl;
+
+    try {
+        // 创建Web服务器实例
+        webServer = std::make_unique<neumann::web::WebServer>(port, webRootDir);
+
+        // 启动服务器（后台模式）
+        webServer->start(true);
+
+        // 显示成功信息
+        termUtils.printSuccess(_("web.server_started"));
+        std::cout << std::endl;
+
+        // 保存端口设置到配置
+        if (port != defaultPort) {
+            config.setDefaultWebPort(port);
+            std::string configFile = config.getConfigFilePath();
+            if (config.saveToFile(configFile)) {
+                termUtils.printInfo(_("web.port_saved"));
+            }
+        }
+
+        // 进入Web服务器运行状态
+        showWebServerRunningInterface();
+    }
+    catch (const std::exception &e) {
+        termUtils.printError(_("web.server_start_failed") + ": " + e.what());
+        webServer.reset();
+        std::cout << _("prompt.press_enter");
+        std::cin.get();
+    }
+}
+
+void TerminalUI::showWebServerRunningInterface()
+{
+    auto &termUtils = TerminalUtils::getInstance();
+
+    while (webServer && webServer->isRunning()) {
+        clearScreen();
+
+        // 标题
+        termUtils.printColor("===== " + _("web.server_running") + " =====", Color::BRIGHT_CYAN,
+                             TextStyle::BOLD);
+        std::cout << std::endl << std::endl;
+
+        // 显示服务器信息
+        termUtils.printColor("🌐 " + _("web.access_url") + ": ", Color::BRIGHT_CYAN,
+                             TextStyle::BOLD);
+        termUtils.printColor(webServer->getUrl(), Color::BRIGHT_GREEN, TextStyle::UNDERLINE);
+        std::cout << std::endl << std::endl;
+
+        // 显示状态信息
+        termUtils.printSuccess(_("web.server_status_running"));
+        std::cout << std::endl;
+
+        // 显示操作说明
+        termUtils.printInfo(_("web.server_instructions"));
+        std::cout << "• " << _("web.instruction_browser") << std::endl;
+        std::cout << "• " << _("web.instruction_enter_return") << std::endl;
+        std::cout << "• " << _("web.instruction_ctrl_c_stop") << std::endl;
+        std::cout << std::endl;
+
+        termUtils.printColor(_("web.waiting_for_input"), Color::YELLOW, TextStyle::BOLD);
+        std::cout << std::endl;
+
+        // 等待用户输入
+        std::string input;
+        std::getline(std::cin, input);
+
+        // 如果用户按Enter，返回主菜单但保持服务器运行
+        if (input.empty()) {
+            termUtils.printInfo(_("web.returning_to_menu"));
+            std::cout << _("web.server_continues_background") << std::endl;
+            std::cout << _("prompt.press_enter");
+            std::cin.get();
+            break;
+        }
+        // 如果用户输入其他内容，检查是否是停止命令
+        else if (input == "stop" || input == "quit" || input == "exit") {
+            termUtils.printInfo(_("web.stopping_server"));
+            webServer->stop();
+            webServer.reset();
+            termUtils.printSuccess(_("web.server_stopped"));
+            std::cout << _("prompt.press_enter");
+            std::cin.get();
+            break;
+        }
+        // 其他输入显示帮助
+        else {
+            termUtils.printWarning(_("web.invalid_command"));
+            std::cout << _("web.valid_commands") << std::endl;
+            std::cout << _("prompt.press_enter");
+            std::cin.get();
+        }
+    }
 }
 
 }}  // namespace neumann::cli

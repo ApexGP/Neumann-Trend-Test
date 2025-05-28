@@ -29,6 +29,13 @@ public:
     bool loadFromFile(const std::string &filename);
 
     /**
+   * @brief 保存当前标准值到JSON文件
+   * @param filename JSON文件路径
+   * @return 是否成功保存
+   */
+    bool saveToFile(const std::string &filename);
+
+    /**
    * @brief 获取指定样本数和置信水平的W(P)值
    * @param sampleSize 样本数量
    * @param confidenceLevel 置信水平 (0.95, 0.99等)
@@ -54,6 +61,28 @@ public:
    */
     std::vector<double> getSupportedConfidenceLevels() const;
 
+    /**
+   * @brief 导入自定义置信度的标准值表
+   * @param confidenceLevel 置信度水平
+   * @param filename 包含标准值的文件路径（JSON或CSV格式）
+   * @return 是否成功导入
+   */
+    bool importCustomConfidenceLevel(double confidenceLevel, const std::string &filename);
+
+    /**
+   * @brief 移除指定的置信度水平
+   * @param confidenceLevel 要移除的置信度水平
+   * @return 是否成功移除
+   */
+    bool removeConfidenceLevel(double confidenceLevel);
+
+    /**
+   * @brief 验证自定义标准值表的完整性
+   * @param values 标准值映射（样本数 -> W(P)值）
+   * @return 是否通过验证
+   */
+    bool validateCustomValues(const std::map<int, double> &values) const;
+
 private:
     // 私有构造函数，防止外部实例化
     StandardValues();
@@ -71,6 +100,9 @@ private:
 
     // 缓存支持的置信水平
     std::vector<double> confidenceLevels;
+
+    // 当前标准值文件路径
+    std::string currentFilePath;
 };
 
 }  // namespace neumann

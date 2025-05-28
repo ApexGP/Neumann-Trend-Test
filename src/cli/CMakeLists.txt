@@ -12,8 +12,8 @@ target_include_directories(neumann_cli PUBLIC
     ${CMAKE_SOURCE_DIR}/include
 )
 
-# 链接核心库
-target_link_libraries(neumann_cli PUBLIC neumann_core)
+# 链接核心库和Web库
+target_link_libraries(neumann_cli PUBLIC neumann_core neumann_web)
 
 # 设置FTXUI查找选项
 set(FTXUI_QUIET ON)
@@ -86,6 +86,7 @@ if(MINGW OR DEFINED ENV{NEUMANN_USE_MINGW} OR NEUMANN_USE_MINGW)
                 ${FTXUI_DOM_LIB}
                 ${FTXUI_SCREEN_LIB}
                 neumann_core
+                neumann_web
             )
             set(FTXUI_FOUND TRUE)
         endif()
@@ -99,6 +100,7 @@ if(MINGW OR DEFINED ENV{NEUMANN_USE_MINGW} OR NEUMANN_USE_MINGW)
             message(STATUS "使用find_package找到FTXUI")
             target_link_libraries(neumann_cli PUBLIC
                 neumann_core
+                neumann_web
                 ftxui::screen
                 ftxui::dom
                 ftxui::component
@@ -115,6 +117,7 @@ else()
         message(STATUS "找到FTXUI库(标准查找)")
         target_link_libraries(neumann_cli PUBLIC
             neumann_core
+            neumann_web
             ftxui::screen
             ftxui::dom
             ftxui::component
@@ -145,6 +148,7 @@ else()
                     ${FTXUI_DOM_LIB}
                     ${FTXUI_SCREEN_LIB}
                     neumann_core
+                    neumann_web
                 )
                 set(FTXUI_FOUND TRUE)
             endif()
