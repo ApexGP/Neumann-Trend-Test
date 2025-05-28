@@ -89,25 +89,25 @@
 
 ```
 Neumann-Trend-Test/
-├── bin/                    # 可执行文件
-│   └── neumann_cli_app.exe # 统一应用程序
-├── config/                 # 配置文件
-│   ├── config.json         # 应用配置
-│   └── translations.json   # 多语言翻译
+├── bin/                     # 可执行文件
+│   └── neumann_cli_app.exe  # 统一应用程序
+├── config/                  # 配置文件
+│   ├── config.json          # 应用配置
+│   └── translations.json    # 多语言翻译
 ├── data/
-│   ├── sample/             # 示例数据
-│   │   ├── TestSuite/      # 测试数据集
-│   │   └── ConfidenceLevel/# 自定义置信度示例
-│   └── svg/                # svg默认导出路径
+│   ├── sample/              # 示例数据
+│   │   ├── TestSuite/       # 测试数据集
+│   │   └── ConfidenceLevel/ # 自定义置信度示例
+│   └── svg/                 # svg默认导出路径
 │
-├── ref/                    # 参考文件
-│   ├── standard_values.json                   # 标准值表
+├── ref/                     # 参考文件
+│   ├── standard_values.json # 标准值表
 │   ├── Table_of_Standard_W(P)_for_Neumann-Trend-Test.md
 │   └── Table_of_Standard_W(P)_for_Neumann-Trend-Test.pdf
-├── web/                    # Web界面资源
-├── start.bat               # Windows启动脚本
-├── start.sh                # Linux/macOS启动脚本
-└── README.md               # 使用说明
+├── web/                     # Web界面资源
+├── start.bat                # Windows启动脚本
+├── start.sh                 # Linux/macOS启动脚本
+└── README.md                # 使用说明
 ```
 
 ## 🛠️ 从源码构建
@@ -229,6 +229,8 @@ Neumann-Trend-Test/
 - **⚡ 简化测试流程**：自动使用配置的置信度，减少重复输入
 - **🎨 美化结果显示**：改进的边框设计和彩色输出
 - **💾 配置持久化**：设置自动保存，重启后保持用户偏好
+- **🧮 智能趋势判断**：新增药物稳定性专用的趋势检测算法，更准确地判断末端连续趋势
+- **🔧 界面优化**：修复菜单对齐问题，完善双语支持，提升用户体验
 
 3. **命令行参数**
 
@@ -340,6 +342,7 @@ v2.1.0 版本新增了可视化的置信度配置界面：
 
 - **静态链接**：无运行时依赖，单文件部署
 - **高效算法**：O(n²)时间复杂度的 PG 值计算
+- **智能趋势检测**：v2.2.0 新增末端连续趋势点检测算法，专为药物稳定性研究优化
 - **内存优化**：数据流式处理，支持大型数据集
 
 ### 跨平台兼容
@@ -396,10 +399,29 @@ v2.1.0 版本新增了可视化的置信度配置界面：
    ```
 
 6. **状态栏显示异常**
+
    ```bash
    # 检查终端宽度设置
    echo $COLUMNS  # Linux/macOS
    # 或尝试调整终端窗口大小
+   ```
+
+7. **趋势判断结果异常**
+
+   ```bash
+   # v2.2.0版本采用了新的智能趋势判断算法
+   # 如果发现结果与预期不符，请检查：
+   # 1. 数据是否为药物稳定性相关的时序数据
+   # 2. 数据点数量是否足够（建议≥4个点）
+   # 3. 是否存在末端连续的异常值
+   ```
+
+8. **翻译文件损坏**
+   ```bash
+   # 如果界面显示翻译键而非实际文本
+   # 检查翻译文件是否正确
+   ls -la config/translations.json
+   # 重新下载或重置翻译文件
    ```
 
 ### 性能建议
