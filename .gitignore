@@ -10,6 +10,8 @@ install.bat
 release/
 
 # 编辑器和IDE文件
+.vscode/
+.idea/
 *.suo
 *.user
 *.sln.docstates
@@ -28,6 +30,9 @@ compile_commands.json
 # 数据测试文件
 data/sample*.json
 data/standard*.json
+
+# svg 导出文件
+data/svg/*.svg
 
 # 临时文件
 *.tmp

@@ -6,29 +6,40 @@
 #include <iomanip>
 #include <sstream>
 
+#include "core/i18n.h"
+
 namespace neumann {
 
 std::string DataVisualization::generateTrendChart(const NeumannTestResults& results)
 {
     if (results.results.empty()) {
-        return "<svg><text x='10' y='20'>No data available</text></svg>";
+        return "<svg><text x='10' y='20'>" + _("chart.no_data") + "</text></svg>";
     }
 
-    const int width = 800;
-    const int height = 400;
-    const int margin = 60;
+    const int width = 1200;  // 放大图表宽度
+    const int height = 600;  // 放大图表高度
+    const int margin = 80;   // 增加边距以容纳轴标签
 
     std::ostringstream svg;
     svg << "<svg width='" << width << "' height='" << height
-        << "' xmlns='http://www.w3.org/2000/svg'>\n";
+        << "' xmlns='http://www.w3.org/2000/svg' style='display: block; margin: 0 auto;'>\n";
+
+    // 添加样式定义
+    svg << "<style>\n";
+    svg << "  .chart-title { font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; "
+           "}\n";
+    svg << "  .axis-label { font-family: Arial, sans-serif; font-size: 12px; }\n";
+    svg << "  .axis-title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; "
+           "}\n";
+    svg << "  .legend-text { font-family: Arial, sans-serif; font-size: 14px; }\n";
+    svg << "</style>\n";
 
     // 背景
     svg << "<rect width='" << width << "' height='" << height << "' fill='white' stroke='#ddd'/>\n";
 
     // 标题
-    svg << "<text x='" << width / 2
-        << "' y='30' text-anchor='middle' font-size='16' font-weight='bold'>"
-        << "Neumann Trend Test Results</text>\n";
+    svg << "<text x='" << width / 2 << "' y='30' text-anchor='middle' class='chart-title'>"
+        << _("chart.title") << "</text>\n";
 
     // 计算坐标范围
     std::vector<double> pgValues;
@@ -104,13 +115,13 @@ std::string DataVisualization::generateTrendChart(const NeumannTestResults& resu
     }
 
     // 图例
-    svg << "<text x='" << chartRight - 150 << "' y='" << chartTop + 20 << "' font-size='12'>"
-        << "PG Values</text>\n";
+    svg << "<text x='" << chartRight - 150 << "' y='" << chartTop + 20 << "' class='legend-text'>"
+        << _("chart.pg_values") << "</text>\n";
     svg << "<line x1='" << chartRight - 170 << "' y1='" << chartTop + 16 << "' x2='"
         << chartRight - 155 << "' y2='" << chartTop + 16 << "' stroke='blue' stroke-width='2'/>\n";
 
-    svg << "<text x='" << chartRight - 150 << "' y='" << chartTop + 40 << "' font-size='12'>"
-        << "Thresholds</text>\n";
+    svg << "<text x='" << chartRight - 150 << "' y='" << chartTop + 40 << "' class='legend-text'>"
+        << _("chart.thresholds") << "</text>\n";
     svg << "<line x1='" << chartRight - 170 << "' y1='" << chartTop + 36 << "' x2='"
         << chartRight - 155 << "' y2='" << chartTop + 36
         << "' stroke='red' stroke-width='2' stroke-dasharray='5,5'/>\n";
@@ -120,19 +131,38 @@ std::string DataVisualization::generateTrendChart(const NeumannTestResults& resu
         double value = minY + (maxY - minY) * i / 5.0;
         int y = chartBottom - i * (chartBottom - chartTop) / 5;
         svg << "<text x='" << chartLeft - 10 << "' y='" << y + 5
-            << "' text-anchor='end' font-size='10'>" << std::fixed << std::setprecision(3) << value
-            << "</text>\n";
+            << "' text-anchor='end' class='axis-label'>" << std::fixed << std::setprecision(3)
+            << value << "</text>\n";
     }
 
-    // X轴标签
-    for (size_t i = 0; i < results.results.size(); ++i) {
-        if (i % 2 == 0 || results.results.size() <= 10) {  // 避免标签过密
-            double x =
-                chartLeft + (double(i) / (results.results.size() - 1)) * (chartRight - chartLeft);
+    // X轴标签 - 改进间距算法
+    size_t totalPoints = results.results.size();
+    int maxLabels = std::min(static_cast<int>(totalPoints), 12);  // 最多显示12个标签
+    int labelStep = std::max(1, static_cast<int>(totalPoints) / maxLabels);
+
+    // 确保始终显示第一个和最后一个标签
+    for (size_t i = 0; i < totalPoints; ++i) {
+        bool shouldShowLabel = (i == 0) || (i == totalPoints - 1) || (i % labelStep == 0);
+
+        if (shouldShowLabel) {
+            double x = (totalPoints == 1)
+                           ? (chartLeft + chartRight) / 2.0
+                           : chartLeft + (double(i) / (totalPoints - 1)) * (chartRight - chartLeft);
             svg << "<text x='" << x << "' y='" << chartBottom + 20
-                << "' text-anchor='middle' font-size='10'>Point " << (i + 4) << "</text>\n";
+                << "' text-anchor='middle' class='axis-label'>" << (i + 4) << "</text>\n";
         }
     }
+
+    // X轴标题（时间点说明）
+    svg << "<text x='" << (chartLeft + chartRight) / 2 << "' y='" << chartBottom + 50
+        << "' text-anchor='middle' class='axis-title'>" << _("chart.time_points_unit")
+        << "</text>\n";
+
+    // Y轴标题（PG值说明）
+    svg << "<text x='" << chartLeft - 50 << "' y='" << (chartTop + chartBottom) / 2
+        << "' text-anchor='middle' class='axis-title' transform='rotate(-90, " << chartLeft - 50
+        << ", " << (chartTop + chartBottom) / 2 << ")'>" << _("chart.pg_value_label")
+        << "</text>\n";
 
     svg << "</svg>";
     return svg.str();
@@ -141,7 +171,7 @@ std::string DataVisualization::generateTrendChart(const NeumannTestResults& resu
 std::string DataVisualization::generatePGDistributionChart(const NeumannTestResults& results)
 {
     if (results.results.empty()) {
-        return "<svg><text x='10' y='20'>No data available</text></svg>";
+        return "<svg><text x='10' y='20'>" + _("chart.no_data") + "</text></svg>";
     }
 
     const int width = 600;
@@ -158,7 +188,7 @@ std::string DataVisualization::generatePGDistributionChart(const NeumannTestResu
     // 标题
     svg << "<text x='" << width / 2
         << "' y='30' text-anchor='middle' font-size='16' font-weight='bold'>"
-        << "PG Value Distribution</text>\n";
+        << _("chart.pg_distribution_title") << "</text>\n";
 
     // 创建直方图
     std::vector<double> pgValues;
@@ -237,12 +267,12 @@ bool DataVisualization::saveChartToFile(const std::string& chartSVG, const std::
 std::string DataVisualization::generateASCIIChart(const NeumannTestResults& results)
 {
     if (results.results.empty()) {
-        return "No data available for chart generation.";
+        return _("chart.no_data");
     }
 
     std::ostringstream chart;
     chart << "\n";
-    chart << "=== Neumann Trend Test Results Chart ===\n\n";
+    chart << "=== " << _("chart.title") << " ===\n\n";
 
     // 找到PG值的范围
     std::vector<double> pgValues;
@@ -354,25 +384,6 @@ std::string DataVisualization::generateASCIIChart(const NeumannTestResults& resu
         if (i > 0 && i % 8 == 0) chart << "\n             ";  // 换行避免过长
     }
     chart << "\n";
-
-    // 统计信息
-    chart << "\nSummary:\n";
-    chart << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    chart << "• Total data points: " << results.results.size() << "\n";
-    chart << "• Points with trend: "
-          << std::count_if(results.results.begin(), results.results.end(),
-                           [](const auto& r) { return r.hasTrend; })
-          << " (" << std::fixed << std::setprecision(1)
-          << (100.0 *
-              std::count_if(results.results.begin(), results.results.end(),
-                            [](const auto& r) { return r.hasTrend; }) /
-              results.results.size())
-          << "%)\n";
-    chart << "• Min PG value: " << std::fixed << std::setprecision(4) << results.minPG << "\n";
-    chart << "• Max PG value: " << std::fixed << std::setprecision(4) << results.maxPG << "\n";
-    chart << "• Average PG value: " << std::fixed << std::setprecision(4) << results.avgPG << "\n";
-    chart << "• Overall trend: " << (results.overallTrend ? "YES ⚠" : "NO ✓") << "\n";
-    chart << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 
     return chart.str();
 }

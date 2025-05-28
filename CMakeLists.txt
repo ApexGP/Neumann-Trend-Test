@@ -98,8 +98,11 @@ if(WIN32)
         add_compile_definitions(
             __STDCPP_WANT_MATH_SPEC_FUNCS__=1
             _GLIBCXX_USE_CXX11_ABI=1
+            _GLIBCXX_USE_C99_STDINT_TR1=1
+            __STDC_LIMIT_MACROS=1
+            __STDC_CONSTANT_MACROS=1
         )
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_MINGW_ANSI_STDIO=1 -std=c++17")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__USE_MINGW_ANSI_STDIO=1 -std=c++17 -include cstddef")
     elseif(MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
     endif()
@@ -164,14 +167,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 message(STATUS "开始配置核心模块...")
 add_subdirectory(src/core)
 
-message(STATUS "开始配置CLI模块...")
-add_subdirectory(src/cli)
-
 message(STATUS "开始配置Web模块...")
 add_subdirectory(src/web)
 
+message(STATUS "开始配置CLI模块...")
+add_subdirectory(src/cli)
+
 message(STATUS "开始配置应用程序...")
-add_subdirectory(apps)
+add_subdirectory(app)
 
 message(STATUS "开始配置测试...")
 add_subdirectory(tests)

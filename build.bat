@@ -186,12 +186,13 @@ echo.
 echo 构建完成。可执行文件位于 bin 目录中。
 echo - neumann_cli_app.exe: 命令行界面应用
 echo - neumann_web_app.exe: Web界面应用
+echo - neumann_tests.exe  : 测试程序
 echo.
 echo 用法:
-echo - build.bat                     : 交互式选择构建工具链 (默认Release)
-echo - build.bat mingw               : 使用MinGW构建Release版本
-echo - build.bat msvc                : 使用MSVC构建Release版本
-echo - build.bat [toolchain] debug   : 构建Debug版本
-echo - build.bat clean [其他选项]     : 清理后重新构建
-echo - build.bat verbose [其他选项]   : 显示详细构建信息
+echo - build.bat                       : 交互式选择构建工具链 (默认Release)
+echo - build.bat mingw                 : 使用MinGW构建Release版本
+echo - build.bat msvc                  : 使用MSVC构建Release版本
+echo - build.bat [toolchain] debug     : 构建Debug版本
+echo - build.bat clean [toolchain]     : 清理后重新构建
+echo - build.bat verbose [toolchain]   : 显示详细构建信息
 echo. 
