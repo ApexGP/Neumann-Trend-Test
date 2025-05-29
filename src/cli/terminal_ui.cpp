@@ -66,13 +66,7 @@ void TerminalUI::run()
                          TextStyle::BOLD);
     std::cout << std::endl << std::endl;
 
-    // 加载标准值
-    termUtils.showSpinner(_("status.loading") + " standard values...", 500);
-    if (!StandardValues::getInstance().loadFromFile("data/standard_values.json")) {
-        termUtils.printWarning(_("error.standard_values_not_found"));
-    } else {
-        termUtils.printSuccess("Standard values loaded successfully");
-    }
+    // 标准值已在主程序中加载，无需重复加载
 
     // 主循环
     while (running) {
@@ -610,7 +604,7 @@ void TerminalUI::runNeumannTest()
     auto &config = Config::getInstance();
     double confidenceLevel = config.getDefaultConfidenceLevel();
 
-    std::cout << _("test.using_confidence_level") << ": " << std::fixed << std::setprecision(2)
+    std::cout << _("test.using_confidence_level") << ": " << std::fixed << std::setprecision(3)
               << (confidenceLevel * 100) << "%" << std::endl;
     std::cout << _("test.change_in_settings") << std::endl;
     std::cout << std::endl;
@@ -1111,7 +1105,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.2.0" << std::endl;
+    std::cout << " v2.2.1" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -1170,7 +1164,7 @@ void TerminalUI::showLanguageMenu()
         case 1:
             i18n.setLanguage(Language::CHINESE);
             Config::getInstance().setLanguage(Language::CHINESE);
-            if (Config::getInstance().saveToFile(Config::getInstance().getConfigFilePath())) {
+            if (Config::getInstance().saveConfiguration()) {
                 std::cout << "语言已设置为中文" << std::endl;
             } else {
                 std::cout << "语言设置保存失败" << std::endl;
@@ -1186,7 +1180,7 @@ void TerminalUI::showLanguageMenu()
         case 2:
             i18n.setLanguage(Language::ENGLISH);
             Config::getInstance().setLanguage(Language::ENGLISH);
-            if (Config::getInstance().saveToFile(Config::getInstance().getConfigFilePath())) {
+            if (Config::getInstance().saveConfiguration()) {
                 std::cout << "Language set to English" << std::endl;
             } else {
                 std::cout << "Failed to save language settings" << std::endl;
@@ -1218,8 +1212,8 @@ void TerminalUI::showConfidenceLevelMenu()
     auto &config = Config::getInstance();
     auto &standardValues = StandardValues::getInstance();
 
-    std::cout << _("prompt.current_confidence_level") << ": " << config.getDefaultConfidenceLevel()
-              << std::endl;
+    std::cout << _("prompt.current_confidence_level") << ": " << std::fixed << std::setprecision(3)
+              << config.getDefaultConfidenceLevel() << std::endl;
     std::cout << std::endl;
 
     // 获取支持的置信度列表
@@ -1557,8 +1551,9 @@ void TerminalUI::showConfidenceLevelMenu()
 
         // 尝试保存配置
         std::string configFile = config.getConfigFilePath();
-        if (config.saveToFile(configFile)) {
-            std::cout << _("status.confidence_level_saved") << ": " << newLevel << std::endl;
+        if (config.saveConfiguration()) {
+            std::cout << _("status.confidence_level_saved") << ": " << std::fixed
+                      << std::setprecision(3) << newLevel << std::endl;
         } else {
             std::cout << _("warning.config_save_failed") << std::endl;
         }
@@ -2403,7 +2398,7 @@ void TerminalUI::startWebServer()
         if (port != defaultPort) {
             config.setDefaultWebPort(port);
             std::string configFile = config.getConfigFilePath();
-            if (config.saveToFile(configFile)) {
+            if (config.saveConfiguration()) {
                 termUtils.printInfo(_("web.port_saved"));
             }
         }

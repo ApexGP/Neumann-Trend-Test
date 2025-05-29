@@ -2,14 +2,58 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <nlohmann/json.hpp>
+#include <sstream>
+
+#include "core/i18n.h"
 
 using json = nlohmann::json;
 
 namespace neumann {
+
+// 简单的字符串替换函数
+std::string replace_placeholder(const std::string &text, const std::string &placeholder,
+                                const std::string &replacement)
+{
+    std::string result = text;
+    size_t pos = result.find(placeholder);
+    if (pos != std::string::npos) {
+        result.replace(pos, placeholder.length(), replacement);
+    }
+    return result;
+}
+
+template <typename T>
+std::string format_single(const std::string &format, const T &value)
+{
+    std::ostringstream oss;
+    oss << value;
+    return replace_placeholder(format, "{}", oss.str());
+}
+
+template <typename T1, typename T2>
+std::string format_two(const std::string &format, const T1 &value1, const T2 &value2)
+{
+    std::ostringstream oss1, oss2;
+    oss1 << value1;
+    oss2 << value2;
+    std::string result = format;
+    // 替换第一个 {}
+    size_t pos = result.find("{}");
+    if (pos != std::string::npos) {
+        result.replace(pos, 2, oss1.str());
+    }
+    // 替换第二个 {}
+    pos = result.find("{}");
+    if (pos != std::string::npos) {
+        result.replace(pos, 2, oss2.str());
+    }
+    return result;
+}
 
 StandardValues::StandardValues() : minSampleSize(std::numeric_limits<int>::max()), maxSampleSize(0)
 {
@@ -118,11 +162,11 @@ bool StandardValues::loadFromFile(const std::string &filename)
         // 检查文件是否存在
         std::ifstream checkFile(filename);
         if (!checkFile.is_open()) {
-            std::cerr << "无法打开标准值文件: " << filename << std::endl;
+            std::cerr << _("standard_values.file_open_error") << ": " << filename << std::endl;
 
             // 尝试创建标准值文件
             try {
-                std::cout << "尝试创建标准值文件..." << std::endl;
+                std::cout << _("standard_values.create_file_attempt") << std::endl;
                 std::ofstream outFile(filename);
                 if (outFile.is_open()) {
                     // 创建完整的标准值JSON - 基于Neumann Trend Test标准表
@@ -181,14 +225,15 @@ bool StandardValues::loadFromFile(const std::string &filename)
                     outFile << completeValues.dump(2);  // 缩进为2空格
                     outFile.close();
 
-                    std::cout << "已创建完整标准值文件: " << filename << std::endl;
+                    std::cout << _("standard_values.create_file_success") << ": " << filename
+                              << std::endl;
                 } else {
-                    std::cerr << "无法创建标准值文件。将使用内置默认值。" << std::endl;
+                    std::cerr << _("standard_values.file_create_error") << std::endl;
                     return false;
                 }
             }
             catch (const std::exception &e) {
-                std::cerr << "创建标准值文件失败: " << e.what() << "。将使用内置默认值。"
+                std::cerr << _("standard_values.file_create_failed") << ": " << e.what()
                           << std::endl;
                 return false;
             }
@@ -196,7 +241,7 @@ bool StandardValues::loadFromFile(const std::string &filename)
             // 重新尝试打开文件
             checkFile = std::ifstream(filename);
             if (!checkFile.is_open()) {
-                std::cerr << "仍然无法打开标准值文件。将使用内置默认值。" << std::endl;
+                std::cerr << _("standard_values.file_still_cannot_open") << std::endl;
                 return false;
             }
         }
@@ -209,8 +254,8 @@ bool StandardValues::loadFromFile(const std::string &filename)
             file >> data;
         }
         catch (const json::parse_error &e) {
-            std::cerr << "标准值文件JSON解析错误: " << e.what() << std::endl;
-            std::cerr << "将使用内置默认值。" << std::endl;
+            std::cerr << _("standard_values.json_parse_error") << ": " << e.what() << std::endl;
+            std::cerr << _("standard_values.fallback_to_default") << std::endl;
             return false;
         }
 
@@ -244,9 +289,11 @@ bool StandardValues::loadFromFile(const std::string &filename)
         // 排序置信水平
         std::sort(confidenceLevels.begin(), confidenceLevels.end());
 
-        std::cout << "成功加载标准值文件: " << filename << std::endl;
-        std::cout << "  支持的置信水平: " << confidenceLevels.size() << " 个" << std::endl;
-        std::cout << "  样本大小范围: " << minSampleSize << "-" << maxSampleSize << std::endl;
+        std::cout << _("standard_values.load_success") << ": " << filename << std::endl;
+        std::cout << "  " << _("standard_values.supported_confidence_levels") << ": "
+                  << confidenceLevels.size() << " " << _("ui.count_unit") << std::endl;
+        std::cout << "  " << _("standard_values.sample_size_range") << ": " << minSampleSize << "-"
+                  << maxSampleSize << std::endl;
 
         // 记录当前文件路径
         currentFilePath = filename;
@@ -254,8 +301,8 @@ bool StandardValues::loadFromFile(const std::string &filename)
         return true;
     }
     catch (const std::exception &e) {
-        std::cerr << "加载标准值文件时出错: " << e.what() << std::endl;
-        std::cerr << "将使用内置默认值。" << std::endl;
+        std::cerr << _("standard_values.load_error") << ": " << e.what() << std::endl;
+        std::cerr << _("standard_values.fallback_to_default") << std::endl;
         return false;
     }
 }
@@ -322,7 +369,7 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
             // 解析JSON格式
             std::ifstream file(filename);
             if (!file.is_open()) {
-                std::cerr << "无法打开文件: " << filename << std::endl;
+                std::cerr << _("standard_values.file_cannot_open") << ": " << filename << std::endl;
                 return false;
             }
 
@@ -331,7 +378,7 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
                 file >> data;
             }
             catch (const json::parse_error &e) {
-                std::cerr << "JSON解析错误: " << e.what() << std::endl;
+                std::cerr << _("standard_values.json_error") << ": " << e.what() << std::endl;
                 return false;
             }
 
@@ -343,8 +390,8 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
                     customValues[sampleSize] = wpValue;
                 }
                 catch (const std::exception &e) {
-                    std::cerr << "解析数据项失败: " << item.key() << " -> " << item.value()
-                              << std::endl;
+                    std::cerr << _("standard_values.parse_item_failed") << ": " << item.key()
+                              << " -> " << item.value().dump() << std::endl;
                     return false;
                 }
             }
@@ -353,7 +400,7 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
             // 解析CSV格式
             std::ifstream file(filename);
             if (!file.is_open()) {
-                std::cerr << "无法打开文件: " << filename << std::endl;
+                std::cerr << _("standard_values.file_cannot_open") << ": " << filename << std::endl;
                 return false;
             }
 
@@ -380,27 +427,29 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
                         customValues[sampleSize] = wpValue;
                     }
                     catch (const std::exception &e) {
-                        std::cerr << "解析CSV行失败: " << line << std::endl;
+                        std::cerr << _("standard_values.csv_parse_failed") << ": " << line
+                                  << std::endl;
                         return false;
                     }
                 }
             }
 
         } else {
-            std::cerr << "不支持的文件格式: " << extension << std::endl;
-            std::cerr << "支持的格式: .json, .csv" << std::endl;
+            std::cerr << _("standard_values.unsupported_format") << ": " << extension << std::endl;
+            std::cerr << _("standard_values.supported_formats") << std::endl;
             return false;
         }
 
         // 验证数据完整性
         if (!validateCustomValues(customValues)) {
-            std::cerr << "自定义标准值表验证失败" << std::endl;
+            std::cerr << _("standard_values.validation_failed") << std::endl;
             return false;
         }
 
         // 检查置信度是否已存在
         if (wpValues.find(confidenceLevel) != wpValues.end()) {
-            std::cout << "警告: 置信度 " << confidenceLevel << " 已存在，将被覆盖" << std::endl;
+            std::cout << _("standard_values.confidence_exists_warning") << ": " << confidenceLevel
+                      << std::endl;
         }
 
         // 添加到标准值表
@@ -413,24 +462,25 @@ bool StandardValues::importCustomConfidenceLevel(double confidenceLevel,
             std::sort(confidenceLevels.begin(), confidenceLevels.end());
         }
 
-        std::cout << "成功导入自定义置信度 " << confidenceLevel << " 的标准值表" << std::endl;
-        std::cout << "包含 " << customValues.size() << " 个样本大小的数据" << std::endl;
+        std::cout << _("standard_values.import_success") << ": " << confidenceLevel << std::endl;
+        std::cout << _("standard_values.import_data_count") << ": " << customValues.size()
+                  << std::endl;
 
         // 自动保存到当前标准值文件
         if (!currentFilePath.empty()) {
             if (saveToFile(currentFilePath)) {
-                std::cout << "自定义置信度已保存到标准值文件中" << std::endl;
+                std::cout << _("standard_values.save_success") << std::endl;
             } else {
-                std::cout << "警告: 自定义置信度保存失败，重启应用后将丢失" << std::endl;
+                std::cout << _("standard_values.save_warning") << std::endl;
             }
         } else {
-            std::cout << "警告: 未找到标准值文件路径，自定义置信度未保存" << std::endl;
+            std::cout << _("standard_values.no_file_path_warning") << std::endl;
         }
 
         return true;
     }
     catch (const std::exception &e) {
-        std::cerr << "导入自定义置信度失败: " << e.what() << std::endl;
+        std::cerr << _("standard_values.import_failed") << ": " << e.what() << std::endl;
         return false;
     }
 }
@@ -439,13 +489,15 @@ bool StandardValues::removeConfidenceLevel(double confidenceLevel)
 {
     // 不允许删除内置的标准置信度
     if (confidenceLevel == 0.95 || confidenceLevel == 0.99 || confidenceLevel == 0.999) {
-        std::cerr << "不能删除内置的标准置信度: " << confidenceLevel << std::endl;
+        std::cerr << _("standard_values.cannot_delete_builtin") << ": " << confidenceLevel
+                  << std::endl;
         return false;
     }
 
     auto it = wpValues.find(confidenceLevel);
     if (it == wpValues.end()) {
-        std::cerr << "置信度 " << confidenceLevel << " 不存在" << std::endl;
+        std::cerr << _("standard_values.confidence_not_exists") << ": " << confidenceLevel
+                  << std::endl;
         return false;
     }
 
@@ -458,14 +510,14 @@ bool StandardValues::removeConfidenceLevel(double confidenceLevel)
         confidenceLevels.erase(levelIt);
     }
 
-    std::cout << "成功移除置信度 " << confidenceLevel << std::endl;
+    std::cout << _("standard_values.remove_success") << ": " << confidenceLevel << std::endl;
 
     // 自动保存到当前标准值文件
     if (!currentFilePath.empty()) {
         if (saveToFile(currentFilePath)) {
-            std::cout << "置信度移除已保存到标准值文件中" << std::endl;
+            std::cout << _("standard_values.remove_save_success") << std::endl;
         } else {
-            std::cout << "警告: 置信度移除保存失败" << std::endl;
+            std::cout << _("standard_values.remove_save_warning") << std::endl;
         }
     }
 
@@ -476,7 +528,7 @@ bool StandardValues::validateCustomValues(const std::map<int, double> &values) c
 {
     // 检查是否为空
     if (values.empty()) {
-        std::cerr << "标准值表不能为空" << std::endl;
+        std::cerr << _("standard_values.empty_table") << std::endl;
         return false;
     }
 
@@ -485,12 +537,12 @@ bool StandardValues::validateCustomValues(const std::map<int, double> &values) c
     int maxSize = values.rbegin()->first;
 
     if (minSize < 4) {
-        std::cerr << "最小样本数不能小于4，当前最小值: " << minSize << std::endl;
+        std::cerr << _("standard_values.min_sample_size_error") << ": " << minSize << std::endl;
         return false;
     }
 
     if (maxSize > 100) {  // 设置一个合理的上限
-        std::cerr << "最大样本数不能超过100，当前最大值: " << maxSize << std::endl;
+        std::cerr << _("standard_values.max_sample_size_error") << ": " << maxSize << std::endl;
         return false;
     }
 
@@ -498,7 +550,7 @@ bool StandardValues::validateCustomValues(const std::map<int, double> &values) c
     std::vector<int> requiredSizes = {4, 5, 6, 7, 8, 9, 10, 15, 20};
     for (int size : requiredSizes) {
         if (values.find(size) == values.end()) {
-            std::cerr << "缺少关键样本数 " << size << " 的数据" << std::endl;
+            std::cerr << _("standard_values.missing_required_size") << ": " << size << std::endl;
             return false;
         }
     }
@@ -507,7 +559,8 @@ bool StandardValues::validateCustomValues(const std::map<int, double> &values) c
     for (const auto &pair : values) {
         double wpValue = pair.second;
         if (wpValue <= 0.0 || wpValue > 10.0) {  // W(P)值应该在合理范围内
-            std::cerr << "样本数 " << pair.first << " 的W(P)值不合理: " << wpValue << std::endl;
+            std::cerr << _("standard_values.unreasonable_wp") << ": " << pair.first << " -> "
+                      << wpValue << std::endl;
             return false;
         }
     }
@@ -516,16 +569,17 @@ bool StandardValues::validateCustomValues(const std::map<int, double> &values) c
     double prevValue = 0.0;
     for (const auto &pair : values) {
         if (pair.second < prevValue * 0.8) {  // 允许一定的波动
-            std::cerr << "W(P)值序列可能不合理，样本数 " << pair.first << " 的值 " << pair.second
-                      << " 相比前值 " << prevValue << " 下降过多" << std::endl;
+            std::cerr << _("standard_values.wp_sequence_warning") << ": " << pair.first << " -> "
+                      << pair.second << " vs " << prevValue << std::endl;
             // 这里只是警告，不阻止导入
         }
         prevValue = pair.second;
     }
 
-    std::cout << "自定义标准值表验证通过" << std::endl;
-    std::cout << "样本数范围: " << minSize << "-" << maxSize << std::endl;
-    std::cout << "数据点数量: " << values.size() << std::endl;
+    std::cout << _("standard_values.validation_passed") << std::endl;
+    std::cout << _("standard_values.validation_range") << ": " << minSize << "-" << maxSize
+              << std::endl;
+    std::cout << _("standard_values.validation_count") << ": " << values.size() << std::endl;
 
     return true;
 }
@@ -554,14 +608,15 @@ bool StandardValues::saveToFile(const std::string &filename)
         // 写入文件
         std::ofstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "无法创建文件: " << filename << std::endl;
+            std::cerr << _("standard_values.cannot_create_output_file") << ": " << filename
+                      << std::endl;
             return false;
         }
 
         file << data.dump(2);  // 缩进为2空格
         file.close();
 
-        std::cout << "成功保存标准值到文件: " << filename << std::endl;
+        std::cout << _("standard_values.file_save_success") << ": " << filename << std::endl;
 
         // 更新当前文件路径
         currentFilePath = filename;
@@ -569,9 +624,14 @@ bool StandardValues::saveToFile(const std::string &filename)
         return true;
     }
     catch (const std::exception &e) {
-        std::cerr << "保存标准值文件失败: " << e.what() << std::endl;
+        std::cerr << _("standard_values.save_file_failed") << ": " << e.what() << std::endl;
         return false;
     }
+}
+
+void StandardValues::setUserFilePath(const std::string &filePath)
+{
+    currentFilePath = filePath;
 }
 
 }  // namespace neumann

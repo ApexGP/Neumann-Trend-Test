@@ -24,10 +24,7 @@ int CLIApp::run(int argc, char **argv)
         }
     }
 
-    // 加载标准值
-    if (!StandardValues::getInstance().loadFromFile("data/standard_values.json")) {
-        std::cerr << _("error.standard_values_not_found") << std::endl;
-    }
+    // 标准值已在主程序中加载，无需重复加载
 
     // 运行终端UI
     ui.run();

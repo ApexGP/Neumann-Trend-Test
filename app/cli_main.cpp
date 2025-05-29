@@ -28,146 +28,126 @@ int main(int argc, char **argv)
         // 设置用户数据目录
         config.setDataDirectory(userDataDir);
 
-        // 确保config目录存在
-        if (!fs::exists(configDir)) {
-            fs::create_directories(configDir);
-            std::cout << "创建配置目录: " << configDir << std::endl;
-        }
+        // 设置Web资源目录
+        std::string webRootDir = (releaseDir / "web").string();
+        config.setWebRootDirectory(webRootDir);
 
-        // 尝试加载配置文件（优先从根目录config，回退到bin目录）
-        std::string configFile = (fs::path(configDir) / "config.json").string();
-        std::string fallbackConfigFile = (exeDir / "config.json").string();
-        std::string devConfigFile = "config/config.json";  // 开发时的路径
-
-        if (fs::exists(configFile)) {
-            // 先设置配置文件路径，用于路径转换
-            config.setConfigFilePath(configFile);
-            if (!config.loadFromFile(configFile)) {
-                std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
-            } else {
-                std::cout << "已加载配置文件: " << configFile << std::endl;
-            }
-        } else if (fs::exists(devConfigFile)) {
-            // 开发环境中的配置文件
-            config.setConfigFilePath(devConfigFile);
-            if (!config.loadFromFile(devConfigFile)) {
-                std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
-            } else {
-                std::cout << "已加载开发配置文件: " << devConfigFile << std::endl;
-            }
-        } else if (fs::exists(fallbackConfigFile)) {
-            // 先设置配置文件路径，用于路径转换
-            config.setConfigFilePath(fallbackConfigFile);
-            if (!config.loadFromFile(fallbackConfigFile)) {
-                std::cout << "警告: 配置文件加载失败，使用默认配置" << std::endl;
-            } else {
-                std::cout << "已加载回退配置文件: " << fallbackConfigFile << std::endl;
-            }
-        } else {
-            std::cout << "使用默认配置设置" << std::endl;
-            // 即使没有配置文件，也要设置预期的保存路径
-            config.setConfigFilePath(configFile);
-        }
-
-        // 确保用户数据目录存在
-        if (!fs::exists(userDataDir)) {
-            fs::create_directories(userDataDir);
-            std::cout << "创建用户数据目录: " << userDataDir << std::endl;
-        }
-
-        // 复制必要的系统文件到用户数据目录
-        std::vector<std::string> systemFiles = {"standard_values.json", "translations.json"};
-        for (const auto &fileName : systemFiles) {
-            fs::path sourceFile = exeDir / "data" / fileName;
-            fs::path targetFile = fs::path(userDataDir) / fileName;
-
-            // 如果源文件存在但目标文件不存在，则复制
-            if (fs::exists(sourceFile) && !fs::exists(targetFile)) {
-                try {
-                    fs::copy_file(sourceFile, targetFile);
-                    std::cout << "复制系统文件: " << fileName << std::endl;
-                }
-                catch (const std::exception &e) {
-                    std::cout << "复制文件失败 " << fileName << ": " << e.what() << std::endl;
-                }
-            }
-        }
-
-        // 初始化国际化系统
+        // 初始化国际化系统（提前到配置加载之前）
         auto &i18n = neumann::I18n::getInstance();
-        i18n.setLanguage(config.getLanguage());
 
-        // 尝试加载翻译文件（优先从根目录config，回退到开发目录和data目录）
-        std::string translationFile = (fs::path(configDir) / "translations.json").string();
+        // 尝试加载翻译文件（系统级文件，只从config目录加载）
+        std::string systemTranslationFile = (fs::path(configDir) / "translations.json").string();
         std::string devTranslationFile = "config/translations.json";  // 开发时的路径
-        std::string fallbackTranslationFile = "data/translations.json";
+        std::string oldTranslationFile =
+            (fs::path(userDataDir) / "translations.json").string();  // 旧位置（兼容性迁移）
 
         bool translationsLoaded = false;
 
-        if (fs::exists(translationFile)) {
-            if (i18n.loadTranslations(translationFile)) {
-                std::cout << "已加载翻译文件: " << translationFile << std::endl;
+        if (fs::exists(systemTranslationFile)) {
+            if (i18n.loadTranslations(systemTranslationFile)) {
+                std::cout << _("startup.translation_system_loaded") << ": " << systemTranslationFile
+                          << std::endl;
                 translationsLoaded = true;
             }
         }
 
         if (!translationsLoaded && fs::exists(devTranslationFile)) {
             if (i18n.loadTranslations(devTranslationFile)) {
-                std::cout << "已加载开发翻译文件: " << devTranslationFile << std::endl;
+                std::cout << _("startup.translation_dev_loaded") << ": " << devTranslationFile
+                          << std::endl;
                 translationsLoaded = true;
             }
         }
 
-        if (!translationsLoaded && fs::exists(fallbackTranslationFile)) {
-            if (i18n.loadTranslations(fallbackTranslationFile)) {
-                std::cout << "已加载回退翻译文件: " << fallbackTranslationFile << std::endl;
-                translationsLoaded = true;
+        // 兼容性处理：如果发现旧位置的翻译文件，删除它并提示用户
+        if (fs::exists(oldTranslationFile)) {
+            try {
+                fs::remove(oldTranslationFile);
+                std::cout << _("startup.translation_old_cleaned") << ": " << oldTranslationFile
+                          << std::endl;
+            }
+            catch (const std::exception &e) {
+                std::cout << _("startup.translation_cleanup_failed") << ": " << e.what()
+                          << std::endl;
             }
         }
 
         if (!translationsLoaded) {
-            std::cout << "警告: 翻译文件加载失败，使用内置翻译" << std::endl;
+            std::cout << _("startup.translation_load_warning") << std::endl;
+        }
+
+        // 使用智能配置加载系统（现在翻译系统已经初始化，可以正确显示翻译文本）
+        if (!config.loadConfigurationSmart(userDataDir, configDir)) {
+            std::cout << _("startup.config_load_warning") << std::endl;
+        }
+
+        // 设置语言（从配置文件读取后设置）
+        i18n.setLanguage(config.getLanguage());
+
+        // 使用智能系统文件管理
+        neumann::Config::manageSystemFilesSmart(userDataDir, refDir, configDir);
+
+        // 确保用户数据目录存在
+        if (!fs::exists(userDataDir)) {
+            fs::create_directories(userDataDir);
+            std::cout << _("startup.user_data_dir_created") << ": " << userDataDir << std::endl;
         }
 
         // 显示欢迎信息
         if (config.getShowWelcomeMessage()) {
             std::cout << "\n=== " << _("app.title") << " ===" << std::endl;
             std::cout << _("app.description") << std::endl;
-            std::cout << "语言/Language: "
+            std::cout << _("startup.language_display") << ": "
                       << (i18n.getCurrentLanguage() == neumann::Language::CHINESE ? "中文"
                                                                                   : "English")
                       << std::endl;
-            std::cout << "数据目录: " << userDataDir << std::endl;
+            std::cout << _("startup.data_directory") << ": " << userDataDir << std::endl;
             std::cout << std::endl;
         }
 
-        // 加载标准值（优先从根目录ref，回退到开发目录和data目录）
+        // 加载标准值（优先从用户usr目录，回退到系统目录和开发目录）
         auto &standardValues = neumann::StandardValues::getInstance();
-        std::string standardValuesFile = (fs::path(refDir) / "standard_values.json").string();
+        std::string userStandardValuesFile =
+            neumann::Config::getUserSystemFilePath(userDataDir, "standard_values.json");
+        std::string systemStandardValuesFile = (fs::path(refDir) / "standard_values.json").string();
         std::string devStandardValuesFile = "ref/standard_values.json";  // 开发时的路径
-        std::string fallbackStandardValuesFile = "data/standard_values.json";
+        std::string oldStandardValuesFile =
+            (fs::path(userDataDir) / "standard_values.json").string();  // 旧位置（兼容性）
 
-        if (fs::exists(standardValuesFile)) {
-            if (!standardValues.loadFromFile(standardValuesFile)) {
+        if (fs::exists(userStandardValuesFile)) {
+            if (!standardValues.loadFromFile(userStandardValuesFile)) {
                 std::cout << _("error.standard_values_not_found") << std::endl;
             } else {
-                std::cout << "已加载标准值文件: " << standardValuesFile << std::endl;
+                std::cout << _("startup.standard_values_user_loaded") << ": "
+                          << userStandardValuesFile << std::endl;
+            }
+        } else if (fs::exists(systemStandardValuesFile)) {
+            if (!standardValues.loadFromFile(systemStandardValuesFile)) {
+                std::cout << _("error.standard_values_not_found") << std::endl;
+            } else {
+                std::cout << _("startup.standard_values_system_loaded") << ": "
+                          << systemStandardValuesFile << std::endl;
             }
         } else if (fs::exists(devStandardValuesFile)) {
             if (!standardValues.loadFromFile(devStandardValuesFile)) {
                 std::cout << _("error.standard_values_not_found") << std::endl;
             } else {
-                std::cout << "已加载开发标准值文件: " << devStandardValuesFile << std::endl;
+                std::cout << _("startup.standard_values_dev_loaded") << ": "
+                          << devStandardValuesFile << std::endl;
             }
-        } else if (fs::exists(fallbackStandardValuesFile)) {
-            if (!standardValues.loadFromFile(fallbackStandardValuesFile)) {
+        } else if (fs::exists(oldStandardValuesFile)) {
+            if (!standardValues.loadFromFile(oldStandardValuesFile)) {
                 std::cout << _("error.standard_values_not_found") << std::endl;
             } else {
-                std::cout << "已加载回退标准值文件: " << fallbackStandardValuesFile << std::endl;
+                std::cout << _("startup.standard_values_old_loaded") << ": "
+                          << oldStandardValuesFile << std::endl;
             }
         } else {
             std::cout << _("error.standard_values_not_found") << std::endl;
         }
+
+        // 设置用户标准值文件路径，确保自定义标准值保存到正确的用户目录
+        standardValues.setUserFilePath(userStandardValuesFile);
 
         // 创建并运行CLI应用
         neumann::cli::CLIApp app;
@@ -183,7 +163,7 @@ int main(int argc, char **argv)
         // 处理其他标准异常
         auto &errorHandler = neumann::ErrorHandler::getInstance();
         auto errorInfo = errorHandler.handleError(neumann::ErrorCode::UNKNOWN_ERROR,
-                                                  "CLI应用程序启动失败", e.what());
+                                                  _("startup.cli_app_start_failed"), e.what());
         errorHandler.displayError(errorInfo, true);
         return 1;
     }

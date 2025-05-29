@@ -78,6 +78,54 @@ public:
     // 设置配置文件路径
     void setConfigFilePath(const std::string &path);
 
+    /**
+     * @brief 智能加载配置文件
+     * @param userDataDir 用户数据目录
+     * @param systemConfigDir 系统配置目录
+     * @return 是否成功加载配置
+     */
+    bool loadConfigurationSmart(const std::string &userDataDir, const std::string &systemConfigDir);
+
+    /**
+     * @brief 保存配置到当前配置文件路径
+     * @return 是否成功保存
+     */
+    bool saveConfiguration();
+
+    /**
+     * @brief 获取用户私有配置文件路径
+     * @param userDataDir 用户数据目录
+     * @return 用户私有配置文件路径
+     */
+    static std::string getUserConfigPath(const std::string &userDataDir);
+
+    /**
+     * @brief 获取系统默认配置文件路径
+     * @param systemConfigDir 系统配置目录
+     * @return 系统默认配置文件路径
+     */
+    static std::string getSystemConfigPath(const std::string &systemConfigDir);
+
+    /**
+     * @brief 智能管理系统文件（标准值、翻译文件等）
+     * @param userDataDir 用户数据目录
+     * @param systemRefDir 系统参考文件目录
+     * @param systemConfigDir 系统配置目录
+     * @return 是否成功管理所有系统文件
+     */
+    static bool manageSystemFilesSmart(const std::string &userDataDir,
+                                       const std::string &systemRefDir,
+                                       const std::string &systemConfigDir);
+
+    /**
+     * @brief 获取用户系统文件路径
+     * @param userDataDir 用户数据目录
+     * @param filename 文件名
+     * @return 用户系统文件路径
+     */
+    static std::string getUserSystemFilePath(const std::string &userDataDir,
+                                             const std::string &filename);
+
 private:
     // 私有构造函数
     Config();
@@ -92,6 +140,22 @@ private:
     // 路径转换辅助方法
     std::string makeRelativePath(const std::string &absolutePath) const;
     std::string makeAbsolutePath(const std::string &relativePath) const;
+
+    /**
+     * @brief 创建用户私有配置文件
+     * @param userConfigPath 用户私有配置文件路径
+     * @param systemConfigPath 系统默认配置文件路径
+     * @return 是否成功创建
+     */
+    bool createUserConfigFromSystem(const std::string &userConfigPath,
+                                    const std::string &systemConfigPath);
+
+    /**
+     * @brief 确保用户配置目录存在
+     * @param userConfigPath 用户配置文件路径
+     * @return 是否成功创建目录
+     */
+    bool ensureUserConfigDirectory(const std::string &userConfigPath);
 
     // 配置项
     Language language;
