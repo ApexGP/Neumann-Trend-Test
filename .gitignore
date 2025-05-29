@@ -31,6 +31,9 @@ compile_commands.json
 data/sample*.json
 data/standard*.json
 
+# 用户私有配置文件
+data/usr/
+
 # svg 导出文件
 data/svg/*.svg
 

@@ -83,6 +83,12 @@ public:
    */
     bool validateCustomValues(const std::map<int, double> &values) const;
 
+    /**
+   * @brief 设置用户标准值文件路径（用于保存自定义标准值）
+   * @param filePath 用户标准值文件的完整路径
+   */
+    void setUserFilePath(const std::string &filePath);
+
 private:
     // 私有构造函数，防止外部实例化
     StandardValues();

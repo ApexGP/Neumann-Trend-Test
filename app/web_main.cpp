@@ -117,26 +117,40 @@ int main(int argc, char **argv)
             }
         }
 
-        // 标准值文件路径（优先从ref目录，回退到开发目录）
-        std::string standardValuesFile = (releaseDir / "ref" / "standard_values.json").string();
-        std::string fallbackStandardValuesFile = dataDir + "/standard_values.json";
+        // 标准值文件路径（使用智能系统文件管理）
+        std::string refDir = (releaseDir / "ref").string();
+        std::string userStandardValuesFile =
+            (fs::path(dataDir) / "usr" / "standard_values.json").string();
+        std::string systemStandardValuesFile = (fs::path(refDir) / "standard_values.json").string();
+        std::string devStandardValuesFile = "ref/standard_values.json";  // 开发时的路径
 
-        // 加载标准值 - 注意这会创建文件如果不存在
-        if (fs::exists(standardValuesFile)) {
-            if (!neumann::StandardValues::getInstance().loadFromFile(standardValuesFile)) {
-                std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+        auto &standardValues = neumann::StandardValues::getInstance();
+
+        // 按优先级加载标准值文件
+        if (fs::exists(userStandardValuesFile)) {
+            if (!standardValues.loadFromFile(userStandardValuesFile)) {
+                std::cerr << "警告: 无法加载用户标准值文件，将使用内置默认值。" << std::endl;
             } else {
-                std::cout << "已加载标准值文件: " << standardValuesFile << std::endl;
+                std::cout << "已加载用户标准值文件: " << userStandardValuesFile << std::endl;
             }
-        } else if (fs::exists(fallbackStandardValuesFile)) {
-            if (!neumann::StandardValues::getInstance().loadFromFile(fallbackStandardValuesFile)) {
-                std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+        } else if (fs::exists(systemStandardValuesFile)) {
+            if (!standardValues.loadFromFile(systemStandardValuesFile)) {
+                std::cerr << "警告: 无法加载系统标准值文件，将使用内置默认值。" << std::endl;
             } else {
-                std::cout << "已加载开发标准值文件: " << fallbackStandardValuesFile << std::endl;
+                std::cout << "已加载系统标准值文件: " << systemStandardValuesFile << std::endl;
+            }
+        } else if (fs::exists(devStandardValuesFile)) {
+            if (!standardValues.loadFromFile(devStandardValuesFile)) {
+                std::cerr << "警告: 无法加载开发标准值文件，将使用内置默认值。" << std::endl;
+            } else {
+                std::cout << "已加载开发标准值文件: " << devStandardValuesFile << std::endl;
             }
         } else {
-            std::cerr << "警告: 无法加载标准值文件，将使用内置默认值。" << std::endl;
+            std::cerr << "警告: 未找到标准值文件，将使用内置默认值。" << std::endl;
         }
+
+        // 设置用户标准值文件路径，确保自定义标准值保存到正确的用户目录
+        standardValues.setUserFilePath(userStandardValuesFile);
 
         // 创建并启动Web服务器
         std::cout << "初始化Web服务器..." << std::endl;

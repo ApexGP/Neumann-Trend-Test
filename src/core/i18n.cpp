@@ -51,6 +51,12 @@ std::string I18n::getText(const std::string &key) const
         }
     }
 
+// 如果都没找到，输出调试信息（仅在调试模式下）
+#ifdef DEBUG
+    std::cerr << "Translation not found for key: " << key
+              << ", current language: " << static_cast<int>(currentLanguage) << std::endl;
+#endif
+
     // 如果都没找到，返回键本身
     return key;
 }
