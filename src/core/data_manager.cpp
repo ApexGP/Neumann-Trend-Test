@@ -10,6 +10,8 @@
 #include <set>
 #include <sstream>
 
+#include "core/config.h"
+
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
@@ -17,12 +19,13 @@ namespace neumann {
 
 DataManager::DataManager()
 {
-    // 设置数据目录
-    dataDir = "data";
+    // 从配置获取数据目录
+    auto &config = Config::getInstance();
+    dataDir = config.getDataDirectory();
 
     // 创建数据目录（如果不存在）
     if (!fs::exists(dataDir)) {
-        fs::create_directory(dataDir);
+        fs::create_directories(dataDir);
     }
 }
 

@@ -72,7 +72,7 @@ if(DEFINED VCPKG_TARGET_TRIPLET)
 endif()
 
 project(NeumannTrendTest 
-    VERSION 1.0.0
+    VERSION 2.3.0
     DESCRIPTION "诺依曼趋势测试工具"
     LANGUAGES CXX)
 
@@ -123,7 +123,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
         
         # MinGW特定的链接选项
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static -Wl,-Bstatic -pthread")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+        
+        # 强制静态链接所有库，包括系统库
+        set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+        set(BUILD_SHARED_LIBS OFF)
     else()
         message(STATUS "构建工具链: MSVC")
         # MSVC特定的编译选项

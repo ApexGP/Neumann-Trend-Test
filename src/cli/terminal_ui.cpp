@@ -10,6 +10,7 @@
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <thread>
 
 #include "cli/terminal_utils.h"
 #include "core/batch_processor.h"
@@ -52,21 +53,13 @@ void TerminalUI::run()
 {
     running = true;
 
-    auto &termUtils = TerminalUtils::getInstance();
+    // 首先自动启动Web服务器并打开浏览器
+    autoStartWebServerAndBrowser();
 
-    // 显示欢迎信息
-    clearScreen();
-
-    termUtils.printColor("=====================================", Color::BRIGHT_CYAN,
-                         TextStyle::BOLD);
-    std::cout << std::endl;
-    termUtils.printColor("  " + _("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << std::endl;
-    termUtils.printColor("=====================================", Color::BRIGHT_CYAN,
-                         TextStyle::BOLD);
-    std::cout << std::endl << std::endl;
-
-    // 标准值已在主程序中加载，无需重复加载
+    // 如果用户选择继续使用CLI界面，继续正常的菜单流程
+    if (!running) {
+        return;  // 用户选择退出
+    }
 
     // 主循环
     while (running) {
@@ -76,6 +69,7 @@ void TerminalUI::run()
 
     // 显示退出信息
     std::cout << std::endl;
+    auto &termUtils = TerminalUtils::getInstance();
     termUtils.printInfo(_("status.goodbye"));
 }
 
@@ -1105,7 +1099,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.2.1" << std::endl;
+    std::cout << " v2.3.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -2475,6 +2469,139 @@ void TerminalUI::showWebServerRunningInterface()
             std::cout << _("prompt.press_enter");
             std::cin.get();
         }
+    }
+}
+
+void TerminalUI::autoStartWebServerAndBrowser()
+{
+    clearScreen();
+    auto &termUtils = TerminalUtils::getInstance();
+    auto &config = Config::getInstance();
+
+    // 显示欢迎标题
+    termUtils.printColor("===== " + _("app.title") + " =====", Color::BRIGHT_CYAN, TextStyle::BOLD);
+    std::cout << std::endl;
+    termUtils.printInfo(_("app.description"));
+    std::cout << std::endl << std::endl;
+
+    // 检查是否已经有Web服务器在运行
+    if (webServer && webServer->isRunning()) {
+        termUtils.printSuccess(_("web.server_already_running"));
+        termUtils.printColor("🌐 " + _("web.access_url") + ": ", Color::BRIGHT_CYAN,
+                             TextStyle::BOLD);
+        termUtils.printColor(webServer->getUrl(), Color::BRIGHT_GREEN, TextStyle::UNDERLINE);
+        std::cout << std::endl << std::endl;
+    } else {
+        // 自动启动Web服务器
+        termUtils.printInfo(_("web.auto_starting_server"));
+
+        // 使用默认配置启动
+        int port = config.getDefaultWebPort();
+        std::string webRootDir = config.getWebRootDirectory();
+
+        // 检查Web资源目录
+        if (!fs::exists(webRootDir)) {
+            // 尝试使用当前目录的web文件夹
+            if (fs::exists("web")) {
+                webRootDir = "web";
+            } else {
+                termUtils.printWarning(_("web.webroot_not_found") + ": " + webRootDir);
+                std::cout << _("web.instruction_manual_start") << std::endl;
+                std::cout << _("prompt.press_enter");
+                std::cin.get();
+                return;
+            }
+        }
+
+        try {
+            // 创建Web服务器实例
+            webServer = std::make_unique<neumann::web::WebServer>(port, webRootDir);
+
+            // 启动服务器（后台模式）
+            webServer->start(true);
+
+            // 等待一秒让服务器完全启动
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+            termUtils.printSuccess(_("web.server_started"));
+            termUtils.printColor("🌐 " + _("web.access_url") + ": ", Color::BRIGHT_CYAN,
+                                 TextStyle::BOLD);
+            termUtils.printColor(webServer->getUrl(), Color::BRIGHT_GREEN, TextStyle::UNDERLINE);
+            std::cout << std::endl;
+        }
+        catch (const std::exception &e) {
+            termUtils.printError(_("web.server_start_failed") + ": " + e.what());
+            std::cout << _("web.instruction_manual_start") << std::endl;
+            std::cout << _("prompt.press_enter");
+            std::cin.get();
+            return;
+        }
+    }
+
+    // 自动打开浏览器
+    termUtils.printInfo(_("web.opening_browser"));
+    std::string url = webServer->getUrl();
+    std::string openCommand;
+
+#ifdef _WIN32
+    openCommand = "start \"\" \"" + url + "\"";
+#elif __APPLE__
+    openCommand = "open \"" + url + "\"";
+#else
+    openCommand = "xdg-open \"" + url + "\"";
+#endif
+
+    int result = std::system(openCommand.c_str());
+    if (result == 0) {
+        termUtils.printSuccess(_("web.browser_opened"));
+    } else {
+        termUtils.printWarning(_("web.browser_open_failed"));
+        termUtils.printInfo(_("web.manual_access_instruction"));
+    }
+
+    std::cout << std::endl;
+
+    // 提供用户选择
+    termUtils.printColor(_("web.next_action_prompt"), Color::BRIGHT_YELLOW, TextStyle::BOLD);
+    std::cout << std::endl;
+    std::cout << "1. " << _("web.option_use_web_interface") << std::endl;
+    std::cout << "2. " << _("web.option_use_cli_interface") << std::endl;
+    std::cout << "3. " << _("web.option_stop_and_exit") << std::endl;
+    std::cout << std::endl;
+    std::cout << _("prompt.select_option") << " [1-3] (" << _("menu.default") << ": 1): ";
+
+    std::string response;
+    std::getline(std::cin, response);
+
+    // 默认选择Web界面
+    if (response.empty()) {
+        response = "1";
+    }
+
+    if (response == "1") {
+        // 使用Web界面
+        showWebServerRunningInterface();
+    } else if (response == "2") {
+        // 使用CLI界面，但保持Web服务器在后台运行
+        termUtils.printInfo(_("web.using_cli_interface"));
+        termUtils.printInfo(_("web.server_continues_background"));
+        std::cout << _("prompt.press_enter");
+        std::cin.get();
+        // 返回到正常的CLI流程
+    } else if (response == "3") {
+        // 停止服务器并退出
+        if (webServer) {
+            termUtils.printInfo(_("web.stopping_server"));
+            webServer->stop();
+            webServer.reset();
+            termUtils.printSuccess(_("web.server_stopped"));
+        }
+        running = false;
+    } else {
+        // 无效选择，默认使用Web界面
+        termUtils.printWarning(_("error.invalid_choice"));
+        termUtils.printInfo(_("web.defaulting_to_web"));
+        showWebServerRunningInterface();
     }
 }
 

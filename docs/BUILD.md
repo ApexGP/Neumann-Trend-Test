@@ -11,6 +11,7 @@
 - [macOS 构建](#macos-构建)
 - [构建选项](#构建选项)
 - [故障排除](#故障排除)
+- [静态编译配置](#静态编译配置)
 
 ## 系统要求
 
@@ -214,6 +215,167 @@ cmake --build . --target install
 | `BUILD_TESTING`     | 构建测试        | ON           |
 | `ENABLE_WEB_SERVER` | 启用 Web 服务器 | ON           |
 | `STATIC_LINKING`    | 静态链接        | ON (Windows) |
+
+## 静态编译配置
+
+从 v2.3.0 开始，项目默认启用静态编译，彻底解决 Windows 运行库依赖问题。
+
+### MinGW 静态链接配置
+
+#### 自动配置（推荐）
+
+项目的 CMakeLists.txt 已自动配置 MinGW 静态链接：
+
+```cmake
+# MinGW特定的链接选项（已在项目中配置）
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static -Wl,-Bstatic -pthread")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+
+# 强制静态链接所有库
+set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+set(BUILD_SHARED_LIBS OFF)
+```
+
+#### 使用 vcpkg 静态三元组
+
+确保使用静态链接的 vcpkg 三元组：
+
+```bash
+# 安装静态库依赖
+vcpkg install nlohmann-json:x64-mingw-static ftxui:x64-mingw-static crow:x64-mingw-static
+
+# 或设置环境变量
+set VCPKG_DEFAULT_TRIPLET=x64-mingw-static
+```
+
+### 验证静态编译
+
+#### Windows 验证方法
+
+1. **使用 dumpbin 检查依赖**（需要 Visual Studio）：
+
+   ```cmd
+   dumpbin /dependents bin\neumann_cli_app.exe
+   ```
+
+2. **使用 objdump 检查**（MinGW 环境）：
+
+   ```bash
+   objdump -p bin/neumann_cli_app.exe | grep "DLL Name"
+   ```
+
+3. **期望的依赖结果**：
+
+   ```
+   正确的静态编译应只显示系统库：
+   ✅ KERNEL32.dll
+   ✅ api-ms-win-crt-*.dll
+   ✅ WS2_32.dll
+   ✅ WSOCK32.dll
+
+   不应出现这些依赖：
+   ❌ libwinpthread-1.dll
+   ❌ libgcc_s_seh-1.dll
+   ❌ libstdc++-6.dll
+   ```
+
+#### Linux 验证方法
+
+```bash
+# 检查动态库依赖
+ldd bin/neumann_cli_app
+
+# 静态编译应显示最少依赖
+```
+
+### 故障排除
+
+#### 常见静态链接问题
+
+1. **pthread 库仍为动态链接**
+
+   ```cmake
+   # 解决方案：确保使用正确的pthread链接标志
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -pthread -Wl,-Bstatic")
+   ```
+
+2. **vcpkg 三元组错误**
+
+   ```bash
+   # 检查当前三元组
+   vcpkg list
+
+   # 重新安装正确的静态三元组
+   vcpkg remove nlohmann-json ftxui crow --triplet x64-mingw-dynamic
+   vcpkg install nlohmann-json:x64-mingw-static ftxui:x64-mingw-static crow:x64-mingw-static
+   ```
+
+3. **链接顺序问题**
+   ```cmake
+   # 确保在app/CMakeLists.txt中有正确的库链接顺序
+   target_link_libraries(neumann_cli_app
+       neumann_cli
+       neumann_core
+       ${STATIC_LIBRARIES}
+       ws2_32 wsock32 winpthread  # Windows静态系统库
+   )
+   ```
+
+#### 高级静态链接技巧
+
+1. **完全静态链接**（消除所有动态依赖）：
+
+   ```cmake
+   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -Wl,--whole-archive -lpthread -Wl,--no-whole-archive")
+   ```
+
+2. **选择性静态链接**：
+
+   ```cmake
+   # 只静态链接特定库
+   target_link_libraries(target_name
+       -static-libgcc
+       -static-libstdc++
+       -Wl,-Bstatic -lpthread
+       -Wl,-Bdynamic -lkernel32
+   )
+   ```
+
+3. **检查未解决的符号**：
+
+   ```bash
+   # MinGW
+   nm -u bin/neumann_cli_app.exe | grep " U "
+
+   # 或使用objdump
+   objdump -t bin/neumann_cli_app.exe | grep "*UND*"
+   ```
+
+### 不同平台的静态编译说明
+
+#### Windows (MinGW)
+
+- 默认启用完全静态链接
+- 生成的可执行文件可在任何 Windows 机器运行
+- 无需安装 MinGW 运行时
+
+#### Windows (MSVC)
+
+- 默认使用静态运行时链接
+- 可能仍需要 Visual C++运行时
+- 建议使用 MinGW 进行真正的静态编译
+
+#### Linux
+
+- 静态链接 glibc 可能导致兼容性问题
+- 推荐只静态链接第三方库
+- 保持系统库动态链接
+
+#### macOS
+
+- 系统限制静态链接系统库
+- 只能静态链接第三方依赖
+- 使用 bundle 方式分发依赖
 
 ## 故障排除
 
