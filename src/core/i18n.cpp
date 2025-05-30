@@ -331,6 +331,9 @@ void I18n::initializeBuiltinTranslations()
 template std::string I18n::getTextf(const std::string &key, int) const;
 template std::string I18n::getTextf(const std::string &key, double) const;
 template std::string I18n::getTextf(const std::string &key, const std::string &) const;
+template std::string I18n::getTextf(const std::string &key, std::string) const;  // 添加非引用版本
 template std::string I18n::getTextf(const std::string &key, size_t) const;
+template std::string I18n::getTextf(const std::string &key, char *) const;
+template std::string I18n::getTextf(const std::string &key, const char *) const;
 
 }  // namespace neumann

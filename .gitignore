@@ -12,10 +12,12 @@ release/
 # 编辑器和IDE文件
 .vscode/
 .idea/
+.cursor/
 *.suo
 *.user
 *.sln.docstates
 compile_commands.json
+.cursorrules
 
 # 编译产物
 *.o

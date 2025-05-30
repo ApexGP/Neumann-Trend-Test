@@ -5,6 +5,8 @@
 #include <string>
 #include <thread>
 
+#include "core/config.h"
+#include "core/i18n.h"
 #include "core/standard_values.h"
 #include "web/web_server.h"
 
@@ -23,7 +25,8 @@ neumann::web::WebServer *g_server = nullptr;
 // 信号处理函数
 void signalHandler(int signal)
 {
-    std::cout << "接收到信号 " << signal << "，正在关闭服务器..." << std::endl;
+    auto &i18n = neumann::I18n::getInstance();
+    std::cout << i18n.getTextf("web.app.signal_received", std::to_string(signal)) << std::endl;
     if (g_server) {
         g_server->stop();
     }
@@ -46,6 +49,36 @@ int main(int argc, char **argv)
         fs::path exeDir = exePath.parent_path();
         fs::path releaseDir = exeDir.parent_path();  // 从bin目录上升到release目录
 
+        // 初始化配置系统和国际化系统
+        auto &config = neumann::Config::getInstance();
+        auto &i18n = neumann::I18n::getInstance();
+
+        // 设置数据和配置目录路径
+        std::string userDataDir = (releaseDir / "data").string();
+        std::string configDir = (releaseDir / "config").string();
+        std::string refDir = (releaseDir / "ref").string();
+
+        config.setDataDirectory(userDataDir);
+
+        // 尝试加载翻译文件
+        std::string systemTranslationFile = (fs::path(configDir) / "translations.json").string();
+        std::string devTranslationFile = "config/translations.json";
+
+        bool translationsLoaded = false;
+        if (fs::exists(systemTranslationFile)) {
+            if (i18n.loadTranslations(systemTranslationFile)) {
+                translationsLoaded = true;
+            }
+        } else if (fs::exists(devTranslationFile)) {
+            if (i18n.loadTranslations(devTranslationFile)) {
+                translationsLoaded = true;
+            }
+        }
+
+        // 加载配置
+        config.loadConfigurationSmart(userDataDir, configDir);
+        i18n.setLanguage(config.getLanguage());
+
         // 解析命令行参数
         int port = 8080;                                         // 默认端口
         std::string webRootDir = (releaseDir / "web").string();  // release文件结构下的Web资源目录
@@ -58,7 +91,8 @@ int main(int argc, char **argv)
                     port = std::stoi(argv[++i]);
                 }
                 catch (...) {
-                    std::cerr << "无效的端口号: " << argv[i] << std::endl;
+                    std::cerr << i18n.getText("web.app.invalid_port") << ": " << argv[i]
+                              << std::endl;
                     return 1;
                 }
             } else if ((arg == "-d" || arg == "--dir") && i + 1 < argc) {
@@ -66,34 +100,38 @@ int main(int argc, char **argv)
             } else if ((arg == "--data-dir") && i + 1 < argc) {
                 dataDir = argv[++i];
             } else if (arg == "-h" || arg == "--help") {
-                std::cout << "诺依曼趋势测试 Web服务器" << std::endl;
-                std::cout << "用法: " << argv[0] << " [选项]" << std::endl;
-                std::cout << "选项:" << std::endl;
-                std::cout << "  -p, --port PORT  设置监听端口 (默认: 8080)" << std::endl;
-                std::cout << "  -d, --dir DIR    设置Web资源目录 (默认: web)" << std::endl;
-                std::cout << "  --data-dir DIR   设置数据目录 (默认: data)" << std::endl;
-                std::cout << "  -h, --help       显示此帮助信息并退出" << std::endl;
+                std::cout << i18n.getText("web.app.title") << std::endl;
+                std::cout << i18n.getTextf("web.app.help_usage", argv[0]) << std::endl;
+                std::cout << i18n.getText("web.app.help_options") << std::endl;
+                std::cout << i18n.getText("web.app.help_port") << std::endl;
+                std::cout << i18n.getText("web.app.help_dir") << std::endl;
+                std::cout << i18n.getText("web.app.help_data_dir") << std::endl;
+                std::cout << i18n.getText("web.app.help_help") << std::endl;
                 return 0;
             }
         }
 
         // 尝试获取当前工作目录
         try {
-            std::cout << "当前工作目录: " << fs::current_path().string() << std::endl;
+            std::cout << i18n.getText("web.app.current_directory") << ": "
+                      << fs::current_path().string() << std::endl;
         }
         catch (const std::exception &e) {
-            std::cerr << "警告: 无法获取当前工作目录: " << e.what() << std::endl;
+            std::cerr << i18n.getText("web.app.directory_get_warning") << ": " << e.what()
+                      << std::endl;
         }
 
         // 确保数据目录存在
         if (!fs::exists(dataDir)) {
-            std::cout << "数据目录不存在，正在创建: " << dataDir << std::endl;
+            std::cout << i18n.getText("web.app.data_directory_missing") << ": " << dataDir
+                      << std::endl;
             try {
                 fs::create_directory(dataDir);
             }
             catch (const std::exception &e) {
-                std::cerr << "错误: 无法创建数据目录: " << e.what() << std::endl;
-                std::cerr << "可能需要管理员权限或当前用户无写入权限" << std::endl;
+                std::cerr << i18n.getText("web.app.data_directory_create_error") << ": " << e.what()
+                          << std::endl;
+                std::cerr << i18n.getText("web.app.data_directory_permission_warning") << std::endl;
                 return 1;
             }
         }
@@ -103,22 +141,25 @@ int main(int argc, char **argv)
             std::string fallbackWebDir = "web";
             if (fs::exists(fallbackWebDir)) {
                 webRootDir = fallbackWebDir;
-                std::cout << "使用开发Web资源目录: " << webRootDir << std::endl;
+                std::cout << i18n.getText("web.app.fallback_web_directory") << ": " << webRootDir
+                          << std::endl;
             } else {
-                std::cout << "Web资源目录不存在，正在创建: " << webRootDir << std::endl;
+                std::cout << i18n.getText("web.app.web_directory_missing") << ": " << webRootDir
+                          << std::endl;
                 try {
                     fs::create_directory(webRootDir);
                 }
                 catch (const std::exception &e) {
-                    std::cerr << "错误: 无法创建Web资源目录: " << e.what() << std::endl;
-                    std::cerr << "可能需要管理员权限或当前用户无写入权限" << std::endl;
+                    std::cerr << i18n.getText("web.app.web_directory_create_error") << ": "
+                              << e.what() << std::endl;
+                    std::cerr << i18n.getText("web.app.web_directory_permission_warning")
+                              << std::endl;
                     return 1;
                 }
             }
         }
 
         // 标准值文件路径（使用智能系统文件管理）
-        std::string refDir = (releaseDir / "ref").string();
         std::string userStandardValuesFile =
             (fs::path(dataDir) / "usr" / "standard_values.json").string();
         std::string systemStandardValuesFile = (fs::path(refDir) / "standard_values.json").string();
@@ -129,43 +170,47 @@ int main(int argc, char **argv)
         // 按优先级加载标准值文件
         if (fs::exists(userStandardValuesFile)) {
             if (!standardValues.loadFromFile(userStandardValuesFile)) {
-                std::cerr << "警告: 无法加载用户标准值文件，将使用内置默认值。" << std::endl;
+                std::cerr << i18n.getText("web.app.user_standard_values_load_warning") << std::endl;
             } else {
-                std::cout << "已加载用户标准值文件: " << userStandardValuesFile << std::endl;
+                std::cout << i18n.getText("web.app.user_standard_values_loaded") << ": "
+                          << userStandardValuesFile << std::endl;
             }
         } else if (fs::exists(systemStandardValuesFile)) {
             if (!standardValues.loadFromFile(systemStandardValuesFile)) {
-                std::cerr << "警告: 无法加载系统标准值文件，将使用内置默认值。" << std::endl;
+                std::cerr << i18n.getText("web.app.system_standard_values_load_warning")
+                          << std::endl;
             } else {
-                std::cout << "已加载系统标准值文件: " << systemStandardValuesFile << std::endl;
+                std::cout << i18n.getText("web.app.system_standard_values_loaded") << ": "
+                          << systemStandardValuesFile << std::endl;
             }
         } else if (fs::exists(devStandardValuesFile)) {
             if (!standardValues.loadFromFile(devStandardValuesFile)) {
-                std::cerr << "警告: 无法加载开发标准值文件，将使用内置默认值。" << std::endl;
+                std::cerr << i18n.getText("web.app.dev_standard_values_load_warning") << std::endl;
             } else {
-                std::cout << "已加载开发标准值文件: " << devStandardValuesFile << std::endl;
+                std::cout << i18n.getText("web.app.dev_standard_values_loaded") << ": "
+                          << devStandardValuesFile << std::endl;
             }
         } else {
-            std::cerr << "警告: 未找到标准值文件，将使用内置默认值。" << std::endl;
+            std::cerr << i18n.getText("web.app.standard_values_not_found") << std::endl;
         }
 
         // 设置用户标准值文件路径，确保自定义标准值保存到正确的用户目录
         standardValues.setUserFilePath(userStandardValuesFile);
 
         // 创建并启动Web服务器
-        std::cout << "初始化Web服务器..." << std::endl;
+        std::cout << i18n.getText("web.app.initializing_web_server") << std::endl;
         neumann::web::WebServer server(port, webRootDir);
         g_server = &server;
 
         std::cout << std::endl;
-        std::cout << "诺依曼趋势测试Web服务器" << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "监听端口: " << port << std::endl;
-        std::cout << "Web资源目录: " << webRootDir << std::endl;
-        std::cout << "数据目录: " << dataDir << std::endl;
-        std::cout << "Web界面访问URL: " << server.getUrl() << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "按Ctrl+C停止服务器..." << std::endl;
+        std::cout << i18n.getText("web.app.title") << std::endl;
+        std::cout << i18n.getText("web.app.server_info_header") << std::endl;
+        std::cout << i18n.getText("web.app.port") << ": " << port << std::endl;
+        std::cout << i18n.getText("web.app.web_directory") << ": " << webRootDir << std::endl;
+        std::cout << i18n.getText("web.app.data_directory") << ": " << dataDir << std::endl;
+        std::cout << i18n.getText("web.app.web_url") << ": " << server.getUrl() << std::endl;
+        std::cout << i18n.getText("web.app.server_info_footer") << std::endl;
+        std::cout << i18n.getText("web.app.press_ctrl_c_stop") << std::endl;
         std::cout << std::endl;
 
         // 启动服务器（在当前线程中）
@@ -174,7 +219,8 @@ int main(int argc, char **argv)
         return 0;
     }
     catch (const std::exception &e) {
-        std::cerr << "发生错误: " << e.what() << std::endl;
+        auto &i18n = neumann::I18n::getInstance();
+        std::cerr << i18n.getText("web.app.error_occurred") << ": " << e.what() << std::endl;
         return 1;
     }
 }

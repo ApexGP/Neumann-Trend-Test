@@ -110,6 +110,9 @@ private:
     // 启动Web服务器
     void startWebServer();
 
+    // 自动启动Web服务器并打开浏览器
+    void autoStartWebServerAndBrowser();
+
     // 显示Web服务器运行界面
     void showWebServerRunningInterface();
 

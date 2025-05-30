@@ -26,6 +26,10 @@ if(Crow_FOUND)
     target_link_libraries(neumann_web PUBLIC Crow::Crow neumann_core)
     if(WIN32)
         target_link_libraries(neumann_web PUBLIC ws2_32 wsock32)
+        # MinGW静态链接设置
+        if(MINGW OR DEFINED ENV{NEUMANN_USE_MINGW})
+            target_link_libraries(neumann_web PUBLIC winpthread)
+        endif()
     endif()
     set(CROW_FOUND TRUE)
 else()
@@ -85,6 +89,16 @@ else()
             
             # Crow是仅头文件库，只需链接核心库
             target_link_libraries(neumann_web PUBLIC neumann_core)
+            
+            # Windows下需要链接网络库
+            if(WIN32)
+                target_link_libraries(neumann_web PUBLIC ws2_32 wsock32)
+                # MinGW静态链接设置
+                if(MINGW OR DEFINED ENV{NEUMANN_USE_MINGW})
+                    target_link_libraries(neumann_web PUBLIC winpthread)
+                endif()
+            endif()
+            
             set(CROW_FOUND TRUE)
             break()
         endif()

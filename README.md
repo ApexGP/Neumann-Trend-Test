@@ -1,7 +1,7 @@
 # 诺依曼趋势测试工具 (Neumann Trend Test Tool)
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Xyf0606/Neumann-Trend-Test)
-[![Version](https://img.shields.io/badge/version-2.2.1-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
+[![Version](https://img.shields.io/badge/version-2.7.1-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
 [![Language](https://img.shields.io/badge/language-C%2B%2B-orange.svg)](https://isocpp.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -36,12 +36,43 @@
 - **可视化**：ASCII/SVG 图表，结果导出 (CSV/HTML)
 - **现代 UI**：彩色终端，状态栏，表格格式化
 
-### 🔧 v2.2.1 新特性
+### 🔧 v2.7.1 新特性
 
-- **配置管理**：用户私有配置与系统配置分离
-- **完整国际化**：所有模块消除硬编码文本
-- **精度修复**：置信度显示修复 (0.990 vs 0.9)
-- **启动优化**：翻译系统优先初始化
+- **国际化系统完善**：Web 服务器启动模块全面国际化
+
+  - ✅ 彻底消除 `web_main.cpp` 中的硬编码文本
+  - ✅ 统一 Web 和 CLI 模块的翻译机制
+  - ✅ 完善 `getTextf` 模板函数支持
+  - ✅ 新增 36 个翻译键，覆盖服务器启动全流程
+
+- **模板系统优化**：修复格式化文本处理机制
+
+  - ✅ 解决 `getTextf` 模板函数链接错误
+  - ✅ 添加 `std::string` 非引用版本模板实例化
+  - ✅ 支持类型安全的多参数格式化
+  - ✅ 避免手动字符串拼接，重用现有代码
+
+### 🔧 v2.3.0 新特性
+
+- **静态编译优化**：彻底解决动态库依赖问题
+
+  - ✅ 消除 `libwinpthread-1.dll` 依赖
+  - ✅ 完全静态链接 MinGW 运行时
+  - ✅ 可在任何 Windows 机器上运行
+  - ✅ 无需额外安装任何运行库
+
+- **国际化系统完善**：修复 Web 界面翻译显示问题
+
+  - ✅ 消除所有硬编码中英文文本
+  - ✅ 修复翻译键映射错误（如 `result.test_results`）
+  - ✅ 新增 75+ 个翻译键，覆盖所有功能模块
+  - ✅ 支持实时语言切换，优化翻译 API 性能
+
+- **用户体验优化**：智能启动流程，降低使用门槛
+  - ✅ CLI 应用自动启动 Web 服务器并打开浏览器
+  - ✅ 提供 Web/CLI 界面选择，默认推荐 Web 界面
+  - ✅ 优化用户引导流程，改进错误处理
+  - ✅ 清晰的失败反馈和解决建议
 
 ## 🚀 快速开始
 
@@ -219,15 +250,15 @@ brew install nlohmann-json             # macOS
 
 ## 📦 版本信息
 
-**当前版本**：v2.2.1  
-**发布日期**：2025-05-29
+**当前版本**：v2.7.1  
+**发布日期**：2025-05-30
 
 **主要更新**：
 
-- 🔧 智能配置管理系统
-- 🌍 完整国际化支持
-- 🐛 置信度显示精度修复
-- 🚀 程序启动优化
+- 🌍 完善国际化系统，消除 Web 服务器启动模块硬编码文本
+- ✨ 优化 getTextf 模板函数，修复链接错误和类型支持
+- 📝 新增 36 个翻译键，统一 Web 和 CLI 模块翻译机制
+- 🔧 提升代码质量，避免重复实现，重用现有格式化系统
 
 **更新历史**：[CHANGELOG.md](CHANGELOG.md)
 
