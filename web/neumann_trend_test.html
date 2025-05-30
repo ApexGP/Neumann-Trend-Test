@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>诺依曼趋势测试工具 - Web版</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
       :root {
         --primary-color: #2563eb;
@@ -21,7 +24,8 @@
         --border: #e2e8f0;
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
         --radius: 0.5rem;
         --radius-lg: 0.75rem;
       }
@@ -33,7 +37,7 @@
       }
 
       body {
-        font-family: 'Inter', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        font-family: "Inter", "Microsoft YaHei", "PingFang SC", sans-serif;
         line-height: 1.6;
         color: var(--text-primary);
         background-color: var(--background);
@@ -41,7 +45,11 @@
       }
 
       .app-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--primary-dark) 100%
+        );
         color: white;
         padding: 1rem 0;
         box-shadow: var(--shadow-lg);
@@ -192,7 +200,9 @@
         font-size: 0.9rem;
       }
 
-      .form-input, .form-select, .form-textarea {
+      .form-input,
+      .form-select,
+      .form-textarea {
         width: 100%;
         padding: 0.75rem;
         border: 1px solid var(--border);
@@ -202,7 +212,9 @@
         background: var(--surface);
       }
 
-      .form-input:focus, .form-select:focus, .form-textarea:focus {
+      .form-input:focus,
+      .form-select:focus,
+      .form-textarea:focus {
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -211,7 +223,7 @@
       .form-textarea {
         min-height: 120px;
         resize: vertical;
-        font-family: 'Courier New', monospace;
+        font-family: "Courier New", monospace;
       }
 
       .btn {
@@ -311,8 +323,12 @@
       }
 
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       .alert {
@@ -345,7 +361,7 @@
           grid-template-columns: 1fr;
           gap: 1rem;
         }
-        
+
         .sidebar {
           position: static;
         }
@@ -356,9 +372,58 @@
           flex-direction: column;
           gap: 1rem;
         }
-        
+
         .main-container {
           padding: 1rem;
+        }
+      }
+
+      /* SVG预览样式 */
+      .btn-small {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      #svg-preview-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+      }
+
+      #svg-preview-content svg {
+        max-width: 100%;
+        max-height: 80vh;
+        height: auto;
+        border-radius: 4px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      #svg-preview-container {
+        transition: all 0.3s ease;
+        max-height: 90vh;
+        overflow: hidden;
+      }
+
+      #svg-no-files {
+        transition: opacity 0.3s ease;
+      }
+
+      /* 确保SVG在小屏幕上也能正确显示 */
+      @media (max-width: 768px) {
+        #svg-preview-container {
+          min-height: 300px;
+          max-height: 70vh;
+        }
+
+        #svg-preview-content {
+          min-height: 200px;
+          padding: 0.5rem;
+        }
+
+        #svg-preview-content svg {
+          max-height: 60vh;
         }
       }
     </style>
@@ -373,7 +438,8 @@
             <span data-i18n="app.title">诺依曼趋势测试工具</span>
           </div>
           <div class="confidence-display">
-            <span data-i18n="current.confidence">置信水平</span>: <span id="current-confidence">95%</span>
+            <span data-i18n="current.confidence">置信水平</span>:
+            <span id="current-confidence">95%</span>
           </div>
         </div>
         <div class="header-controls">
@@ -404,6 +470,10 @@
               <i class="fas fa-cog"></i>
               <span data-i18n="tab.config">设置</span>
             </button>
+            <button class="nav-tab" data-tab="svg">
+              <i class="fas fa-chart-bar"></i>
+              <span data-i18n="tab.svg">图表预览</span>
+            </button>
           </div>
         </nav>
 
@@ -411,16 +481,24 @@
           <!-- 测试面板 -->
           <div class="tab-panel active" id="test-panel">
             <div class="form-group">
-              <label class="form-label" for="data-input" data-i18n="input.data">数据点</label>
-              <textarea 
-                class="form-textarea" 
-                id="data-input" 
+              <label class="form-label" for="data-input" data-i18n="input.data"
+                >数据点</label
+              >
+              <textarea
+                class="form-textarea"
+                id="data-input"
                 placeholder="每行一个数值或CSV格式 (时间,数值)&#10;例如:&#10;100&#10;110&#10;120&#10;或&#10;0,100&#10;1,110&#10;2,120"
-                data-i18n-placeholder="input.data.placeholder"></textarea>
+                data-i18n-placeholder="input.data.placeholder"
+              ></textarea>
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="confidence-select" data-i18n="input.confidence">置信水平</label>
+              <label
+                class="form-label"
+                for="confidence-select"
+                data-i18n="input.confidence"
+                >置信水平</label
+              >
               <select class="form-select" id="confidence-select">
                 <option value="0.90">90%</option>
                 <option value="0.95" selected>95%</option>
@@ -432,18 +510,21 @@
 
             <div class="form-group">
               <label class="form-label">
-                <input type="checkbox" id="use-default-time" checked>
+                <input type="checkbox" id="use-default-time" checked />
                 <span data-i18n="input.default_time">使用默认时间点</span>
               </label>
             </div>
 
-            <div class="form-group" id="time-input-group" style="display: none;">
-              <label class="form-label" for="time-input" data-i18n="input.time">时间点</label>
-              <textarea 
-                class="form-textarea" 
-                id="time-input" 
+            <div class="form-group" id="time-input-group" style="display: none">
+              <label class="form-label" for="time-input" data-i18n="input.time"
+                >时间点</label
+              >
+              <textarea
+                class="form-textarea"
+                id="time-input"
                 placeholder="每行一个时间值&#10;例如:&#10;0&#10;1&#10;2&#10;3"
-                data-i18n-placeholder="input.time.placeholder"></textarea>
+                data-i18n-placeholder="input.time.placeholder"
+              ></textarea>
             </div>
 
             <button class="btn btn-primary btn-block" id="run-test-btn">
@@ -455,8 +536,16 @@
           <!-- 数据管理面板 -->
           <div class="tab-panel" id="data-panel">
             <div class="form-group">
-              <label class="form-label" for="dataset-name" data-i18n="data.name">数据集名称</label>
-              <input type="text" class="form-input" id="dataset-name" placeholder="输入数据集名称" data-i18n-placeholder="data.name.placeholder">
+              <label class="form-label" for="dataset-name" data-i18n="data.name"
+                >数据集名称</label
+              >
+              <input
+                type="text"
+                class="form-input"
+                id="dataset-name"
+                placeholder="输入数据集名称"
+                data-i18n-placeholder="data.name.placeholder"
+              />
             </div>
 
             <button class="btn btn-success btn-block" id="save-dataset-btn">
@@ -464,32 +553,59 @@
               <span data-i18n="action.save_dataset">保存数据集</span>
             </button>
 
-            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+            <hr
+              style="
+                margin: 1.5rem 0;
+                border: none;
+                border-top: 1px solid var(--border);
+              "
+            />
 
             <div class="form-group">
-              <label class="form-label" for="saved-datasets" data-i18n="data.saved">已保存的数据集</label>
+              <label
+                class="form-label"
+                for="saved-datasets"
+                data-i18n="data.saved"
+                >已保存的数据集</label
+              >
               <select class="form-select" id="saved-datasets">
                 <option value="" data-i18n="data.select">选择数据集...</option>
               </select>
             </div>
 
-            <div style="display: flex; gap: 0.5rem;">
-              <button class="btn btn-secondary" id="load-dataset-btn" style="flex: 1;">
+            <div style="display: flex; gap: 0.5rem">
+              <button
+                class="btn btn-secondary"
+                id="load-dataset-btn"
+                style="flex: 1"
+              >
                 <i class="fas fa-folder-open"></i>
                 <span data-i18n="action.load">加载</span>
               </button>
-              <button class="btn btn-secondary" id="delete-dataset-btn" style="flex: 1;">
+              <button
+                class="btn btn-secondary"
+                id="delete-dataset-btn"
+                style="flex: 1"
+              >
                 <i class="fas fa-trash"></i>
                 <span data-i18n="action.delete">删除</span>
               </button>
             </div>
 
-            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
+            <hr
+              style="
+                margin: 1.5rem 0;
+                border: none;
+                border-top: 1px solid var(--border);
+              "
+            />
 
             <div class="form-group">
               <label class="form-label" data-i18n="data.sample">样本数据</label>
               <select class="form-select" id="sample-data">
-                <option value="" data-i18n="data.sample.select">选择样本数据...</option>
+                <option value="" data-i18n="data.sample.select">
+                  选择样本数据...
+                </option>
               </select>
             </div>
 
@@ -502,7 +618,12 @@
           <!-- 配置面板 -->
           <div class="tab-panel" id="config-panel">
             <div class="form-group">
-              <label class="form-label" for="default-confidence" data-i18n="config.default_confidence">默认置信水平</label>
+              <label
+                class="form-label"
+                for="default-confidence"
+                data-i18n="config.default_confidence"
+                >默认置信水平</label
+              >
               <select class="form-select" id="default-confidence">
                 <option value="0.90">90%</option>
                 <option value="0.95">95%</option>
@@ -514,14 +635,14 @@
 
             <div class="form-group">
               <label class="form-label">
-                <input type="checkbox" id="auto-save-results">
+                <input type="checkbox" id="auto-save-results" />
                 <span data-i18n="config.auto_save">自动保存结果</span>
               </label>
             </div>
 
             <div class="form-group">
               <label class="form-label">
-                <input type="checkbox" id="enable-color-output">
+                <input type="checkbox" id="enable-color-output" />
                 <span data-i18n="config.color_output">启用彩色输出</span>
               </label>
             </div>
@@ -531,14 +652,75 @@
               <span data-i18n="action.save_config">保存配置</span>
             </button>
 
-            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid var(--border);">
-            
+            <hr
+              style="
+                margin: 1.5rem 0;
+                border: none;
+                border-top: 1px solid var(--border);
+              "
+            />
+
             <div class="form-group">
-              <label class="form-label" data-i18n="config.standard_values">标准值文件</label>
-              <button class="btn btn-secondary btn-block" id="reload-standards-btn">
+              <label class="form-label" data-i18n="config.standard_values"
+                >标准值文件</label
+              >
+              <button
+                class="btn btn-secondary btn-block"
+                id="reload-standards-btn"
+              >
                 <i class="fas fa-sync-alt"></i>
                 <span data-i18n="action.reload_standards">重新加载标准值</span>
               </button>
+            </div>
+          </div>
+
+          <!-- SVG预览面板 -->
+          <div class="tab-panel" id="svg-panel">
+            <div class="form-group">
+              <label
+                class="form-label"
+                for="svg-files-select"
+                data-i18n="svg.files"
+                >SVG文件</label
+              >
+              <select class="form-select" id="svg-files-select">
+                <option value="" data-i18n="svg.select">选择SVG文件...</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem">
+              <button
+                class="btn btn-primary"
+                id="preview-svg-btn"
+                style="flex: 1"
+              >
+                <i class="fas fa-eye"></i>
+                <span data-i18n="svg.preview">预览</span>
+              </button>
+              <button
+                class="btn btn-secondary"
+                id="refresh-svg-btn"
+                style="flex: 1"
+              >
+                <i class="fas fa-sync-alt"></i>
+                <span data-i18n="svg.refresh">刷新列表</span>
+              </button>
+            </div>
+
+            <div
+              id="svg-no-files"
+              style="
+                text-align: center;
+                padding: 2rem;
+                color: var(--text-secondary);
+                display: none;
+              "
+            >
+              <i
+                class="fas fa-chart-bar"
+                style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5"
+              ></i>
+              <p data-i18n="svg.no_files">未找到SVG文件</p>
             </div>
           </div>
         </div>
@@ -548,23 +730,110 @@
         <div class="loading-overlay" id="loading-overlay">
           <div>
             <div class="loading-spinner"></div>
-            <p style="margin-top: 1rem; color: var(--text-secondary);" data-i18n="status.loading">正在计算...</p>
+            <p
+              style="margin-top: 1rem; color: var(--text-secondary)"
+              data-i18n="status.loading"
+            >
+              正在计算...
+            </p>
           </div>
         </div>
 
         <div class="content-header">
           <h1 class="content-title" data-i18n="result.title">测试结果</h1>
-          <p class="content-description" data-i18n="result.description">诺依曼趋势测试分析结果将在这里显示</p>
+          <p class="content-description" data-i18n="result.description">
+            诺依曼趋势测试分析结果将在这里显示
+          </p>
         </div>
 
         <div class="content-body" id="main-content">
-          <div id="welcome-message" class="text-center" style="padding: 3rem; color: var(--text-secondary);">
-            <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 1rem; color: var(--primary-color);"></i>
+          <div
+            id="welcome-message"
+            class="text-center"
+            style="padding: 3rem; color: var(--text-secondary)"
+          >
+            <i
+              class="fas fa-chart-line"
+              style="
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                color: var(--primary-color);
+              "
+            ></i>
             <h2 data-i18n="welcome.title">欢迎使用诺依曼趋势测试工具</h2>
-            <p data-i18n="welcome.description">请在左侧输入数据并运行测试以查看分析结果</p>
+            <p data-i18n="welcome.description">
+              请在左侧输入数据并运行测试以查看分析结果
+            </p>
           </div>
 
-          <div id="results-container" style="display: none;">
+          <!-- SVG预览容器 -->
+          <div
+            id="svg-preview-container"
+            style="display: none; margin-bottom: 2rem"
+          >
+            <div
+              style="
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+              "
+            >
+              <div
+                id="svg-preview-header"
+                style="
+                  padding: 1.5rem;
+                  border-bottom: 1px solid var(--border);
+                  background: var(--surface-2);
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                "
+              >
+                <h2
+                  style="
+                    margin: 0;
+                    color: var(--text-primary);
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                  "
+                  data-i18n="svg.preview_title"
+                >
+                  SVG图表预览
+                </h2>
+                <div style="display: flex; gap: 0.5rem">
+                  <button
+                    class="btn btn-secondary btn-small"
+                    id="download-svg-btn"
+                  >
+                    <i class="fas fa-download"></i>
+                    <span data-i18n="svg.download">下载</span>
+                  </button>
+                  <button
+                    class="btn btn-secondary btn-small"
+                    id="close-svg-preview-btn"
+                  >
+                    <i class="fas fa-times"></i>
+                    <span data-i18n="svg.close">关闭</span>
+                  </button>
+                </div>
+              </div>
+              <div
+                id="svg-preview-content"
+                style="
+                  padding: 2rem;
+                  text-align: center;
+                  min-height: 400px;
+                  overflow: auto;
+                  background: #f8f9fa;
+                "
+              >
+                <!-- SVG内容将在这里显示 -->
+              </div>
+            </div>
+          </div>
+
+          <div id="results-container" style="display: none">
             <!-- 结果将在这里动态生成 -->
           </div>
 
@@ -580,7 +849,7 @@
       // 应用程序主要逻辑
       class NeumannTrendTestApp {
         constructor() {
-          this.currentLanguage = 'zh';
+          this.currentLanguage = "zh";
           this.config = {};
           this.translations = {};
           this.init();
@@ -590,95 +859,150 @@
           this.setupEventListeners();
           this.initTabNavigation();
           await this.loadConfig();
+          this.setupLanguage();
           await this.initializeConfidenceOptions();
           await this.loadDatasets();
           await this.loadSampleDataList();
-          this.setupLanguage();
+          await this.loadSVGFiles();
         }
 
         setupEventListeners() {
           // 语言切换
-          document.getElementById('language-toggle').addEventListener('click', () => {
-            this.toggleLanguage();
-          });
+          document
+            .getElementById("language-toggle")
+            .addEventListener("click", () => {
+              this.toggleLanguage();
+            });
 
           // 测试运行
-          document.getElementById('run-test-btn').addEventListener('click', () => {
-            this.runTest();
-          });
+          document
+            .getElementById("run-test-btn")
+            .addEventListener("click", () => {
+              this.runTest();
+            });
 
           // 数据集管理
-          document.getElementById('save-dataset-btn').addEventListener('click', () => {
-            this.saveDataset();
-          });
+          document
+            .getElementById("save-dataset-btn")
+            .addEventListener("click", () => {
+              this.saveDataset();
+            });
 
-          document.getElementById('load-dataset-btn').addEventListener('click', () => {
-            this.loadDataset();
-          });
+          document
+            .getElementById("load-dataset-btn")
+            .addEventListener("click", () => {
+              this.loadDataset();
+            });
 
-          document.getElementById('delete-dataset-btn').addEventListener('click', () => {
-            this.deleteDataset();
-          });
+          document
+            .getElementById("delete-dataset-btn")
+            .addEventListener("click", () => {
+              this.deleteDataset();
+            });
 
-          document.getElementById('load-sample-btn').addEventListener('click', () => {
-            this.loadSampleData();
-          });
+          document
+            .getElementById("load-sample-btn")
+            .addEventListener("click", () => {
+              this.loadSampleData();
+            });
 
           // 配置管理
-          document.getElementById('save-config-btn').addEventListener('click', () => {
-            this.saveConfig();
-          });
+          document
+            .getElementById("save-config-btn")
+            .addEventListener("click", () => {
+              this.saveConfig();
+            });
 
-          document.getElementById('reload-standards-btn').addEventListener('click', () => {
-            this.reloadStandardValues();
-          });
+          document
+            .getElementById("reload-standards-btn")
+            .addEventListener("click", () => {
+              this.reloadStandardValues();
+            });
 
           // 置信水平变化
-          document.getElementById('confidence-select').addEventListener('change', (e) => {
-            this.updateConfidenceDisplay(e.target.value);
-          });
+          document
+            .getElementById("confidence-select")
+            .addEventListener("change", (e) => {
+              this.updateConfidenceDisplay(e.target.value);
+            });
 
           // 时间点输入切换
-          document.getElementById('use-default-time').addEventListener('change', (e) => {
-            document.getElementById('time-input-group').style.display = 
-              e.target.checked ? 'none' : 'block';
-          });
+          document
+            .getElementById("use-default-time")
+            .addEventListener("change", (e) => {
+              document.getElementById("time-input-group").style.display = e
+                .target.checked
+                ? "none"
+                : "block";
+            });
+
+          // SVG预览管理
+          document
+            .getElementById("preview-svg-btn")
+            .addEventListener("click", () => {
+              this.previewSVG();
+            });
+
+          document
+            .getElementById("refresh-svg-btn")
+            .addEventListener("click", () => {
+              this.loadSVGFiles();
+            });
+
+          document
+            .getElementById("download-svg-btn")
+            .addEventListener("click", () => {
+              this.downloadSVG();
+            });
+
+          document
+            .getElementById("close-svg-preview-btn")
+            .addEventListener("click", () => {
+              this.closeSVGPreview();
+            });
         }
 
         initTabNavigation() {
-          const tabs = document.querySelectorAll('.nav-tab');
-          const panels = document.querySelectorAll('.tab-panel');
+          const tabs = document.querySelectorAll(".nav-tab");
+          const panels = document.querySelectorAll(".tab-panel");
 
-          tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
+          tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
               const targetTab = tab.dataset.tab;
-              
+
               // 更新活动标签
-              tabs.forEach(t => t.classList.remove('active'));
-              tab.classList.add('active');
+              tabs.forEach((t) => t.classList.remove("active"));
+              tab.classList.add("active");
 
               // 更新活动面板
-              panels.forEach(panel => {
-                panel.classList.remove('active');
+              panels.forEach((panel) => {
+                panel.classList.remove("active");
                 if (panel.id === `${targetTab}-panel`) {
-                  panel.classList.add('active');
+                  panel.classList.add("active");
                 }
               });
+
+              // 如果切换到SVG面板，重新应用翻译
+              if (targetTab === "svg" && this.translations) {
+                setTimeout(() => {
+                  this.applyTranslations(this.translations);
+                }, 100); // 短暂延迟确保DOM更新完成
+              }
             });
           });
         }
 
         async loadConfig() {
           try {
-            const response = await fetch('/api/config');
+            const response = await fetch("/api/config");
             const data = await response.json();
-            
+
             if (data.success) {
               this.config = data.config;
               this.updateUIFromConfig();
             }
           } catch (error) {
-            console.error('加载配置失败:', error);
+            console.error("加载配置失败:", error);
           }
         }
 
@@ -688,134 +1012,149 @@
             this.updateLanguageDisplay();
             this.loadTranslations();
           }
-          
+
           if (this.config.defaultConfidenceLevel) {
-            document.getElementById('confidence-select').value = this.config.defaultConfidenceLevel;
-            document.getElementById('default-confidence').value = this.config.defaultConfidenceLevel;
+            document.getElementById("confidence-select").value =
+              this.config.defaultConfidenceLevel;
+            document.getElementById("default-confidence").value =
+              this.config.defaultConfidenceLevel;
             this.updateConfidenceDisplay(this.config.defaultConfidenceLevel);
           }
 
           if (this.config.autoSaveResults !== undefined) {
-            document.getElementById('auto-save-results').checked = this.config.autoSaveResults;
+            document.getElementById("auto-save-results").checked =
+              this.config.autoSaveResults;
           }
 
           if (this.config.enableColorOutput !== undefined) {
-            document.getElementById('enable-color-output').checked = this.config.enableColorOutput;
+            document.getElementById("enable-color-output").checked =
+              this.config.enableColorOutput;
           }
         }
 
         updateConfidenceDisplay(value) {
           const percentage = (parseFloat(value) * 100).toFixed(1);
-          document.getElementById('current-confidence').textContent = `${percentage}%`;
+          document.getElementById(
+            "current-confidence"
+          ).textContent = `${percentage}%`;
         }
 
         async loadDatasets() {
           try {
-            const response = await fetch('/api/datasets');
+            const response = await fetch("/api/datasets");
             const data = await response.json();
-            
+
             if (data.success) {
-              const select = document.getElementById('saved-datasets');
-              select.innerHTML = '<option value="" data-i18n="data.select">选择数据集...</option>';
-              
-              data.datasets.forEach(name => {
-                const option = document.createElement('option');
+              const select = document.getElementById("saved-datasets");
+              select.innerHTML =
+                '<option value="" data-i18n="data.select">选择数据集...</option>';
+
+              data.datasets.forEach((name) => {
+                const option = document.createElement("option");
                 option.value = name;
                 option.textContent = name;
                 select.appendChild(option);
               });
             }
           } catch (error) {
-            this.showAlert('error', '加载数据集列表失败: ' + error.message);
+            this.showAlert("error", "加载数据集列表失败: " + error.message);
           }
         }
 
         async loadSampleDataList() {
           try {
-            const response = await fetch('/api/sample_data');
+            const response = await fetch("/api/sample_data");
             const data = await response.json();
-            
+
             if (data.success) {
-              const select = document.getElementById('sample-data');
-              select.innerHTML = '<option value="" data-i18n="data.sample.select">选择样本数据...</option>';
-              
-              data.files.forEach(filename => {
-                const option = document.createElement('option');
+              const select = document.getElementById("sample-data");
+              select.innerHTML =
+                '<option value="" data-i18n="data.sample.select">选择样本数据...</option>';
+
+              data.files.forEach((filename) => {
+                const option = document.createElement("option");
                 option.value = filename;
                 option.textContent = filename;
                 select.appendChild(option);
               });
             }
           } catch (error) {
-            console.error('加载样本数据列表失败:', error);
+            console.error("加载样本数据列表失败:", error);
           }
         }
 
         async loadSampleData() {
-          const selectedSample = document.getElementById('sample-data').value;
+          const selectedSample = document.getElementById("sample-data").value;
 
           if (!selectedSample) {
-            this.showAlert('error', '请选择要加载的样本数据');
+            this.showAlert("error", "请选择要加载的样本数据");
             return;
           }
 
           try {
-            const response = await fetch('/api/sample_data/load', {
-              method: 'POST',
+            const response = await fetch("/api/sample_data/load", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                filename: selectedSample
-              })
+                filename: selectedSample,
+              }),
             });
 
             const result = await response.json();
 
             if (result.success) {
               // 填充数据到输入框
-              const dataText = result.data.map((value, index) => 
-                `${result.time[index]},${value}`
-              ).join('\n');
-              
-              document.getElementById('data-input').value = dataText;
-              document.getElementById('use-default-time').checked = false;
-              document.getElementById('time-input-group').style.display = 'none';
-              
-              this.showAlert('success', `样本数据 "${selectedSample}" 加载成功`);
-              
+              const dataText = result.data
+                .map((value, index) => `${result.time[index]},${value}`)
+                .join("\n");
+
+              document.getElementById("data-input").value = dataText;
+              document.getElementById("use-default-time").checked = false;
+              document.getElementById("time-input-group").style.display =
+                "none";
+
+              this.showAlert(
+                "success",
+                `样本数据 "${selectedSample}" 加载成功`
+              );
+
               // 切换到测试面板
               document.querySelector('[data-tab="test"]').click();
             } else {
-              this.showAlert('error', result.error || '加载失败');
+              this.showAlert("error", result.error || "加载失败");
             }
           } catch (error) {
-            this.showAlert('error', '网络错误: ' + error.message);
+            this.showAlert("error", "网络错误: " + error.message);
           }
         }
 
         async toggleLanguage() {
-          this.currentLanguage = this.currentLanguage === 'zh' ? 'en' : 'zh';
+          this.currentLanguage = this.currentLanguage === "zh" ? "en" : "zh";
           this.updateLanguageDisplay();
           await this.loadTranslations();
-          
+
           // 保存语言设置到后端
           try {
-            const response = await fetch(`/api/language/${this.currentLanguage}`, {
-              method: 'POST'
-            });
+            const response = await fetch(
+              `/api/language/${this.currentLanguage}`,
+              {
+                method: "POST",
+              }
+            );
             const data = await response.json();
             if (data.success) {
-              console.log('语言设置已保存');
+              console.log("语言设置已保存");
             }
           } catch (error) {
-            console.error('保存语言设置失败:', error);
+            console.error("保存语言设置失败:", error);
           }
         }
 
         updateLanguageDisplay() {
-          const langBtn = document.getElementById('language-toggle');
-          if (this.currentLanguage === 'zh') {
+          const langBtn = document.getElementById("language-toggle");
+          if (this.currentLanguage === "zh") {
             langBtn.innerHTML = '<i class="fas fa-globe"></i> 中文';
           } else {
             langBtn.innerHTML = '<i class="fas fa-globe"></i> English';
@@ -824,26 +1163,28 @@
 
         async loadTranslations() {
           try {
-            const response = await fetch(`/api/translations/${this.currentLanguage}`);
+            const response = await fetch(
+              `/api/translations/${this.currentLanguage}`
+            );
             const data = await response.json();
-            
+
             if (data.success && data.translations) {
               this.translations = data.translations;
               this.applyTranslations(data.translations);
             } else {
-              console.error('加载翻译失败:', data.error);
+              console.error("加载翻译失败:", data.error);
             }
           } catch (error) {
-            console.error('加载翻译失败:', error);
+            console.error("加载翻译失败:", error);
           }
         }
 
         applyTranslations(translations) {
           // 处理 data-i18n 属性的元素
-          document.querySelectorAll('[data-i18n]').forEach(element => {
-            const key = element.getAttribute('data-i18n');
+          document.querySelectorAll("[data-i18n]").forEach((element) => {
+            const key = element.getAttribute("data-i18n");
             if (translations[key]) {
-              if (element.tagName === 'INPUT' && element.type === 'submit') {
+              if (element.tagName === "INPUT" && element.type === "submit") {
                 element.value = translations[key];
               } else {
                 element.textContent = translations[key];
@@ -852,16 +1193,18 @@
           });
 
           // 处理 data-i18n-placeholder 属性的元素
-          document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-            const key = element.getAttribute('data-i18n-placeholder');
-            if (translations[key]) {
-              element.placeholder = translations[key];
-            }
-          });
+          document
+            .querySelectorAll("[data-i18n-placeholder]")
+            .forEach((element) => {
+              const key = element.getAttribute("data-i18n-placeholder");
+              if (translations[key]) {
+                element.placeholder = translations[key];
+              }
+            });
 
           // 处理 data-i18n-title 属性的元素
-          document.querySelectorAll('[data-i18n-title]').forEach(element => {
-            const key = element.getAttribute('data-i18n-title');
+          document.querySelectorAll("[data-i18n-title]").forEach((element) => {
+            const key = element.getAttribute("data-i18n-title");
             if (translations[key]) {
               element.title = translations[key];
             }
@@ -874,24 +1217,30 @@
         }
 
         showLoading() {
-          document.getElementById('loading-overlay').style.display = 'flex';
+          document.getElementById("loading-overlay").style.display = "flex";
         }
 
         hideLoading() {
-          document.getElementById('loading-overlay').style.display = 'none';
+          document.getElementById("loading-overlay").style.display = "none";
         }
 
         showAlert(type, message) {
-          const container = document.getElementById('alerts-container');
-          const alert = document.createElement('div');
+          const container = document.getElementById("alerts-container");
+          const alert = document.createElement("div");
           alert.className = `alert alert-${type}`;
           alert.innerHTML = `
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i>
+            <i class="fas ${
+              type === "success"
+                ? "fa-check-circle"
+                : type === "error"
+                ? "fa-exclamation-circle"
+                : "fa-exclamation-triangle"
+            }"></i>
             ${message}
           `;
-          
+
           container.appendChild(alert);
-          
+
           // 自动移除警告
           setTimeout(() => {
             if (alert.parentNode) {
@@ -901,15 +1250,18 @@
         }
 
         parseInputData(input) {
-          const lines = input.trim().split('\n').filter(line => line.trim());
+          const lines = input
+            .trim()
+            .split("\n")
+            .filter((line) => line.trim());
           const data = [];
           const time = [];
-          
-          lines.forEach(line => {
+
+          lines.forEach((line) => {
             line = line.trim();
-            if (line.includes(',')) {
+            if (line.includes(",")) {
               // CSV格式
-              const parts = line.split(',');
+              const parts = line.split(",");
               if (parts.length >= 2) {
                 time.push(parseFloat(parts[0]));
                 data.push(parseFloat(parts[1]));
@@ -922,18 +1274,24 @@
               }
             }
           });
-          
+
           return { data, time };
         }
 
         async runTest() {
-          const dataInput = document.getElementById('data-input').value;
-          const confidenceLevel = parseFloat(document.getElementById('confidence-select').value);
-          const useDefaultTime = document.getElementById('use-default-time').checked;
-          const timeInput = document.getElementById('time-input').value;
+          const dataInput = document.getElementById("data-input").value;
+          const confidenceLevel = parseFloat(
+            document.getElementById("confidence-select").value
+          );
+          const useDefaultTime =
+            document.getElementById("use-default-time").checked;
+          const timeInput = document.getElementById("time-input").value;
 
           if (!dataInput.trim()) {
-            this.showAlert('error', this.getTranslation('error.no_data', '请输入数据点'));
+            this.showAlert(
+              "error",
+              this.getTranslation("error.no_data", "请输入数据点")
+            );
             return;
           }
 
@@ -941,16 +1299,28 @@
           let { data, time } = parsed;
 
           if (data.length < 4) {
-            this.showAlert('error', this.getTranslation('error.min_points', '至少需要4个数据点才能进行诺依曼趋势测试'));
+            this.showAlert(
+              "error",
+              this.getTranslation(
+                "error.min_points",
+                "至少需要4个数据点才能进行诺依曼趋势测试"
+              )
+            );
             return;
           }
 
           if (!useDefaultTime) {
             const timeParsed = this.parseInputData(timeInput);
             time = timeParsed.data;
-            
+
             if (time.length !== data.length) {
-              this.showAlert('error', this.getTranslation('error.time_mismatch', '时间点数量必须与数据点数量一致'));
+              this.showAlert(
+                "error",
+                this.getTranslation(
+                  "error.time_mismatch",
+                  "时间点数量必须与数据点数量一致"
+                )
+              );
               return;
             }
           } else {
@@ -960,105 +1330,191 @@
           this.showLoading();
 
           try {
-            const response = await fetch('/api/neumann_test', {
-              method: 'POST',
+            const response = await fetch("/api/neumann_test", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 data: data,
                 time: time,
-                confidenceLevel: confidenceLevel
-              })
+                confidenceLevel: confidenceLevel,
+              }),
             });
 
             const result = await response.json();
 
             if (result.success) {
               this.displayResults(result);
-              document.getElementById('welcome-message').style.display = 'none';
-              document.getElementById('results-container').style.display = 'block';
+              document.getElementById("welcome-message").style.display = "none";
+              document.getElementById("results-container").style.display =
+                "block";
             } else {
-              this.showAlert('error', result.error || this.getTranslation('error.test_failed', '测试失败'));
+              this.showAlert(
+                "error",
+                result.error ||
+                  this.getTranslation("error.test_failed", "测试失败")
+              );
             }
           } catch (error) {
-            this.showAlert('error', this.getTranslation('error.network', '网络错误') + ': ' + error.message);
+            this.showAlert(
+              "error",
+              this.getTranslation("error.network", "网络错误") +
+                ": " +
+                error.message
+            );
           } finally {
             this.hideLoading();
           }
         }
 
         getTranslation(key, fallback) {
-          return this.translations && this.translations[key] ? this.translations[key] : fallback;
+          return this.translations && this.translations[key]
+            ? this.translations[key]
+            : fallback;
         }
 
         displayResults(result) {
-          const container = document.getElementById('results-container');
-          
+          const container = document.getElementById("results-container");
+
           const hasOverallTrend = result.overallTrend;
-          const statusClass = hasOverallTrend ? 'error' : 'success';
-          const statusIcon = hasOverallTrend ? 'fa-trending-up' : 'fa-check-circle';
-          const statusText = hasOverallTrend ? this.getTranslation('result.trend_detected', '检测到趋势') : this.getTranslation('result.no_trend', '无明显趋势');
+          const statusClass = hasOverallTrend ? "error" : "success";
+          const statusIcon = hasOverallTrend
+            ? "fa-trending-up"
+            : "fa-check-circle";
+          const statusText = hasOverallTrend
+            ? this.getTranslation("result.trend_detected", "检测到趋势")
+            : this.getTranslation("result.no_trend", "无明显趋势");
 
           container.innerHTML = `
             <div class="alert alert-${statusClass}">
               <i class="fas ${statusIcon}"></i>
-              <strong>${this.getTranslation('result.conclusion', '测试结论：')}</strong>${statusText}
+              <strong>${this.getTranslation(
+                "result.conclusion",
+                "测试结论："
+              )}</strong>${statusText}
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
               <div style="background: var(--surface-2); padding: 1rem; border-radius: var(--radius); text-align: center;">
-                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);">${result.results.length}</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation('result.test_points', '测试点数')}</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);">${
+                  result.results.length
+                }</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation(
+                  "result.test_points",
+                  "测试点数"
+                )}</div>
               </div>
               <div style="background: var(--surface-2); padding: 1rem; border-radius: var(--radius); text-align: center;">
-                <div style="font-size: 1.5rem; font-weight: 600; color: var(--success-color);">${result.minPG.toFixed(4)}</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation('result.min_pg', '最小PG值')}</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--success-color);">${result.minPG.toFixed(
+                  4
+                )}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation(
+                  "result.min_pg",
+                  "最小PG值"
+                )}</div>
               </div>
               <div style="background: var(--surface-2); padding: 1rem; border-radius: var(--radius); text-align: center;">
-                <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning-color);">${result.maxPG.toFixed(4)}</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation('result.max_pg', '最大PG值')}</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning-color);">${result.maxPG.toFixed(
+                  4
+                )}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation(
+                  "result.max_pg",
+                  "最大PG值"
+                )}</div>
               </div>
               <div style="background: var(--surface-2); padding: 1rem; border-radius: var(--radius); text-align: center;">
-                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);">${result.avgPG.toFixed(4)}</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation('result.avg_pg', '平均PG值')}</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-color);">${result.avgPG.toFixed(
+                  4
+                )}</div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">${this.getTranslation(
+                  "result.avg_pg",
+                  "平均PG值"
+                )}</div>
               </div>
             </div>
 
             <div id="chart-container" style="margin-bottom: 2rem;">
-              <h3 style="margin-bottom: 1rem;">${this.getTranslation('result.chart_title', 'PG值趋势图')}</h3>
+              <h3 style="margin-bottom: 1rem;">${this.getTranslation(
+                "result.chart_title",
+                "PG值趋势图"
+              )}</h3>
               <div id="trend-chart"></div>
             </div>
 
             <div>
-              <h3 style="margin-bottom: 1rem;">${this.getTranslation('result.details_title', '详细结果')}</h3>
+              <h3 style="margin-bottom: 1rem;">${this.getTranslation(
+                "result.details_title",
+                "详细结果"
+              )}</h3>
               <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden;">
                   <thead>
                     <tr style="background: var(--primary-color); color: white;">
-                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation('table.data_point', '数据点')}</th>
-                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation('table.time_point', '时间点')}</th>
-                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation('table.pg_value', 'PG值')}</th>
-                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation('table.threshold', 'W(P)阈值')}</th>
-                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation('table.trend_judgment', '趋势判断')}</th>
+                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation(
+                        "table.data_point",
+                        "数据点"
+                      )}</th>
+                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation(
+                        "table.time_point",
+                        "时间点"
+                      )}</th>
+                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation(
+                        "table.pg_value",
+                        "PG值"
+                      )}</th>
+                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation(
+                        "table.threshold",
+                        "W(P)阈值"
+                      )}</th>
+                      <th style="padding: 0.75rem; text-align: left;">${this.getTranslation(
+                        "table.trend_judgment",
+                        "趋势判断"
+                      )}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${result.results.map(r => `
+                    ${result.results
+                      .map(
+                        (r) => `
                       <tr style="border-bottom: 1px solid var(--border);">
-                        <td style="padding: 0.75rem;">${r.dataPoint.toFixed(2)}</td>
-                        <td style="padding: 0.75rem;">${r.timePoint.toFixed(2)}</td>
-                        <td style="padding: 0.75rem; font-family: monospace;">${r.pgValue.toFixed(4)}</td>
-                        <td style="padding: 0.75rem; font-family: monospace;">${r.wpThreshold.toFixed(4)}</td>
+                        <td style="padding: 0.75rem;">${r.dataPoint.toFixed(
+                          2
+                        )}</td>
+                        <td style="padding: 0.75rem;">${r.timePoint.toFixed(
+                          2
+                        )}</td>
+                        <td style="padding: 0.75rem; font-family: monospace;">${r.pgValue.toFixed(
+                          4
+                        )}</td>
+                        <td style="padding: 0.75rem; font-family: monospace;">${r.wpThreshold.toFixed(
+                          4
+                        )}</td>
                         <td style="padding: 0.75rem;">
                           <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; 
-                            background: ${r.hasTrend ? 'var(--error-color)' : 'var(--success-color)'}; 
+                            background: ${
+                              r.hasTrend
+                                ? "var(--error-color)"
+                                : "var(--success-color)"
+                            }; 
                             color: white;">
-                            ${r.hasTrend ? this.getTranslation('table.has_trend', '有趋势') : this.getTranslation('table.no_trend', '无趋势')}
+                            ${
+                              r.hasTrend
+                                ? this.getTranslation(
+                                    "table.has_trend",
+                                    "有趋势"
+                                  )
+                                : this.getTranslation(
+                                    "table.no_trend",
+                                    "无趋势"
+                                  )
+                            }
                           </span>
                         </td>
                       </tr>
-                    `).join('')}
+                    `
+                      )
+                      .join("")}
                   </tbody>
                 </table>
               </div>
@@ -1070,121 +1526,140 @@
         }
 
         drawChart(result) {
-          const container = d3.select('#trend-chart');
-          container.selectAll('*').remove();
+          const container = d3.select("#trend-chart");
+          container.selectAll("*").remove();
 
           const margin = { top: 20, right: 30, bottom: 40, left: 50 };
           const width = 600 - margin.left - margin.right;
           const height = 300 - margin.top - margin.bottom;
 
-          const svg = container.append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom);
+          const svg = container
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
 
-          const g = svg.append('g')
-            .attr('transform', `translate(${margin.left},${margin.top})`);
+          const g = svg
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
 
-          const xScale = d3.scaleLinear()
-            .domain(d3.extent(result.results, d => d.timePoint))
+          const xScale = d3
+            .scaleLinear()
+            .domain(d3.extent(result.results, (d) => d.timePoint))
             .range([0, width]);
 
-          const yScale = d3.scaleLinear()
-            .domain(d3.extent([...result.results.map(d => d.pgValue), ...result.results.map(d => d.wpThreshold)]))
+          const yScale = d3
+            .scaleLinear()
+            .domain(
+              d3.extent([
+                ...result.results.map((d) => d.pgValue),
+                ...result.results.map((d) => d.wpThreshold),
+              ])
+            )
             .range([height, 0]);
 
           // 添加坐标轴
-          g.append('g')
-            .attr('transform', `translate(0,${height})`)
+          g.append("g")
+            .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(xScale));
 
-          g.append('g')
-            .call(d3.axisLeft(yScale));
+          g.append("g").call(d3.axisLeft(yScale));
 
           // PG值线
-          const pgLine = d3.line()
-            .x(d => xScale(d.timePoint))
-            .y(d => yScale(d.pgValue));
+          const pgLine = d3
+            .line()
+            .x((d) => xScale(d.timePoint))
+            .y((d) => yScale(d.pgValue));
 
-          g.append('path')
+          g.append("path")
             .datum(result.results)
-            .attr('fill', 'none')
-            .attr('stroke', 'var(--primary-color)')
-            .attr('stroke-width', 2)
-            .attr('d', pgLine);
+            .attr("fill", "none")
+            .attr("stroke", "var(--primary-color)")
+            .attr("stroke-width", 2)
+            .attr("d", pgLine);
 
           // 阈值线
-          const thresholdLine = d3.line()
-            .x(d => xScale(d.timePoint))
-            .y(d => yScale(d.wpThreshold));
+          const thresholdLine = d3
+            .line()
+            .x((d) => xScale(d.timePoint))
+            .y((d) => yScale(d.wpThreshold));
 
-          g.append('path')
+          g.append("path")
             .datum(result.results)
-            .attr('fill', 'none')
-            .attr('stroke', 'var(--error-color)')
-            .attr('stroke-width', 2)
-            .attr('stroke-dasharray', '5,5')
-            .attr('d', thresholdLine);
+            .attr("fill", "none")
+            .attr("stroke", "var(--error-color)")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,5")
+            .attr("d", thresholdLine);
 
           // 数据点
-          g.selectAll('.pg-point')
+          g.selectAll(".pg-point")
             .data(result.results)
-            .enter().append('circle')
-            .attr('class', 'pg-point')
-            .attr('cx', d => xScale(d.timePoint))
-            .attr('cy', d => yScale(d.pgValue))
-            .attr('r', 4)
-            .attr('fill', d => d.hasTrend ? 'var(--error-color)' : 'var(--success-color)');
+            .enter()
+            .append("circle")
+            .attr("class", "pg-point")
+            .attr("cx", (d) => xScale(d.timePoint))
+            .attr("cy", (d) => yScale(d.pgValue))
+            .attr("r", 4)
+            .attr("fill", (d) =>
+              d.hasTrend ? "var(--error-color)" : "var(--success-color)"
+            );
 
           // 图例
-          const legend = g.append('g')
-            .attr('transform', `translate(${width - 120}, 20)`);
+          const legend = g
+            .append("g")
+            .attr("transform", `translate(${width - 120}, 20)`);
 
-          legend.append('line')
-            .attr('x1', 0)
-            .attr('x2', 20)
-            .attr('y1', 0)
-            .attr('y2', 0)
-            .attr('stroke', 'var(--primary-color)')
-            .attr('stroke-width', 2);
+          legend
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", 20)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", "var(--primary-color)")
+            .attr("stroke-width", 2);
 
-          legend.append('text')
-            .attr('x', 25)
-            .attr('y', 5)
-            .text(this.getTranslation('chart.pg_value', 'PG值'))
-            .style('font-size', '12px');
+          legend
+            .append("text")
+            .attr("x", 25)
+            .attr("y", 5)
+            .text(this.getTranslation("chart.pg_value", "PG值"))
+            .style("font-size", "12px");
 
-          legend.append('line')
-            .attr('x1', 0)
-            .attr('x2', 20)
-            .attr('y1', 20)
-            .attr('y2', 20)
-            .attr('stroke', 'var(--error-color)')
-            .attr('stroke-width', 2)
-            .attr('stroke-dasharray', '5,5');
+          legend
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", 20)
+            .attr("y1", 20)
+            .attr("y2", 20)
+            .attr("stroke", "var(--error-color)")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "5,5");
 
-          legend.append('text')
-            .attr('x', 25)
-            .attr('y', 25)
-            .text(this.getTranslation('chart.threshold', '阈值'))
-            .style('font-size', '12px');
+          legend
+            .append("text")
+            .attr("x", 25)
+            .attr("y", 25)
+            .text(this.getTranslation("chart.threshold", "阈值"))
+            .style("font-size", "12px");
         }
 
         async saveDataset() {
-          const name = document.getElementById('dataset-name').value.trim();
-          const dataInput = document.getElementById('data-input').value;
+          const name = document.getElementById("dataset-name").value.trim();
+          const dataInput = document.getElementById("data-input").value;
 
           if (!name) {
-            this.showAlert('error', '请输入数据集名称');
+            this.showAlert("error", "请输入数据集名称");
             return;
           }
 
           if (!dataInput.trim()) {
-            this.showAlert('error', '请输入数据');
+            this.showAlert("error", "请输入数据");
             return;
           }
 
           const parsed = this.parseInputData(dataInput);
-          const useDefaultTime = document.getElementById('use-default-time').checked;
+          const useDefaultTime =
+            document.getElementById("use-default-time").checked;
           let time = parsed.time;
 
           if (useDefaultTime || time.length === 0) {
@@ -1192,203 +1667,415 @@
           }
 
           try {
-            const response = await fetch('/api/dataset', {
-              method: 'POST',
+            const response = await fetch("/api/dataset", {
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
               },
               body: JSON.stringify({
                 name: name,
                 description: `Web界面创建的数据集`,
-                source: 'Web界面',
+                source: "Web界面",
                 data: parsed.data,
-                time: time
-              })
+                time: time,
+              }),
             });
 
             const result = await response.json();
 
             if (result.success) {
-              this.showAlert('success', '数据集保存成功');
-              document.getElementById('dataset-name').value = '';
+              this.showAlert("success", "数据集保存成功");
+              document.getElementById("dataset-name").value = "";
               this.loadDatasets(); // 刷新数据集列表
             } else {
-              this.showAlert('error', result.error || '保存失败');
+              this.showAlert("error", result.error || "保存失败");
             }
           } catch (error) {
-            this.showAlert('error', '网络错误: ' + error.message);
+            this.showAlert("error", "网络错误: " + error.message);
           }
         }
 
         async loadDataset() {
-          const selectedDataset = document.getElementById('saved-datasets').value;
+          const selectedDataset =
+            document.getElementById("saved-datasets").value;
 
           if (!selectedDataset) {
-            this.showAlert('error', '请选择要加载的数据集');
+            this.showAlert("error", "请选择要加载的数据集");
             return;
           }
 
           try {
-            const response = await fetch(`/api/dataset/${encodeURIComponent(selectedDataset)}`);
+            const response = await fetch(
+              `/api/dataset/${encodeURIComponent(selectedDataset)}`
+            );
             const result = await response.json();
 
             if (result.success) {
               // 填充数据到输入框
-              const dataText = result.data.map((value, index) => 
-                `${result.time[index]},${value}`
-              ).join('\n');
-              
-              document.getElementById('data-input').value = dataText;
-              document.getElementById('use-default-time').checked = false;
-              document.getElementById('time-input-group').style.display = 'none';
-              
-              this.showAlert('success', `数据集 "${selectedDataset}" 加载成功`);
-              
+              const dataText = result.data
+                .map((value, index) => `${result.time[index]},${value}`)
+                .join("\n");
+
+              document.getElementById("data-input").value = dataText;
+              document.getElementById("use-default-time").checked = false;
+              document.getElementById("time-input-group").style.display =
+                "none";
+
+              this.showAlert("success", `数据集 "${selectedDataset}" 加载成功`);
+
               // 切换到测试面板
               document.querySelector('[data-tab="test"]').click();
             } else {
-              this.showAlert('error', result.error || '加载失败');
+              this.showAlert("error", result.error || "加载失败");
             }
           } catch (error) {
-            this.showAlert('error', '网络错误: ' + error.message);
+            this.showAlert("error", "网络错误: " + error.message);
           }
         }
 
         async deleteDataset() {
-          const selectedDataset = document.getElementById('saved-datasets').value;
+          const selectedDataset =
+            document.getElementById("saved-datasets").value;
 
           if (!selectedDataset) {
-            this.showAlert('error', '请选择要删除的数据集');
+            this.showAlert("error", "请选择要删除的数据集");
             return;
           }
 
-          if (!confirm(`确定要删除数据集 "${selectedDataset}" 吗？此操作无法撤销。`)) {
+          if (
+            !confirm(
+              `确定要删除数据集 "${selectedDataset}" 吗？此操作无法撤销。`
+            )
+          ) {
             return;
           }
 
           try {
-            const response = await fetch(`/api/dataset/delete/${encodeURIComponent(selectedDataset)}`);
+            const response = await fetch(
+              `/api/dataset/delete/${encodeURIComponent(selectedDataset)}`
+            );
             const result = await response.json();
 
             if (result.success) {
-              this.showAlert('success', `数据集 "${selectedDataset}" 删除成功`);
+              this.showAlert("success", `数据集 "${selectedDataset}" 删除成功`);
               this.loadDatasets(); // 刷新数据集列表
             } else {
-              this.showAlert('error', result.error || '删除失败');
+              this.showAlert("error", result.error || "删除失败");
             }
           } catch (error) {
-            this.showAlert('error', '网络错误: ' + error.message);
+            this.showAlert("error", "网络错误: " + error.message);
           }
         }
 
         async saveConfig() {
           const config = {
-            defaultConfidenceLevel: parseFloat(document.getElementById('default-confidence').value),
-            autoSaveResults: document.getElementById('auto-save-results').checked,
-            enableColorOutput: document.getElementById('enable-color-output').checked,
-            language: this.currentLanguage
+            defaultConfidenceLevel: parseFloat(
+              document.getElementById("default-confidence").value
+            ),
+            autoSaveResults:
+              document.getElementById("auto-save-results").checked,
+            enableColorOutput: document.getElementById("enable-color-output")
+              .checked,
+            language: this.currentLanguage,
           };
 
           try {
-            const response = await fetch('/api/config/update', {
-              method: 'PUT',
+            const response = await fetch("/api/config/update", {
+              method: "PUT",
               headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json",
               },
-              body: JSON.stringify(config)
+              body: JSON.stringify(config),
             });
-            
+
             const data = await response.json();
             if (data.success) {
-              this.showAlert('success', '配置已更新');
+              this.showAlert("success", "配置已更新");
               this.config = { ...this.config, ...config };
               this.updateUIFromConfig();
             } else {
-              this.showAlert('error', '配置更新失败: ' + (data.error || '未知错误'));
+              this.showAlert(
+                "error",
+                "配置更新失败: " + (data.error || "未知错误")
+              );
             }
           } catch (error) {
-            this.showAlert('error', '配置更新失败: ' + error.message);
+            this.showAlert("error", "配置更新失败: " + error.message);
           }
         }
 
         async reloadStandardValues() {
-          this.showAlert('warning', '标准值重新加载功能尚未实现');
+          this.showAlert("warning", "标准值重新加载功能尚未实现");
         }
 
         async initializeConfidenceOptions() {
           try {
-            const response = await fetch('/api/standard_values');
+            const response = await fetch("/api/standard_values");
             const data = await response.json();
-            
+
             if (data.success && data.confidenceLevels) {
-              const confidenceSelect = document.getElementById('confidence-select');
-              const defaultConfidenceSelect = document.getElementById('default-confidence');
-              
+              const confidenceSelect =
+                document.getElementById("confidence-select");
+              const defaultConfidenceSelect =
+                document.getElementById("default-confidence");
+
               // 清空现有选项
-              confidenceSelect.innerHTML = '';
-              defaultConfidenceSelect.innerHTML = '';
-              
+              confidenceSelect.innerHTML = "";
+              defaultConfidenceSelect.innerHTML = "";
+
               // 添加支持的置信度选项
-              data.confidenceLevels.forEach(level => {
-                const percentage = (level * 100).toFixed(level === 0.999 ? 1 : 0);
-                
-                const option1 = document.createElement('option');
+              data.confidenceLevels.forEach((level) => {
+                const percentage = (level * 100).toFixed(
+                  level === 0.999 ? 1 : 0
+                );
+
+                const option1 = document.createElement("option");
                 option1.value = level;
                 option1.textContent = `${percentage}%`;
                 confidenceSelect.appendChild(option1);
-                
-                const option2 = document.createElement('option');
+
+                const option2 = document.createElement("option");
                 option2.value = level;
                 option2.textContent = `${percentage}%`;
                 defaultConfidenceSelect.appendChild(option2);
               });
-              
+
               // 设置默认选中值
               if (this.config.defaultConfidenceLevel) {
                 confidenceSelect.value = this.config.defaultConfidenceLevel;
-                defaultConfidenceSelect.value = this.config.defaultConfidenceLevel;
+                defaultConfidenceSelect.value =
+                  this.config.defaultConfidenceLevel;
               }
             }
           } catch (error) {
-            console.error('加载置信度选项失败:', error);
+            console.error("加载置信度选项失败:", error);
             // 使用备用选项
             this.setFallbackConfidenceOptions();
           }
         }
 
         setFallbackConfidenceOptions() {
-          const confidenceSelect = document.getElementById('confidence-select');
-          const defaultConfidenceSelect = document.getElementById('default-confidence');
-          
+          const confidenceSelect = document.getElementById("confidence-select");
+          const defaultConfidenceSelect =
+            document.getElementById("default-confidence");
+
           const options = [
-            { value: 0.95, text: '95%' },
-            { value: 0.99, text: '99%' },
-            { value: 0.999, text: '99.9%' }
+            { value: 0.95, text: "95%" },
+            { value: 0.99, text: "99%" },
+            { value: 0.999, text: "99.9%" },
           ];
-          
-          confidenceSelect.innerHTML = '';
-          defaultConfidenceSelect.innerHTML = '';
-          
-          options.forEach(opt => {
-            const option1 = document.createElement('option');
+
+          confidenceSelect.innerHTML = "";
+          defaultConfidenceSelect.innerHTML = "";
+
+          options.forEach((opt) => {
+            const option1 = document.createElement("option");
             option1.value = opt.value;
             option1.textContent = opt.text;
             confidenceSelect.appendChild(option1);
-            
-            const option2 = document.createElement('option');
+
+            const option2 = document.createElement("option");
             option2.value = opt.value;
             option2.textContent = opt.text;
             defaultConfidenceSelect.appendChild(option2);
           });
-          
+
           // 默认选择95%
-          confidenceSelect.value = '0.95';
-          defaultConfidenceSelect.value = '0.95';
+          confidenceSelect.value = "0.95";
+          defaultConfidenceSelect.value = "0.95";
+        }
+
+        async loadSVGFiles() {
+          try {
+            const response = await fetch("/api/svg_files");
+            const data = await response.json();
+
+            if (data.success) {
+              const select = document.getElementById("svg-files-select");
+              select.innerHTML =
+                '<option value="" data-i18n="svg.select">选择SVG文件...</option>';
+
+              if (data.files && data.files.length > 0) {
+                data.files.forEach((filename) => {
+                  const option = document.createElement("option");
+                  option.value = filename;
+                  option.textContent = filename;
+                  select.appendChild(option);
+                });
+                document.getElementById("svg-no-files").style.display = "none";
+              } else {
+                document.getElementById("svg-no-files").style.display = "block";
+              }
+
+              // 重新应用翻译到SVG相关元素
+              if (this.translations) {
+                this.applyTranslations(this.translations);
+              }
+            }
+          } catch (error) {
+            console.error("加载SVG文件列表失败:", error);
+            this.showAlert(
+              "error",
+              this.getTranslation(
+                "svg.load_list_error",
+                "加载SVG文件列表失败"
+              ) +
+                ": " +
+                error.message
+            );
+          }
+        }
+
+        async previewSVG() {
+          const selectedFile =
+            document.getElementById("svg-files-select").value;
+
+          if (!selectedFile) {
+            this.showAlert(
+              "error",
+              this.getTranslation(
+                "svg.select_file_error",
+                "请选择要预览的SVG文件"
+              )
+            );
+            return;
+          }
+
+          try {
+            document.getElementById(
+              "svg-preview-content"
+            ).innerHTML = `<div style="padding: 2rem;"><i class="fas fa-spinner fa-spin"></i> <span>${this.getTranslation(
+              "svg.loading",
+              "正在加载SVG文件..."
+            )}</span></div>`;
+            document.getElementById("svg-preview-container").style.display =
+              "block";
+
+            // 隐藏欢迎消息和结果容器
+            document.getElementById("welcome-message").style.display = "none";
+            document.getElementById("results-container").style.display = "none";
+
+            const response = await fetch(
+              `/api/svg_files/${encodeURIComponent(selectedFile)}`
+            );
+            const result = await response.json();
+
+            if (result.success) {
+              // 显示SVG内容
+              const svgContent = result.content;
+              document.getElementById("svg-preview-content").innerHTML =
+                svgContent;
+
+              // 调整SVG样式使其适应容器
+              const svgElement = document.querySelector(
+                "#svg-preview-content svg"
+              );
+              if (svgElement) {
+                // 获取原有的宽度和高度属性
+                const originalWidth = svgElement.getAttribute("width") || "800";
+                const originalHeight =
+                  svgElement.getAttribute("height") || "600";
+
+                // 移除原有的宽度和高度属性，让CSS样式控制
+                svgElement.removeAttribute("width");
+                svgElement.removeAttribute("height");
+
+                // 确保SVG有viewBox属性以支持响应式缩放
+                if (!svgElement.getAttribute("viewBox")) {
+                  svgElement.setAttribute(
+                    "viewBox",
+                    `0 0 ${originalWidth} ${originalHeight}`
+                  );
+                }
+
+                // 设置preserveAspectRatio以保持比例
+                svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+                // 应用CSS样式
+                svgElement.style.maxWidth = "100%";
+                svgElement.style.maxHeight = "80vh";
+                svgElement.style.height = "auto";
+                svgElement.style.width = "auto";
+              }
+
+              // 存储当前文件名和内容，用于下载
+              this.currentSVGFile = selectedFile;
+              this.currentSVGContent = svgContent;
+            } else {
+              document.getElementById(
+                "svg-preview-content"
+              ).innerHTML = `<div style="padding: 2rem; color: var(--error);"><i class="fas fa-exclamation-triangle"></i> ${
+                result.error ||
+                this.getTranslation("svg.load_error", "加载SVG文件失败")
+              }</div>`;
+            }
+          } catch (error) {
+            document.getElementById(
+              "svg-preview-content"
+            ).innerHTML = `<div style="padding: 2rem; color: var(--error);"><i class="fas fa-exclamation-triangle"></i> ${this.getTranslation(
+              "svg.load_error",
+              "加载SVG文件失败"
+            )}: ${error.message}</div>`;
+          }
+        }
+
+        downloadSVG() {
+          if (!this.currentSVGFile || !this.currentSVGContent) {
+            this.showAlert(
+              "error",
+              this.getTranslation(
+                "svg.no_file_to_download",
+                "没有可下载的SVG文件"
+              )
+            );
+            return;
+          }
+
+          try {
+            // 创建下载链接
+            const blob = new Blob([this.currentSVGContent], {
+              type: "image/svg+xml",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = this.currentSVGFile;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            this.showAlert(
+              "success",
+              `${this.getTranslation("svg.download_success", "下载成功")}: "${
+                this.currentSVGFile
+              }"`
+            );
+          } catch (error) {
+            this.showAlert(
+              "error",
+              this.getTranslation("svg.download_failed", "下载失败") +
+                ": " +
+                error.message
+            );
+          }
+        }
+
+        closeSVGPreview() {
+          document.getElementById("svg-preview-container").style.display =
+            "none";
+          // 恢复欢迎消息（如果没有其他内容显示）
+          if (
+            document.getElementById("results-container").style.display ===
+            "none"
+          ) {
+            document.getElementById("welcome-message").style.display = "block";
+          }
         }
       }
 
       // 启动应用
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener("DOMContentLoaded", () => {
         window.app = new NeumannTrendTestApp();
       });
     </script>

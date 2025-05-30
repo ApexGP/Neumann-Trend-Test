@@ -243,6 +243,13 @@ void WebServer::registerApiEndpoints()
     // 统计
     CROW_ROUTE(impl->app, "/api/statistics")
     ([this]() { return handleStatisticsRequest(); });
+
+    // SVG文件管理
+    CROW_ROUTE(impl->app, "/api/svg_files")
+    ([this]() { return handleSVGListRequest(); });
+
+    CROW_ROUTE(impl->app, "/api/svg_files/<string>")
+    ([this](const std::string &filename) { return handleSVGFileRequest(filename); });
 }
 
 // 简化的API处理函数
@@ -488,6 +495,31 @@ std::string WebServer::handleTranslationsGetRequest(const std::string &language)
         translations["tab.test"] = (language == "zh") ? "测试" : "Test";
         translations["tab.data"] = (language == "zh") ? "数据" : "Data";
         translations["tab.config"] = (language == "zh") ? "设置" : "Settings";
+        translations["tab.svg"] = (language == "zh") ? "图表预览" : "Chart Preview";
+
+        // SVG预览相关
+        translations["svg.files"] = (language == "zh") ? "SVG文件" : "SVG Files";
+        translations["svg.no_files"] = (language == "zh") ? "未找到SVG文件" : "No SVG files found";
+        translations["svg.select"] = (language == "zh") ? "选择SVG文件..." : "Select SVG file...";
+        translations["svg.preview"] = (language == "zh") ? "预览" : "Preview";
+        translations["svg.download"] = (language == "zh") ? "下载" : "Download";
+        translations["svg.refresh"] = (language == "zh") ? "刷新列表" : "Refresh List";
+        translations["svg.preview_title"] =
+            (language == "zh") ? "SVG图表预览" : "SVG Chart Preview";
+        translations["svg.loading"] =
+            (language == "zh") ? "正在加载SVG文件..." : "Loading SVG file...";
+        translations["svg.load_error"] =
+            (language == "zh") ? "加载SVG文件失败" : "Failed to load SVG file";
+        translations["svg.select_file_error"] =
+            (language == "zh") ? "请选择要预览的SVG文件" : "Please select file to preview";
+        translations["svg.load_list_error"] =
+            (language == "zh") ? "加载SVG文件列表失败" : "Failed to load SVG file list";
+        translations["svg.no_file_to_download"] =
+            (language == "zh") ? "没有可下载的SVG文件" : "No SVG files to download";
+        translations["svg.download_success"] =
+            (language == "zh") ? "下载成功" : "Download succeeded";
+        translations["svg.download_failed"] = (language == "zh") ? "下载失败" : "Download failed";
+        translations["svg.close"] = (language == "zh") ? "关闭" : "Close";
 
         // 输入标签
         translations["input.data"] = (language == "zh") ? "数据点" : "Data Points";
@@ -860,6 +892,90 @@ std::string WebServer::handleFileUploadRequest(const std::string & /*requestBody
 {
     json response = {{"success", false}, {"error", "功能尚未实现"}};
     return response.dump();
+}
+
+std::string WebServer::handleSVGListRequest()
+{
+    json response;
+
+    try {
+        // 获取配置实例来获取数据目录
+        auto &config = neumann::Config::getInstance();
+        std::string dataDir = config.getDataDirectory();
+        fs::path svgDir = fs::path(dataDir) / "svg";
+
+        std::vector<std::string> svgFiles;
+
+        // 检查SVG目录是否存在
+        if (fs::exists(svgDir) && fs::is_directory(svgDir)) {
+            // 遍历目录中的SVG文件
+            for (const auto &entry : fs::directory_iterator(svgDir)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".svg") {
+                    svgFiles.push_back(entry.path().filename().string());
+                }
+            }
+
+            // 按文件名排序
+            std::sort(svgFiles.begin(), svgFiles.end());
+        }
+
+        response = {{"success", true}, {"files", svgFiles}, {"directory", svgDir.string()}};
+    }
+    catch (const std::exception &e) {
+        response = {{"success", false}, {"error", "获取SVG文件列表失败: " + std::string(e.what())}};
+    }
+
+    return response.dump();
+}
+
+std::string WebServer::handleSVGFileRequest(const std::string &filename)
+{
+    try {
+        // 获取配置实例来获取数据目录
+        auto &config = neumann::Config::getInstance();
+        std::string dataDir = config.getDataDirectory();
+        fs::path svgDir = fs::path(dataDir) / "svg";
+        fs::path filePath = svgDir / filename;
+
+        // 安全检查：确保文件在SVG目录内
+        fs::path canonicalSvgDir = fs::canonical(svgDir);
+        fs::path canonicalFilePath = fs::canonical(filePath);
+
+        if (!std::equal(canonicalSvgDir.begin(), canonicalSvgDir.end(),
+                        canonicalFilePath.begin())) {
+            json response = {{"success", false}, {"error", "文件路径无效"}};
+            return response.dump();
+        }
+
+        // 检查文件是否存在且为SVG文件
+        if (!fs::exists(filePath) || !fs::is_regular_file(filePath) ||
+            filePath.extension() != ".svg") {
+            json response = {{"success", false}, {"error", "SVG文件不存在"}};
+            return response.dump();
+        }
+
+        // 读取SVG文件内容
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            json response = {{"success", false}, {"error", "无法打开SVG文件"}};
+            return response.dump();
+        }
+
+        std::string svgContent((std::istreambuf_iterator<char>(file)),
+                               std::istreambuf_iterator<char>());
+
+        json response = {{"success", true},
+                         {"filename", filename},
+                         {"content", svgContent},
+                         {"contentType", "image/svg+xml"}};
+
+        return response.dump();
+    }
+    catch (const std::exception &e) {
+        json response = {{"success", false},
+                         {"error", "读取SVG文件失败: " + std::string(e.what())}};
+        return response.dump();
+    }
 }
 
 }}  // namespace neumann::web

@@ -22,9 +22,7 @@
     "menu.default": "默认",
     "menu.custom": "自定义",
     "menu.back": "返回",
-
     "menu.custom_confidence": "自定义置信度设置",
-
     "input.data_points": "请输入数据点 (用空格分隔):",
     "input.time_points": "请输入时间点 (用空格分隔):",
     "input.confidence_level": "请选择置信水平:",
@@ -33,7 +31,6 @@
     "input.select_file": "请选择文件:",
     "input.file_preview": "文件预览:",
     "input.exit_hint": "输入 'q' 或直接按回车退出",
-
     "excel.file_detected": "检测到Excel文件",
     "excel.sheet_selection": "请选择工作表:",
     "excel.column_detection": "自动检测到以下列:",
@@ -42,13 +39,11 @@
     "excel.preview_data": "数据预览:",
     "excel.import_success": "Excel文件导入成功",
     "excel.unsupported_format": "不支持的Excel格式，请转换为CSV",
-
     "progress.processing": "正在处理",
     "progress.importing": "正在导入",
     "progress.calculating": "正在计算",
     "progress.validating": "正在验证数据",
     "progress.complete": "处理完成",
-
     "tutorial.welcome": "欢迎使用诺依曼趋势测试教程",
     "tutorial.step1": "步骤1: 准备数据",
     "tutorial.step2": "步骤2: 选择置信水平",
@@ -56,15 +51,13 @@
     "tutorial.step4": "步骤4: 解读结果",
     "tutorial.example_data": "示例数据集",
     "tutorial.try_yourself": "现在试试自己的数据",
-
     "batch.select_directory": "请选择包含数据文件的目录:",
     "batch.file_count": "找到 {0} 个数据文件",
     "batch.processing_file": "正在处理文件: {0}",
-    "batch.results_summary": "批量处理结果摘要",
+    "batch.results_summary": "处理结果汇总",
     "batch.files_processed": "已处理文件数",
-    "batch.files_with_trend": "检测到趋势的文件数",
+    "batch.files_with_trend": "发现趋势",
     "batch.export_results": "导出批量结果",
-
     "result.no_trend": "无趋势",
     "result.has_trend": "有趋势",
     "result.pg_value": "PG值",
@@ -83,7 +76,6 @@
     "result.min_pg": "最小PG值",
     "result.max_pg": "最大PG值",
     "result.avg_pg": "平均PG值",
-
     "result.trend_detected": "系统性趋势变化检测到",
     "result.data_stable": "数据保持稳定状态",
     "result.trend_statistics": "趋势点统计",
@@ -93,7 +85,6 @@
     "result.pg_interpretation_stable": "PG 折线图表示无显著趋势",
     "result.trend_warning": "趋势警告",
     "result.stability_confirmed": "稳定确认",
-
     "help.title": "帮助信息",
     "help.description": "诺依曼趋势测试是一种统计方法，用于评估数据集是否存在系统性趋势。",
     "help.usage_areas": "这种测试常用于药物稳定性研究和质量控制等领域。",
@@ -134,7 +125,6 @@
     "help.tip_batch": "批量处理支持CSV和Excel文件，可导出详细报告",
     "help.tip_visualization": "测试结果自动显示ASCII图表，可导出SVG格式",
     "help.tip_export": "支持多种导出格式：数据集、图表、批量报告",
-
     "about.title": "关于",
     "about.description": "这是一个专业的诺依曼趋势测试工具，提供完整的统计分析功能。",
     "about.applications": "适用于药物稳定性研究、质量控制和数据趋势分析等领域。",
@@ -150,7 +140,6 @@
     "about.tech_cross_platform": "跨平台支持（Windows/Linux/macOS）",
     "about.tech_formats": "支持CSV、Excel多种数据格式",
     "about.tech_performance": "高性能批量处理引擎",
-
     "load.no_datasets": "没有可用的数据集。",
     "load.available_datasets": "可用数据集:",
     "load.select_dataset": "请选择数据集",
@@ -160,7 +149,6 @@
     "load.dataset_created": "创建时间",
     "load.dataset_count": "数据点数量",
     "load.run_test_prompt": "是否对该数据集运行诺依曼趋势测试?",
-
     "test.use_default_timepoints": "是否使用默认时间点 (0, 1, 2, ...)?",
     "test.confidence_level_prompt": "请输入置信水平",
     "test.using_confidence_level": "当前使用置信度水平",
@@ -171,7 +159,6 @@
     "test.manual_input": "手动输入",
     "test.dataset_saved": "数据集已保存。",
     "test.dataset_save_failed": "保存数据集失败。",
-
     "prompt.select_option": "请选择操作",
     "prompt.press_enter": "按Enter键继续...",
     "prompt.current_language": "当前语言",
@@ -180,7 +167,6 @@
     "prompt.save_results": "是否将结果保存到文件?",
     "prompt.separator_help": "用空格或逗号分隔",
     "prompt.timepoint_mismatch_warning": "警告: 时间点数量与数据点数量不匹配，将使用默认时间点。",
-
     "help.usage": "用法: neumann [选项]",
     "help.options": "选项:",
     "help.show_help": "显示此帮助信息并退出",
@@ -189,7 +175,6 @@
     "help.examples": "示例:",
     "help.example_interactive": "启动交互式终端界面",
     "help.example_file": "处理data.csv文件",
-
     "error.file_not_found": "文件未找到",
     "error.file_read_error": "文件读取失败",
     "error.file_write_error": "文件写入失败",
@@ -214,13 +199,11 @@
     "error.unknown": "未知错误",
     "error.invalid_choice": "无效选择，请重试",
     "error.missing_file_argument": "错误: 缺少文件路径参数",
-
     "suggestion.title": "建议",
     "suggestion.check_file_path": "请检查文件路径是否正确",
     "suggestion.check_data_format": "请检查数据格式是否正确",
     "suggestion.add_more_data": "请添加更多数据点",
     "suggestion.contact_support": "请联系技术支持",
-
     "status.loading": "加载中...",
     "status.calculating": "正在运行诺依曼趋势测试...",
     "status.confidence_level_saved": "置信度水平已保存",
@@ -231,11 +214,9 @@
     "status.saving_results": "正在保存结果到",
     "status.results_saved": "结果已保存",
     "technical.details": "技术详情",
-
     "web.server_starting": "启动Web服务器，监听端口:",
     "web.server_url": "Web界面访问URL:",
     "web.server_stopping": "停止Web服务器",
-
     "import.success": "成功导入数据集",
     "import.data_count": "数据点数量",
     "import.save_prompt": "是否保存该数据集",
@@ -244,7 +225,6 @@
     "import.dataset_saved": "数据集已保存",
     "import.dataset_save_failed": "保存数据集失败",
     "import.run_test_prompt": "是否对该数据集运行诺依曼趋势测试",
-
     "sample.directory_not_found": "样本文件目录未找到",
     "sample.no_files_found": "未找到样本文件",
     "sample.available_files": "可用的样本文件:",
@@ -264,9 +244,7 @@
     "sample.description_prefix": "从样本文件加载",
     "sample.source_name": "样本文件",
     "sample.load_error": "加载样本文件时出错",
-
     "warning.config_save_failed": "配置保存失败",
-
     "batch.select_mode": "请选择处理模式",
     "batch.process_directory": "处理目录中的所有数据文件",
     "batch.process_files": "处理指定的文件列表",
@@ -275,24 +253,20 @@
     "batch.processing": "正在处理",
     "batch.progress": "进度",
     "batch.no_files_processed": "没有处理任何文件",
-    "batch.results_summary": "处理结果汇总",
     "batch.total_files": "总文件数",
     "batch.successful_files": "成功处理",
     "batch.error_files": "处理失败",
-    "batch.files_with_trend": "发现趋势",
     "batch.total_processing_time": "总处理时间",
     "batch.save_results_prompt": "是否保存处理结果",
     "batch.select_format": "请选择保存格式",
     "batch.enter_output_filename": "请输入输出文件名",
     "batch.results_saved": "结果已保存",
     "batch.save_failed": "保存失败",
-
     "visualization.select_dataset": "请选择要可视化的数据集",
     "visualization.save_svg_prompt": "是否保存SVG图表文件",
     "visualization.enter_filename": "请输入文件名",
     "visualization.chart_saved": "图表已保存",
     "visualization.save_failed": "保存失败",
-
     "statistics.analyzing_all_datasets": "正在分析所有数据集...",
     "statistics.overall_summary": "总体统计信息",
     "statistics.total_datasets": "总数据集数",
@@ -300,7 +274,6 @@
     "statistics.avg_data_points": "平均数据点数",
     "statistics.avg_pg_value": "平均PG值",
     "statistics.pg_range": "PG值范围",
-
     "chart.title": "诺依曼趋势测试结果",
     "chart.pg_values": "PG 值",
     "chart.thresholds": "阈值",
@@ -308,7 +281,6 @@
     "chart.pg_value_label": "PG 值",
     "chart.pg_distribution_title": "PG 值分布",
     "chart.no_data": "无数据可用",
-
     "custom.confidence_explanation": "自定义置信度需要提供完整的标准值表（W(P)值）。",
     "custom.file_format_info": "请准备包含样本数和对应W(P)值的JSON或CSV文件。",
     "custom.enter_file_path": "请输入标准值表文件路径",
@@ -320,9 +292,7 @@
     "custom.import_failed": "导入失败",
     "custom.check_file_format": "请检查文件格式是否正确",
     "custom.overwrite_prompt": "该置信度已存在，是否覆盖",
-
     "warning.confidence_level_exists": "置信度水平已存在",
-
     "menu.manage_custom": "管理自定义置信度",
     "custom.no_custom_levels": "当前没有自定义置信度水平",
     "custom.add_custom_suggestion": "您可以通过'自定义'选项添加新的置信度水平",
@@ -353,7 +323,6 @@
     "custom.available_example_files": "可用的示例文件:",
     "custom.detected_confidence_level": "检测到置信度水平",
     "custom.enter_confidence_for_file": "请为文件输入置信度水平",
-
     "menu.start_web": "启动Web服务器",
     "web.start_server": "启动Web服务器",
     "web.server_already_running": "Web服务器已在运行",
@@ -381,7 +350,6 @@
     "web.instruction_continue": "按Enter键返回主菜单，服务器将在后台继续运行",
     "web.port_saved": "端口设置已保存",
     "web.server_start_failed": "Web服务器启动失败",
-
     "web.server_running": "Web服务器运行中",
     "web.server_running_options": "请选择操作:",
     "web.option_continue_background": "继续在后台运行，返回主菜单",
@@ -394,15 +362,12 @@
     "web.server_continues_background": "Web服务器将在后台继续运行",
     "web.invalid_command": "无效命令",
     "web.valid_commands": "有效命令: 按Enter返回主菜单，或输入'stop'停止服务器",
-
     "status.confidence": "置信度：",
-
     "config.smart_loading": "智能配置加载系统",
     "config.user_private_created": "已创建用户私有配置文件",
     "config.user_private_loaded": "已加载用户私有配置",
     "config.system_fallback": "回退到系统默认配置（只读模式）",
     "config.directory_created": "创建用户配置目录",
-
     "system.file_management": "智能标准值文件管理",
     "system.user_dir_created": "创建用户系统文件目录",
     "system.file_exists": "用户标准值文件已存在",
@@ -411,7 +376,6 @@
     "system.file_copy_failed": "标准值文件复制失败",
     "system.required_file_missing": "必需的标准值文件无法管理",
     "system.optional_file_unavailable": "标准值文件不可用（将使用内置默认）",
-
     "config.file_not_found_creating": "配置文件不存在，创建默认配置",
     "config.load_success": "成功加载配置文件",
     "config.save_success": "成功保存配置文件",
@@ -431,7 +395,6 @@
     "config.no_config_default": "未找到任何配置文件，使用默认配置",
     "config.user_config_created_from_system": "成功从系统配置创建用户私有配置",
     "config.user_dir_created": "创建用户配置目录",
-
     "system.management_start": "智能系统文件管理启动...",
     "system.usr_dir_created": "创建用户系统文件目录",
     "system.file_already_exists": "用户系统文件已存在",
@@ -439,7 +402,6 @@
     "system.file_migrated_success": "已迁移并删除旧位置文件",
     "system.file_delete_failed_ignorable": "删除旧文件失败（可忽略）",
     "system.optional_file_unavailable_msg": "可选系统文件不可用（将使用内置默认）",
-
     "startup.config_load_warning": "警告: 配置文件加载失败，使用默认配置",
     "startup.user_data_dir_created": "创建用户数据目录",
     "startup.translation_system_loaded": "已加载系统翻译文件",
@@ -454,7 +416,6 @@
     "startup.standard_values_dev_loaded": "已加载开发标准值文件",
     "startup.standard_values_old_loaded": "已加载旧位置标准值文件",
     "startup.cli_app_start_failed": "CLI应用程序启动失败",
-
     "standard_values.create_file_attempt": "尝试创建标准值文件...",
     "standard_values.create_file_success": "已创建完整标准值文件",
     "standard_values.load_success": "成功加载标准值文件",
@@ -498,31 +459,78 @@
     "standard_values.wp_sequence_warning": "W(P)值序列可能不合理",
     "standard_values.cannot_create_output_file": "无法创建文件",
     "standard_values.save_file_failed": "保存标准值文件失败: {}",
-
     "ui.language_chinese": "中文 (Chinese)",
     "ui.language_set_chinese": "语言已设置为中文",
     "ui.language_save_failed": "语言设置保存失败",
     "ui.press_enter_continue": "按Enter键继续...",
-
     "web.server_access_info": "Web界面访问URL",
-    "web.server_stopping": "停止Web服务器",
-
     "web.auto_starting_server": "正在自动启动Web服务器...",
     "web.opening_browser": "正在打开浏览器...",
     "web.browser_opened": "浏览器已打开",
     "web.browser_open_failed": "无法自动打开浏览器",
     "web.manual_access_instruction": "请手动在浏览器中打开上述地址",
     "web.next_action_prompt": "请选择下一步操作:",
-    "web.option_use_web_interface": "使用Web界面（推荐）",
-    "web.option_use_cli_interface": "使用命令行界面（高级用户）",
-    "web.option_stop_and_exit": "停止服务器并退出程序",
+    "web.option_use_web_interface": "同时使用Web界面和命令行界面",
+    "web.option_use_cli_interface": "关闭Web服务器，仅使用命令行界面",
+    "web.option_stop_and_exit": "退出程序",
     "web.using_cli_interface": "将使用命令行界面",
     "web.defaulting_to_web": "默认使用Web界面",
     "web.instruction_manual_start": "您可以在主菜单中手动启动Web服务器",
-
-    "ui.count_unit": "个"
+    "web.using_both_interfaces": "将同时使用Web界面和命令行界面",
+    "web.closing_server_cli_only": "正在关闭Web服务器，将仅使用命令行界面",
+    "ui.count_unit": "个",
+    "web.app.title": "诺依曼趋势测试 Web服务器",
+    "web.app.signal_received": "接收到信号 {0}，正在关闭服务器...",
+    "web.app.current_directory": "当前工作目录",
+    "web.app.directory_get_warning": "警告: 无法获取当前工作目录",
+    "web.app.data_directory_not_exist": "数据目录不存在，正在创建",
+    "web.app.data_directory_create_error": "错误: 无法创建数据目录",
+    "web.app.webroot_directory_not_exist": "Web资源目录不存在，正在创建",
+    "web.app.webroot_directory_create_error": "错误: 无法创建Web资源目录",
+    "web.app.permission_warning": "可能需要管理员权限或当前用户无写入权限",
+    "web.app.using_dev_webroot": "使用开发Web资源目录",
+    "web.app.standard_values_load_warning": "警告: 无法加载用户标准值文件，将使用内置默认值。",
+    "web.app.standard_values_user_loaded": "已加载用户标准值文件",
+    "web.app.standard_values_system_load_warning": "警告: 无法加载系统标准值文件，将使用内置默认值。",
+    "web.app.standard_values_system_loaded": "已加载系统标准值文件",
+    "web.app.standard_values_dev_load_warning": "警告: 无法加载开发标准值文件，将使用内置默认值。",
+    "web.app.standard_values_dev_loaded": "已加载开发标准值文件",
+    "web.app.standard_values_not_found_warning": "警告: 未找到标准值文件，将使用内置默认值。",
+    "web.app.initializing_server": "初始化Web服务器...",
+    "web.app.server_info": "诺依曼趋势测试Web服务器",
+    "web.app.server_separator": "------------------------------------",
+    "web.app.listening_port": "监听端口",
+    "web.app.webroot_directory": "Web资源目录",
+    "web.app.data_directory": "数据目录",
+    "web.app.stop_server_instruction": "按Ctrl+C停止服务器...",
+    "web.app.error_occurred": "发生错误",
+    "web.app.invalid_port": "无效的端口号",
+    "web.app.help_usage": "用法: {0} [选项]",
+    "web.app.help_options": "选项:",
+    "web.app.help_port": "  -p, --port PORT  设置监听端口 (默认: 8080)",
+    "web.app.help_dir": "  -d, --dir DIR    设置Web资源目录 (默认: web)",
+    "web.app.help_data_dir": "  --data-dir DIR   设置数据目录 (默认: data)",
+    "web.app.help_help": "  -h, --help       显示此帮助信息并退出",
+    "web.app.data_directory_missing": "数据目录不存在，正在创建",
+    "web.app.data_directory_permission_warning": "可能需要管理员权限或当前用户无写入权限",
+    "web.app.fallback_web_directory": "使用开发Web资源目录",
+    "web.app.web_directory_missing": "Web资源目录不存在，正在创建",
+    "web.app.web_directory_permission_warning": "可能需要管理员权限或当前用户无写入权限",
+    "web.app.user_standard_values_load_warning": "警告: 无法加载用户标准值文件，将使用内置默认值。",
+    "web.app.user_standard_values_loaded": "已加载用户标准值文件",
+    "web.app.system_standard_values_load_warning": "警告: 无法加载系统标准值文件，将使用内置默认值。",
+    "web.app.system_standard_values_loaded": "已加载系统标准值文件",
+    "web.app.dev_standard_values_load_warning": "警告: 无法加载开发标准值文件，将使用内置默认值。",
+    "web.app.dev_standard_values_loaded": "已加载开发标准值文件",
+    "web.app.standard_values_not_found": "警告: 未找到标准值文件，将使用内置默认值。",
+    "web.app.initializing_web_server": "初始化Web服务器...",
+    "web.app.server_info_header": "------------------------------------",
+    "web.app.port": "监听端口",
+    "web.app.web_directory": "Web资源目录",
+    "web.app.web_url": "Web界面访问URL",
+    "web.app.server_info_footer": "------------------------------------",
+    "web.app.press_ctrl_c_stop": "按Ctrl+C停止服务器..."
   },
-
   "en": {
     "app.title": "Neumann Trend Test Tool",
     "app.description": "Statistical tool for evaluating systematic trends in datasets",
@@ -546,9 +554,7 @@
     "menu.default": "Default",
     "menu.custom": "Custom",
     "menu.back": "Back",
-
     "menu.custom_confidence": "Custom Confidence Level Settings",
-
     "input.data_points": "Please enter data points (separated by spaces):",
     "input.time_points": "Please enter time points (separated by spaces):",
     "input.confidence_level": "Please select confidence level:",
@@ -557,7 +563,6 @@
     "input.select_file": "Please select file:",
     "input.file_preview": "File Preview:",
     "input.exit_hint": "Enter 'q' or press Enter to exit",
-
     "excel.file_detected": "Excel file detected",
     "excel.sheet_selection": "Please select worksheet:",
     "excel.column_detection": "Automatically detected columns:",
@@ -566,13 +571,11 @@
     "excel.preview_data": "Data Preview:",
     "excel.import_success": "Excel file imported successfully",
     "excel.unsupported_format": "Unsupported Excel format, please convert to CSV",
-
     "progress.processing": "Processing",
     "progress.importing": "Importing",
     "progress.calculating": "Calculating",
     "progress.validating": "Validating data",
     "progress.complete": "Processing complete",
-
     "tutorial.welcome": "Welcome to Neumann Trend Test Tutorial",
     "tutorial.step1": "Step 1: Prepare Data",
     "tutorial.step2": "Step 2: Select Confidence Level",
@@ -580,15 +583,13 @@
     "tutorial.step4": "Step 4: Interpret Results",
     "tutorial.example_data": "Example Dataset",
     "tutorial.try_yourself": "Try your own data now",
-
     "batch.select_directory": "Please select directory containing data files:",
     "batch.file_count": "Found {0} data files",
     "batch.processing_file": "Processing file: {0}",
-    "batch.results_summary": "Batch Processing Results Summary",
+    "batch.results_summary": "Processing Results Summary",
     "batch.files_processed": "Files processed",
-    "batch.files_with_trend": "Files with trend detected",
+    "batch.files_with_trend": "Trend detected",
     "batch.export_results": "Export Batch Results",
-
     "result.no_trend": "No Trend",
     "result.has_trend": "Has Trend",
     "result.pg_value": "PG Value",
@@ -607,7 +608,6 @@
     "result.min_pg": "Min PG Value",
     "result.max_pg": "Max PG Value",
     "result.avg_pg": "Avg PG Value",
-
     "result.trend_detected": "Systematic trend change detected",
     "result.data_stable": "Data remains stable",
     "result.trend_statistics": "Trend point statistics",
@@ -617,7 +617,6 @@
     "result.pg_interpretation_stable": "PG graph indicates no significant trend",
     "result.trend_warning": "Trend Warning",
     "result.stability_confirmed": "Stability Confirmed",
-
     "help.title": "Help",
     "help.description": "Neumann Trend Test is a statistical method used to evaluate whether a dataset has systematic trends.",
     "help.usage_areas": "This test is commonly used in pharmaceutical stability studies and quality control fields.",
@@ -658,7 +657,6 @@
     "help.tip_batch": "Batch processing supports CSV and Excel files, can export detailed reports",
     "help.tip_visualization": "Test results automatically display ASCII charts, can export SVG format",
     "help.tip_export": "Support multiple export formats: dataset, chart, batch report",
-
     "about.title": "About",
     "about.description": "This tool is used for performing Neumann Trend Tests, supporting data management, test execution, and result analysis.",
     "about.applications": "Widely applicable in pharmaceutical stability studies, quality control, and time series analysis fields.",
@@ -674,7 +672,6 @@
     "about.tech_cross_platform": "Cross-platform support (Windows/Linux/macOS)",
     "about.tech_formats": "Support CSV, Excel and other data formats",
     "about.tech_performance": "High-performance batch processing engine",
-
     "load.no_datasets": "No datasets available.",
     "load.available_datasets": "Available datasets:",
     "load.select_dataset": "Please select a dataset",
@@ -684,7 +681,6 @@
     "load.dataset_created": "Created",
     "load.dataset_count": "Data Point Count",
     "load.run_test_prompt": "Run Neumann Trend Test on this dataset?",
-
     "test.use_default_timepoints": "Use default time points (0, 1, 2, ...)?",
     "test.confidence_level_prompt": "Please enter confidence level",
     "test.using_confidence_level": "Current Confidence Level",
@@ -695,7 +691,6 @@
     "test.manual_input": "Manual Input",
     "test.dataset_saved": "Dataset saved.",
     "test.dataset_save_failed": "Failed to save dataset.",
-
     "prompt.select_option": "Please select an option",
     "prompt.press_enter": "Press Enter to continue...",
     "prompt.current_language": "Current Language",
@@ -704,7 +699,6 @@
     "prompt.save_results": "Save results to file?",
     "prompt.separator_help": "Use spaces or commas as separators",
     "prompt.timepoint_mismatch_warning": "Warning: Time point count does not match data point count, default time points will be used.",
-
     "help.usage": "Usage: neumann [options]",
     "help.options": "Options:",
     "help.show_help": "Show this help message and exit",
@@ -713,7 +707,6 @@
     "help.examples": "Examples:",
     "help.example_interactive": "Start interactive terminal interface",
     "help.example_file": "Process data.csv file",
-
     "error.file_not_found": "File not found",
     "error.file_read_error": "File read error",
     "error.file_write_error": "File write error",
@@ -738,13 +731,11 @@
     "error.unknown": "Unknown error",
     "error.invalid_choice": "Invalid choice, please try again",
     "error.missing_file_argument": "Error: Missing file path argument",
-
     "suggestion.title": "Suggestion",
     "suggestion.check_file_path": "Please check if the file path is correct",
     "suggestion.check_data_format": "Please check if the data format is correct",
     "suggestion.add_more_data": "Please add more data points",
     "suggestion.contact_support": "Please contact technical support",
-
     "status.loading": "Loading...",
     "status.calculating": "Running Neumann trend test...",
     "status.confidence_level_saved": "Confidence level saved",
@@ -755,11 +746,9 @@
     "status.saving_results": "Saving results to",
     "status.results_saved": "Results saved",
     "technical.details": "Technical Details",
-
     "web.server_starting": "Starting web server on port:",
     "web.server_url": "Web interface URL:",
     "web.server_stopping": "Stopping web server",
-
     "import.success": "Data imported successfully",
     "import.data_count": "Data point count",
     "import.save_prompt": "Save this dataset?",
@@ -768,7 +757,6 @@
     "import.dataset_saved": "Dataset saved",
     "import.dataset_save_failed": "Failed to save dataset",
     "import.run_test_prompt": "Run Neumann Trend Test on this dataset?",
-
     "sample.directory_not_found": "Sample file directory not found",
     "sample.no_files_found": "No sample files found",
     "sample.available_files": "Available sample files:",
@@ -788,9 +776,7 @@
     "sample.description_prefix": "Loaded from sample file",
     "sample.source_name": "Sample File",
     "sample.load_error": "Error loading sample file",
-
     "warning.config_save_failed": "Configuration save failed",
-
     "batch.select_mode": "Please select processing mode",
     "batch.process_directory": "Process all data files in the directory",
     "batch.process_files": "Process specified list of files",
@@ -799,24 +785,20 @@
     "batch.processing": "Processing",
     "batch.progress": "Progress",
     "batch.no_files_processed": "No files processed",
-    "batch.results_summary": "Processing Results Summary",
     "batch.total_files": "Total files",
     "batch.successful_files": "Successful",
     "batch.error_files": "Error",
-    "batch.files_with_trend": "Trend detected",
     "batch.total_processing_time": "Total processing time",
     "batch.save_results_prompt": "Save processing results?",
     "batch.select_format": "Please select save format",
     "batch.enter_output_filename": "Please enter output filename",
     "batch.results_saved": "Results saved",
     "batch.save_failed": "Save failed",
-
     "visualization.select_dataset": "Please select dataset to visualize",
     "visualization.save_svg_prompt": "Save SVG chart file?",
     "visualization.enter_filename": "Enter filename",
     "visualization.chart_saved": "Chart saved",
     "visualization.save_failed": "Save failed",
-
     "statistics.analyzing_all_datasets": "Analyzing all datasets...",
     "statistics.overall_summary": "Overall Statistics",
     "statistics.total_datasets": "Total dataset count",
@@ -824,7 +806,6 @@
     "statistics.avg_data_points": "Average data point count",
     "statistics.avg_pg_value": "Average PG value",
     "statistics.pg_range": "PG value range",
-
     "chart.title": "Neumann Trend Test Results",
     "chart.pg_values": "PG Values",
     "chart.thresholds": "Thresholds",
@@ -832,7 +813,6 @@
     "chart.pg_value_label": "PG Values",
     "chart.pg_distribution_title": "PG Value Distribution",
     "chart.no_data": "No data available",
-
     "custom.confidence_explanation": "Custom confidence level requires providing complete standard value table (W(P) values).",
     "custom.file_format_info": "Please prepare JSON or CSV file containing sample numbers and corresponding W(P) values.",
     "custom.enter_file_path": "Please enter standard value table file path",
@@ -844,9 +824,7 @@
     "custom.import_failed": "Import failed",
     "custom.check_file_format": "Please check if the file format is correct",
     "custom.overwrite_prompt": "This confidence level already exists, overwrite",
-
     "warning.confidence_level_exists": "Confidence level already exists",
-
     "menu.manage_custom": "Manage Custom Confidence Levels",
     "custom.no_custom_levels": "No custom confidence levels currently exist",
     "custom.add_custom_suggestion": "You can add a new confidence level through the 'Custom' option",
@@ -877,7 +855,6 @@
     "custom.available_example_files": "Available example files:",
     "custom.detected_confidence_level": "Detected confidence level",
     "custom.enter_confidence_for_file": "Please enter confidence level for file",
-
     "menu.start_web": "Start Web Server",
     "web.start_server": "Start Web Server",
     "web.server_already_running": "Web server is already running",
@@ -905,7 +882,6 @@
     "web.instruction_continue": "Press Enter to return to main menu, server will continue running in background",
     "web.port_saved": "Port settings saved",
     "web.server_start_failed": "Failed to start web server",
-
     "web.server_running": "Web server is running",
     "web.server_running_options": "Please select an action:",
     "web.option_continue_background": "Continue in background, return to main menu",
@@ -918,15 +894,12 @@
     "web.server_continues_background": "Web server will continue running in background",
     "web.invalid_command": "Invalid command",
     "web.valid_commands": "Valid commands: Press Enter to return to main menu, or enter 'stop' to stop server",
-
     "status.confidence": "Confidence: ",
-
     "config.smart_loading": "Smart Configuration Loading System",
     "config.user_private_created": "User Private Configuration File Created",
     "config.user_private_loaded": "User Private Configuration Loaded",
     "config.system_fallback": "Fallback to System Default Configuration (Read-Only Mode)",
     "config.directory_created": "User Configuration Directory Created",
-
     "system.file_management": "Smart Standard Values File Management",
     "system.user_dir_created": "User System File Directory Created",
     "system.file_exists": "User Standard Values File Already Exists",
@@ -935,7 +908,6 @@
     "system.file_copy_failed": "Standard Values File Copy Failed",
     "system.required_file_missing": "Required Standard Values File Cannot Be Managed",
     "system.optional_file_unavailable": "Standard Values File Unavailable (Using Built-in Default)",
-
     "config.file_not_found_creating": "Configuration file not found, creating default configuration",
     "config.load_success": "Successfully loaded configuration file",
     "config.save_success": "Successfully saved configuration file",
@@ -955,7 +927,6 @@
     "config.no_config_default": "No configuration file found, using default configuration",
     "config.user_config_created_from_system": "Successfully created user private configuration from system configuration",
     "config.user_dir_created": "Created user configuration directory",
-
     "system.management_start": "Smart system file management starting...",
     "system.usr_dir_created": "Created user system file directory",
     "system.file_already_exists": "User system file already exists",
@@ -963,7 +934,6 @@
     "system.file_migrated_success": "Migrated and deleted old location file",
     "system.file_delete_failed_ignorable": "Failed to delete old file (ignorable)",
     "system.optional_file_unavailable_msg": "Optional system file unavailable (using built-in default)",
-
     "startup.config_load_warning": "Warning: Configuration file loading failed, using default configuration",
     "startup.user_data_dir_created": "Created user data directory",
     "startup.translation_system_loaded": "Loaded system translation file",
@@ -978,7 +948,6 @@
     "startup.standard_values_dev_loaded": "Loaded development standard values file",
     "startup.standard_values_old_loaded": "Loaded old location standard values file",
     "startup.cli_app_start_failed": "CLI application startup failed",
-
     "standard_values.create_file_attempt": "Attempting to create standard values file...",
     "standard_values.create_file_success": "Created complete standard values file",
     "standard_values.load_success": "Successfully loaded standard values file",
@@ -1022,28 +991,76 @@
     "standard_values.wp_sequence_warning": "W(P) value sequence may be unreasonable",
     "standard_values.cannot_create_output_file": "Cannot create file",
     "standard_values.save_file_failed": "Failed to save standard values file: {}",
-
     "ui.language_chinese": "Chinese (中文)",
     "ui.language_set_chinese": "Language set to Chinese",
     "ui.language_save_failed": "Language setting save failed",
     "ui.press_enter_continue": "Press Enter to continue...",
-
     "web.server_access_info": "Web interface access URL",
-    "web.server_stopping": "Stopping web server",
-
     "web.auto_starting_server": "Automatically starting web server...",
     "web.opening_browser": "Opening browser...",
     "web.browser_opened": "Browser opened successfully",
     "web.browser_open_failed": "Unable to automatically open browser",
     "web.manual_access_instruction": "Please manually open the above address in your browser",
     "web.next_action_prompt": "Please select next action:",
-    "web.option_use_web_interface": "Use Web Interface (Recommended)",
-    "web.option_use_cli_interface": "Use Command Line Interface (Advanced Users)",
-    "web.option_stop_and_exit": "Stop Server and Exit Program",
+    "web.option_use_web_interface": "Use Both Web Interface and Command Line Interface",
+    "web.option_use_cli_interface": "Close Web Server, Use CLI Only",
+    "web.option_stop_and_exit": "Exit Program",
     "web.using_cli_interface": "Using command line interface",
     "web.defaulting_to_web": "Defaulting to web interface",
     "web.instruction_manual_start": "You can manually start the web server from the main menu",
-
-    "ui.count_unit": "units"
+    "web.using_both_interfaces": "Using Both Web Interface and Command Line Interface",
+    "web.closing_server_cli_only": "Closing Web Server, Use CLI Only",
+    "ui.count_unit": "units",
+    "web.app.title": "Neumann Trend Test Web Server",
+    "web.app.signal_received": "Received signal {0}, shutting down server...",
+    "web.app.current_directory": "Current working directory",
+    "web.app.directory_get_warning": "Warning: Unable to get current working directory",
+    "web.app.data_directory_not_exist": "Data directory does not exist, creating",
+    "web.app.data_directory_create_error": "Error: Unable to create data directory",
+    "web.app.webroot_directory_not_exist": "Web resource directory does not exist, creating",
+    "web.app.webroot_directory_create_error": "Error: Unable to create web resource directory",
+    "web.app.permission_warning": "May require administrator privileges or current user lacks write permissions",
+    "web.app.using_dev_webroot": "Using development web resource directory",
+    "web.app.standard_values_load_warning": "Warning: Unable to load user standard values file, using built-in defaults.",
+    "web.app.standard_values_user_loaded": "Loaded user standard values file",
+    "web.app.standard_values_system_load_warning": "Warning: Unable to load system standard values file, using built-in defaults.",
+    "web.app.standard_values_system_loaded": "Loaded system standard values file",
+    "web.app.standard_values_dev_load_warning": "Warning: Unable to load development standard values file, using built-in defaults.",
+    "web.app.standard_values_dev_loaded": "Loaded development standard values file",
+    "web.app.standard_values_not_found_warning": "Warning: Standard values file not found, using built-in defaults.",
+    "web.app.initializing_server": "Initializing Web server...",
+    "web.app.server_info": "Neumann Trend Test Web Server",
+    "web.app.server_separator": "------------------------------------",
+    "web.app.listening_port": "Listening port",
+    "web.app.webroot_directory": "Web resource directory",
+    "web.app.data_directory": "Data directory",
+    "web.app.stop_server_instruction": "Press Ctrl+C to stop server...",
+    "web.app.error_occurred": "Error occurred",
+    "web.app.invalid_port": "Invalid port number",
+    "web.app.help_usage": "Usage: {0} [options]",
+    "web.app.help_options": "Options:",
+    "web.app.help_port": "  -p, --port PORT  Set listening port (default: 8080)",
+    "web.app.help_dir": "  -d, --dir DIR    Set web resource directory (default: web)",
+    "web.app.help_data_dir": "  --data-dir DIR   Set data directory (default: data)",
+    "web.app.help_help": "  -h, --help       Show this help message and exit",
+    "web.app.data_directory_missing": "Data directory does not exist, creating",
+    "web.app.data_directory_permission_warning": "May require administrator privileges or current user lacks write permissions",
+    "web.app.fallback_web_directory": "Using development web resource directory",
+    "web.app.web_directory_missing": "Web resource directory does not exist, creating",
+    "web.app.web_directory_permission_warning": "May require administrator privileges or current user lacks write permissions",
+    "web.app.user_standard_values_load_warning": "Warning: Unable to load user standard values file, using built-in defaults.",
+    "web.app.user_standard_values_loaded": "Loaded user standard values file",
+    "web.app.system_standard_values_load_warning": "Warning: Unable to load system standard values file, using built-in defaults.",
+    "web.app.system_standard_values_loaded": "Loaded system standard values file",
+    "web.app.dev_standard_values_load_warning": "Warning: Unable to load development standard values file, using built-in defaults.",
+    "web.app.dev_standard_values_loaded": "Loaded development standard values file",
+    "web.app.standard_values_not_found": "Warning: Standard values file not found, using built-in defaults.",
+    "web.app.initializing_web_server": "Initializing Web server...",
+    "web.app.server_info_header": "------------------------------------",
+    "web.app.port": "Listening port",
+    "web.app.web_directory": "Web resource directory",
+    "web.app.web_url": "Web interface access URL",
+    "web.app.server_info_footer": "------------------------------------",
+    "web.app.press_ctrl_c_stop": "Press Ctrl+C to stop server..."
   }
 }

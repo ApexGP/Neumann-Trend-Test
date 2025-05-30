@@ -208,6 +208,19 @@ private:
      */
     std::string handleExportSVGRequest(const std::string &requestBody);
 
+    /**
+     * @brief 处理SVG文件列表请求
+     * @return JSON响应
+     */
+    std::string handleSVGListRequest();
+
+    /**
+     * @brief 处理SVG文件内容请求
+     * @param filename SVG文件名
+     * @return SVG文件内容或错误响应
+     */
+    std::string handleSVGFileRequest(const std::string &filename);
+
     // 批量处理API处理函数
     /**
      * @brief 处理批量处理请求

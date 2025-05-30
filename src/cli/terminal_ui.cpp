@@ -1099,7 +1099,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.3.0" << std::endl;
+    std::cout << " v2.7.1" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -2579,17 +2579,25 @@ void TerminalUI::autoStartWebServerAndBrowser()
     }
 
     if (response == "1") {
-        // 使用Web界面
-        showWebServerRunningInterface();
-    } else if (response == "2") {
-        // 使用CLI界面，但保持Web服务器在后台运行
-        termUtils.printInfo(_("web.using_cli_interface"));
+        // 选项1：同时使用Web界面和命令行界面
+        termUtils.printSuccess(_("web.using_both_interfaces"));
         termUtils.printInfo(_("web.server_continues_background"));
         std::cout << _("prompt.press_enter");
         std::cin.get();
-        // 返回到正常的CLI流程
+        // Web服务器继续运行，回到正常的CLI流程
+    } else if (response == "2") {
+        // 选项2：关闭Web服务器，仅使用命令行界面
+        termUtils.printInfo(_("web.closing_server_cli_only"));
+        if (webServer) {
+            webServer->stop();
+            webServer.reset();
+            termUtils.printSuccess(_("web.server_stopped"));
+        }
+        std::cout << _("prompt.press_enter");
+        std::cin.get();
+        // Web服务器已关闭，继续使用CLI
     } else if (response == "3") {
-        // 停止服务器并退出
+        // 选项3：退出程序
         if (webServer) {
             termUtils.printInfo(_("web.stopping_server"));
             webServer->stop();
@@ -2598,10 +2606,12 @@ void TerminalUI::autoStartWebServerAndBrowser()
         }
         running = false;
     } else {
-        // 无效选择，默认使用Web界面
+        // 无效选择，默认选择选项1
         termUtils.printWarning(_("error.invalid_choice"));
-        termUtils.printInfo(_("web.defaulting_to_web"));
-        showWebServerRunningInterface();
+        termUtils.printInfo(_("web.using_both_interfaces"));
+        termUtils.printInfo(_("web.server_continues_background"));
+        std::cout << _("prompt.press_enter");
+        std::cin.get();
     }
 }
 
