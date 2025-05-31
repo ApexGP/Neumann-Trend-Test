@@ -43,7 +43,7 @@ data/csv/*.xlsx
 data/html/*.html
 
 # 资源文件
-docs/README/assets/
+# docs/README/assets/
 
 # 临时文件
 *.tmp

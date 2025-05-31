@@ -71,7 +71,9 @@ A professional statistical analysis tool implementing the Neumann trend test for
 
 _So simple, even your boss can use it_ 😎
 
-![Startup Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Startup Demo Details</strong></summary>
@@ -87,7 +89,9 @@ _So simple, even your boss can use it_ 😎
 
 _Hierarchical menus, one-click navigation, beloved by professional data analysts_ ⚡
 
-![CLI Interface Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>CLI Demo Details</strong></summary>
@@ -103,7 +107,9 @@ _Hierarchical menus, one-click navigation, beloved by professional data analysts
 
 _Beauty meets functionality, making data analysis a visual delight_ ✨
 
-![Web Interface Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Web Demo Details</strong></summary>
@@ -119,7 +125,9 @@ _Beauty meets functionality, making data analysis a visual delight_ ✨
 
 _Witness the moment when data tells its story_ 🔮
 
-![Data Analysis Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Analysis Demo Details</strong></summary>
@@ -135,7 +143,9 @@ _Witness the moment when data tells its story_ 🔮
 
 _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 
-![Batch Processing Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Batch Processing Demo Details</strong></summary>
@@ -153,7 +163,9 @@ _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 
 _One-click Chinese/English switching, internationally sophisticated_ 🌏
 
-![Internationalization Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Internationalization Demo Details</strong></summary>
@@ -169,7 +181,9 @@ _One-click Chinese/English switching, internationally sophisticated_ 🌏
 
 _ASCII art + SVG charts, a dual visual feast_ 📈
 
-![Visualization Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Visualization Demo Details</strong></summary>
@@ -185,7 +199,9 @@ _ASCII art + SVG charts, a dual visual feast_ 📈
 
 _Set once, use forever_ 💝
 
-![Configuration Management Demo](https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.gif)
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.mp4" type="video/mp4">
+</video>
 
 <details>
 <summary>📋 <strong>Configuration Management Demo Details</strong></summary>
