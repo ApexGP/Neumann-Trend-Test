@@ -72,8 +72,10 @@ A professional statistical analysis tool implementing the Neumann trend test for
 _So simple, even your boss can use it_ 😎
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.mp4" type="video/mp4">
+  <source src="assets/zh_CN/startup.mp4" type="video/mp4">
 </video>
+
+![Startup Demo](assets/zh_CN/startup.mp4)
 
 <details>
 <summary>📋 <strong>Startup Demo Details</strong></summary>
@@ -90,8 +92,10 @@ _So simple, even your boss can use it_ 😎
 _Hierarchical menus, one-click navigation, beloved by professional data analysts_ ⚡
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.mp4" type="video/mp4">
+  <source src="assets/zh_CN/cli-interface.mp4" type="video/mp4">
 </video>
+
+![CLI Interface](assets/zh_CN/cli-interface.mp4)
 
 <details>
 <summary>📋 <strong>CLI Demo Details</strong></summary>
@@ -108,8 +112,10 @@ _Hierarchical menus, one-click navigation, beloved by professional data analysts
 _Beauty meets functionality, making data analysis a visual delight_ ✨
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.mp4" type="video/mp4">
+  <source src="assets/zh_CN/web-interface.mp4" type="video/mp4">
 </video>
+
+![Web Interface](assets/zh_CN/web-interface.mp4)
 
 <details>
 <summary>📋 <strong>Web Demo Details</strong></summary>
@@ -126,8 +132,10 @@ _Beauty meets functionality, making data analysis a visual delight_ ✨
 _Witness the moment when data tells its story_ 🔮
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.mp4" type="video/mp4">
+  <source src="assets/zh_CN/data-analysis.mp4" type="video/mp4">
 </video>
+
+![Data Analysis](assets/zh_CN/data-analysis.mp4)
 
 <details>
 <summary>📋 <strong>Analysis Demo Details</strong></summary>
@@ -144,8 +152,10 @@ _Witness the moment when data tells its story_ 🔮
 _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.mp4" type="video/mp4">
+  <source src="assets/zh_CN/batch-processing.mp4" type="video/mp4">
 </video>
+
+![Batch Processing](assets/zh_CN/batch-processing.mp4)
 
 <details>
 <summary>📋 <strong>Batch Processing Demo Details</strong></summary>
@@ -164,8 +174,10 @@ _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 _One-click Chinese/English switching, internationally sophisticated_ 🌏
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.mp4" type="video/mp4">
+  <source src="assets/zh_CN/i18n.mp4" type="video/mp4">
 </video>
+
+![Internationalization Support](assets/zh_CN/i18n.mp4)
 
 <details>
 <summary>📋 <strong>Internationalization Demo Details</strong></summary>
@@ -182,8 +194,10 @@ _One-click Chinese/English switching, internationally sophisticated_ 🌏
 _ASCII art + SVG charts, a dual visual feast_ 📈
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.mp4" type="video/mp4">
+  <source src="assets/zh_CN/visualization.mp4" type="video/mp4">
 </video>
+
+![Data Visualization](assets/zh_CN/visualization.mp4)
 
 <details>
 <summary>📋 <strong>Visualization Demo Details</strong></summary>
@@ -200,8 +214,10 @@ _ASCII art + SVG charts, a dual visual feast_ 📈
 _Set once, use forever_ 💝
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.mp4" type="video/mp4">
+  <source src="assets/zh_CN/config-management.mp4" type="video/mp4">
 </video>
+
+![Configuration Management](assets/zh_CN/config-management.mp4)
 
 <details>
 <summary>📋 <strong>Configuration Management Demo Details</strong></summary>

@@ -72,8 +72,10 @@
 _简单到连你的老板都会用_ 😎
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/startup.mp4" type="video/mp4">
 </video>
+
+![启动演示](docs/README/assets/zh_CN/startup.mp4)
 
 <details>
 <summary>📋 <strong>启动演示内容说明</strong></summary>
@@ -90,8 +92,10 @@ _简单到连你的老板都会用_ 😎
 _分层菜单，一键直达，专业数据分析师的最爱_ ⚡
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/cli-interface.mp4" type="video/mp4">
 </video>
+
+![CLI界面](docs/README/assets/zh_CN/cli-interface.mp4)
 
 <details>
 <summary>📋 <strong>CLI演示内容说明</strong></summary>
@@ -108,8 +112,10 @@ _分层菜单，一键直达，专业数据分析师的最爱_ ⚡
 _颜值即正义，让数据分析变得赏心悦目_ ✨
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/web-interface.mp4" type="video/mp4">
 </video>
+
+![Web界面](docs/README/assets/zh_CN/web-interface.mp4)
 
 <details>
 <summary>📋 <strong>Web演示内容说明</strong></summary>
@@ -126,8 +132,10 @@ _颜值即正义，让数据分析变得赏心悦目_ ✨
 _见证数据说话的神奇时刻_ 🔮
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/data-analysis.mp4" type="video/mp4">
 </video>
+
+![数据分析](docs/README/assets/zh_CN/data-analysis.mp4)
 
 <details>
 <summary>📋 <strong>分析演示内容说明</strong></summary>
@@ -144,8 +152,10 @@ _见证数据说话的神奇时刻_ 🔮
 _一次处理一整个文件夹，让重复工作见鬼去吧_ 🎯
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/batch-processing.mp4" type="video/mp4">
 </video>
+
+![批量处理](docs/README/assets/zh_CN/batch-processing.mp4)
 
 <details>
 <summary>📋 <strong>批量处理演示内容说明</strong></summary>
@@ -164,8 +174,10 @@ _一次处理一整个文件夹，让重复工作见鬼去吧_ 🎯
 _中英文一键切换，国际范儿十足_ 🌏
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/i18n.mp4" type="video/mp4">
 </video>
+
+![国际化支持](docs/README/assets/zh_CN/i18n.mp4)
 
 <details>
 <summary>📋 <strong>国际化演示内容说明</strong></summary>
@@ -182,8 +194,10 @@ _中英文一键切换，国际范儿十足_ 🌏
 _ASCII 艺术 + SVG 图表，双重视觉盛宴_ 📈
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/visualization.mp4" type="video/mp4">
 </video>
+
+![数据可视化](docs/README/assets/zh_CN/visualization.mp4)
 
 <details>
 <summary>📋 <strong>可视化演示内容说明</strong></summary>
@@ -200,8 +214,10 @@ _ASCII 艺术 + SVG 图表，双重视觉盛宴_ 📈
 _配置记忆，一劳永逸_ 💝
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/config-management.mp4" type="video/mp4">
 </video>
+
+![配置管理](docs/README/assets/zh_CN/config-management.mp4)
 
 <details>
 <summary>📋 <strong>配置管理演示内容说明</strong></summary>
