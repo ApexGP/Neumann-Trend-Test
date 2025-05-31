@@ -36,8 +36,14 @@ data/standard*.json
 # 用户私有配置文件
 data/usr/
 
-# svg 导出文件
+# 批量处理导出文件
 data/svg/*.svg
+data/csv/*.csv
+data/csv/*.xlsx
+data/html/*.html
+
+# 资源文件
+docs/README/assets/
 
 # 临时文件
 *.tmp

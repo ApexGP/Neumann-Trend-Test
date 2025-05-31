@@ -72,7 +72,7 @@ if(DEFINED VCPKG_TARGET_TRIPLET)
 endif()
 
 project(NeumannTrendTest 
-    VERSION 2.7.1
+    VERSION 2.9.0
     DESCRIPTION "诺依曼趋势测试工具"
     LANGUAGES CXX)
 
