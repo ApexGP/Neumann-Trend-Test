@@ -1,6 +1,6 @@
 # 诺依曼趋势测试工具 (Neumann Trend Test Tool)
 
-> **Language / 语言**: [English](docs/README/README_en.md) | **中文**
+> **Language / 语言**: [English](README_en.md) | **中文**
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Xyf0606/Neumann-Trend-Test)
 [![Version](https://img.shields.io/badge/version-2.9.0-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
@@ -298,7 +298,7 @@ brew install nlohmann-json             # macOS
 ./build.sh
 ```
 
-详细构建说明请参考 [构建文档](docs/BUILD.md)。
+详细构建说明请参考 [构建文档](https://github.com/Xyf0606/Neumann-Trend-Test/blob/main/docs/BUILD.md)。
 
 ## 🔧 配置说明
 
@@ -372,7 +372,7 @@ brew install nlohmann-json             # macOS
 - **频繁分析**：保存常用数据集
 - **Web 性能**：大数据建议使用 CLI
 
-更多问题请查看 [FAQ](docs/FAQ.md) 或提交 [Issue](https://github.com/Xyf0606/Neumann-Trend-Test/issues)。
+更多问题请查看 [FAQ](https://github.com/Xyf0606/Neumann-Trend-Test/blob/main/docs/FAQ.md) 或提交 [Issue](https://github.com/Xyf0606/Neumann-Trend-Test/issues)。
 
 ## �� 版本信息
 
@@ -413,7 +413,7 @@ ctest --preset linux-debug
 - 更新相关文档
 - 确保 CI 通过
 
-详细指南：[CONTRIBUTING.md](docs/CONTRIBUTING.md)
+详细指南：[CONTRIBUTING.md](https://github.com/Xyf0606/Neumann-Trend-Test/blob/main/docs/CONTRIBUTING.md)
 
 ## 📄 许可证
 
@@ -426,7 +426,7 @@ ctest --preset linux-debug
 **⭐ 如果这个项目对您有帮助，请给我一个 Star！⭐**
 
 [🏠 主页](https://github.com/Xyf0606/Neumann-Trend-Test) •
-[📖 文档](docs/) •
+[📖 文档](https://github.com/Xyf0606/Neumann-Trend-Test/blob/main/docs/) •
 [🐛 报告问题](https://github.com/Xyf0606/Neumann-Trend-Test/issues) •
 [💬 讨论](https://github.com/Xyf0606/Neumann-Trend-Test/discussions)
 

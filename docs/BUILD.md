@@ -28,6 +28,12 @@
 - **Ninja**: 推荐（可选，提升构建速度）
 - **vcpkg**: Windows 平台强烈推荐
 
+### v2.9.0 新增依赖说明
+
+- **Excel 处理引擎**: 使用标准 C++17 实现，无需额外依赖
+- **ZIP 解压功能**: 使用系统命令（Windows PowerShell / Linux unzip）
+- **临时文件管理**: 使用 `std::filesystem` 进行自动清理
+
 ## 依赖安装
 
 ### 核心依赖库

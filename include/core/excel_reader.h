@@ -84,6 +84,79 @@ private:
 
     // 转换字符串到数字
     bool tryParseDouble(const std::string& str, double& result);
+
+    // xlsx文件处理方法
+    /**
+     * @brief 从xlsx文件导入数据
+     */
+    DataSet importFromXlsx(const std::string& filename, const std::string& sheetName,
+                           bool hasHeader);
+
+    /**
+     * @brief 解压xlsx文件到临时目录
+     */
+    std::string extractXlsxToTemp(const std::string& filename);
+
+    /**
+     * @brief 读取共享字符串表
+     */
+    std::vector<std::string> readSharedStrings(const std::string& filePath);
+
+    /**
+     * @brief 查找工作表文件
+     */
+    std::string findWorksheet(const std::string& tempDir, const std::string& sheetName);
+
+    /**
+     * @brief 读取工作表数据
+     */
+    std::vector<std::vector<std::string>> readWorksheetData(
+        const std::string& worksheetPath, const std::vector<std::string>& sharedStrings);
+
+    /**
+     * @brief 解析行中的单元格
+     */
+    std::vector<std::string> parseCellsInRow(const std::string& rowContent,
+                                             const std::vector<std::string>& sharedStrings);
+
+    /**
+     * @brief 提取单元格值
+     */
+    std::string extractCellValue(const std::string& cellXml,
+                                 const std::vector<std::string>& sharedStrings);
+
+    /**
+     * @brief 处理工作表数据
+     */
+    DataSet processWorksheetData(const std::vector<std::vector<std::string>>& rawData,
+                                 bool hasHeader);
+
+    /**
+     * @brief 解码XML实体
+     */
+    std::string decodeXmlEntities(const std::string& text);
+
+    /**
+     * @brief 清理临时目录
+     */
+    void cleanupTempDir(const std::string& tempDir);
+
+    /**
+     * @brief 获取xlsx文件的工作表名称
+     */
+    std::vector<std::string> getXlsxSheetNames(const std::string& filename);
+
+    /**
+     * @brief 预览CSV数据
+     */
+    std::vector<std::vector<std::string>> previewCsvData(const std::string& filename, int maxRows);
+
+    /**
+     * @brief 预览xlsx数据
+     */
+    std::vector<std::vector<std::string>> previewXlsxData(const std::string& filename,
+                                                          const std::string& sheetName,
+                                                          int maxRows);
 };
 
 }  // namespace neumann

@@ -112,11 +112,13 @@ void TerminalUI::initializeMenus()
     Menu advancedMenu;
     advancedMenu.id = "advanced";
     advancedMenu.title = "menu.advanced";
-    advancedMenu.items = {{"visualization", "menu.visualization", MenuItemType::ACTION, "",
-                           [this]() { showDataVisualization(); }},
-                          {"statistics", "menu.statistics", MenuItemType::ACTION, "",
-                           [this]() { showStatisticsAnalysis(); }},
-                          {"back", "menu.back", MenuItemType::BACK, "", nullptr}};
+    advancedMenu.items = {
+        {"visualization", "menu.visualization", MenuItemType::ACTION, "",
+         [this]() { showDataVisualization(); }},
+        {"statistics", "menu.statistics", MenuItemType::ACTION, "",
+         [this]() { showStatisticsAnalysis(); }},
+        {"view_svg", "menu.view_svg", MenuItemType::ACTION, "", [this]() { showSVGViewer(); }},
+        {"back", "menu.back", MenuItemType::BACK, "", nullptr}};
     menus[advancedMenu.id] = advancedMenu;
 }
 
@@ -448,7 +450,7 @@ void TerminalUI::importFromExcel()
     // 检查文件类型
     if (!ExcelReader::isExcelFile(filePath)) {
         termUtils.printError(_("excel.unsupported_format"));
-        termUtils.printInfo("请将Excel文件转换为CSV格式后重试");
+        termUtils.printInfo(_("excel.convert_suggestion"));
         std::cout << _("prompt.press_enter");
         std::cin.get();
         return;
@@ -460,19 +462,26 @@ void TerminalUI::importFromExcel()
     ExcelReader reader;
 
     try {
-        // 如果是真正的Excel文件，获取工作表列表
+        // 获取文件扩展名
         std::string lowerPath = filePath;
         std::transform(lowerPath.begin(), lowerPath.end(), lowerPath.begin(), ::tolower);
-        if ((lowerPath.length() >= 5 && lowerPath.substr(lowerPath.length() - 5) == ".xlsx") ||
-            (lowerPath.length() >= 4 && lowerPath.substr(lowerPath.length() - 4) == ".xls")) {
-            termUtils.printError(_("excel.unsupported_format"));
-            termUtils.printInfo("请将Excel文件转换为CSV格式后重试");
+
+        if ((lowerPath.length() >= 5 && lowerPath.substr(lowerPath.length() - 5) == ".xlsx")) {
+            // xlsx文件 - 直接处理
+            termUtils.printInfo(_("excel.processing_xlsx"));
+        } else if ((lowerPath.length() >= 4 &&
+                    lowerPath.substr(lowerPath.length() - 4) == ".xls")) {
+            // xls文件 - 提示不支持
+            termUtils.printError(_("excel.xls_not_supported"));
+            termUtils.printInfo(_("excel.xls_convert_suggestion"));
             std::cout << _("prompt.press_enter");
             std::cin.get();
             return;
+        } else {
+            // CSV文件 - 按CSV处理
+            termUtils.printInfo(_("excel.processing_csv"));
         }
 
-        // 对于CSV文件，直接进行处理
         termUtils.showSpinner(_("progress.importing") + "...", 1000);
 
         // 询问是否有表头
@@ -1099,7 +1108,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.7.1" << std::endl;
+    std::cout << " v2.9.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -1720,20 +1729,60 @@ void TerminalUI::runBatchProcessing()
 
             if (!filename.empty()) {
                 bool success = false;
+                std::string fullPath;
+
+                // 获取数据目录配置
+                auto &config = Config::getInstance();
+                std::string dataDir = config.getDataDirectory();
+
                 if (formatChoice == 1) {
+                    // CSV格式 - 保存到 data/csv/ 目录
                     if (!endsWith(filename, ".csv")) {
                         filename += ".csv";
                     }
-                    success = BatchProcessor::exportResultsToCSV(results, filename);
+
+                    std::string csvDir = dataDir + "/csv";
+                    if (!fs::exists(csvDir)) {
+                        try {
+                            fs::create_directories(csvDir);
+                        }
+                        catch (const std::exception &e) {
+                            std::cout << _("batch.save_failed") << ": " << e.what() << std::endl;
+                            std::cout << std::endl;
+                            std::cout << _("prompt.press_enter") << std::endl;
+                            std::cin.get();
+                            return;
+                        }
+                    }
+
+                    fullPath = csvDir + "/" + filename;
+                    success = BatchProcessor::exportResultsToCSV(results, fullPath);
                 } else if (formatChoice == 2) {
+                    // HTML格式 - 保存到 data/html/ 目录
                     if (!endsWith(filename, ".html")) {
                         filename += ".html";
                     }
-                    success = BatchProcessor::exportResultsToHTML(results, filename);
+
+                    std::string htmlDir = dataDir + "/html";
+                    if (!fs::exists(htmlDir)) {
+                        try {
+                            fs::create_directories(htmlDir);
+                        }
+                        catch (const std::exception &e) {
+                            std::cout << _("batch.save_failed") << ": " << e.what() << std::endl;
+                            std::cout << std::endl;
+                            std::cout << _("prompt.press_enter") << std::endl;
+                            std::cin.get();
+                            return;
+                        }
+                    }
+
+                    fullPath = htmlDir + "/" + filename;
+                    success = BatchProcessor::exportResultsToHTML(results, fullPath);
                 }
 
                 if (success) {
-                    std::cout << _("batch.results_saved") << ": " << filename << std::endl;
+                    std::cout << _("batch.results_saved") << ": " << fullPath << std::endl;
                 } else {
                     std::cout << _("batch.save_failed") << std::endl;
                 }
@@ -2613,6 +2662,184 @@ void TerminalUI::autoStartWebServerAndBrowser()
         std::cout << _("prompt.press_enter");
         std::cin.get();
     }
+}
+
+void TerminalUI::showSVGViewer()
+{
+    clearScreen();
+    auto &termUtils = TerminalUtils::getInstance();
+    auto &config = Config::getInstance();
+
+    termUtils.printColor("===== " + _("menu.view_svg") + " =====", Color::BRIGHT_CYAN,
+                         TextStyle::BOLD);
+    std::cout << std::endl;
+
+    // 获取SVG目录路径
+    std::string dataDir = config.getDataDirectory();
+    fs::path svgDir = fs::path(dataDir) / "svg";
+
+    // 检查SVG目录是否存在
+    if (!fs::exists(svgDir)) {
+        termUtils.printWarning(_("svg.directory_not_found"));
+        termUtils.printInfo(_("svg.directory_path") + ": " + svgDir.string());
+        termUtils.printInfo(_("svg.create_charts_first"));
+        std::cout << std::endl;
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
+        return;
+    }
+
+    // 扫描SVG文件
+    std::vector<std::string> svgFiles;
+    try {
+        for (const auto &entry : fs::directory_iterator(svgDir)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".svg") {
+                svgFiles.push_back(entry.path().filename().string());
+            }
+        }
+    }
+    catch (const std::exception &e) {
+        termUtils.printError(_("svg.scan_error") + ": " + e.what());
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
+        return;
+    }
+
+    if (svgFiles.empty()) {
+        termUtils.printInfo(_("svg.no_files_found"));
+        termUtils.printInfo(_("svg.generate_suggestion"));
+        std::cout << std::endl;
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
+        return;
+    }
+
+    // 排序文件列表
+    std::sort(svgFiles.begin(), svgFiles.end());
+
+    // 显示文件列表
+    termUtils.printSuccess(_("svg.files_found") + ": " + std::to_string(svgFiles.size()));
+    std::cout << std::endl;
+
+    std::cout << _("svg.available_files") << std::endl;
+    for (size_t i = 0; i < svgFiles.size(); ++i) {
+        std::cout << (i + 1) << ". " << svgFiles[i];
+
+        // 显示文件大小和修改时间
+        try {
+            fs::path filePath = svgDir / svgFiles[i];
+            auto fileSize = fs::file_size(filePath);
+            auto lastWrite = fs::last_write_time(filePath);
+
+            std::cout << " (" << (fileSize / 1024) << " KB)";
+        }
+        catch (...) {
+            // 忽略文件信息获取错误
+        }
+
+        std::cout << std::endl;
+    }
+    std::cout << "0. " << _("menu.back") << std::endl;
+    std::cout << std::endl;
+
+    // 选择文件
+    std::cout << _("svg.select_file") << " [0-" << svgFiles.size() << "]: ";
+    int choice;
+    std::cin >> choice;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    if (choice == 0) {
+        return;
+    }
+
+    if (choice < 1 || choice > static_cast<int>(svgFiles.size())) {
+        termUtils.printError(_("error.invalid_choice"));
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
+        return;
+    }
+
+    // 获取选择的文件
+    std::string selectedFile = svgFiles[choice - 1];
+    fs::path fullPath = svgDir / selectedFile;
+
+    // 显示文件信息
+    std::cout << std::endl;
+    termUtils.printInfo(_("svg.selected_file") + ": " + selectedFile);
+    termUtils.printInfo(_("svg.file_path") + ": " + fullPath.string());
+
+    try {
+        auto fileSize = fs::file_size(fullPath);
+        termUtils.printInfo(_("svg.file_size") + ": " + std::to_string(fileSize / 1024) + " KB");
+    }
+    catch (...) {
+        // 忽略文件大小获取错误
+    }
+
+    std::cout << std::endl;
+
+    // 提供操作选项
+    std::cout << _("svg.action_options") << std::endl;
+    std::cout << "1. " << _("svg.open_browser") << std::endl;
+    std::cout << "2. " << _("svg.show_file_location") << std::endl;
+    std::cout << "3. " << _("menu.back") << std::endl;
+    std::cout << std::endl;
+    std::cout << _("prompt.select_option") << " [1-3]: ";
+
+    int action;
+    std::cin >> action;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    switch (action) {
+        case 1: {
+            // 用浏览器打开SVG文件
+            termUtils.printInfo(_("svg.opening_browser"));
+
+            std::string openCommand;
+            std::string absolutePath = fs::absolute(fullPath).string();
+
+#ifdef _WIN32
+            // Windows: 使用 start 命令
+            openCommand = "start \"\" \"" + absolutePath + "\"";
+#elif __APPLE__
+            // macOS: 使用 open 命令
+            openCommand = "open \"" + absolutePath + "\"";
+#else
+            // Linux: 使用 xdg-open 命令
+            openCommand = "xdg-open \"" + absolutePath + "\"";
+#endif
+
+            int result = std::system(openCommand.c_str());
+            if (result == 0) {
+                termUtils.printSuccess(_("svg.browser_opened"));
+                termUtils.printInfo(_("svg.browser_instruction"));
+            } else {
+                termUtils.printError(_("svg.browser_failed"));
+                termUtils.printInfo(_("svg.manual_open_instruction"));
+                termUtils.printInfo(_("svg.file_location") + ": " + absolutePath);
+            }
+            break;
+        }
+        case 2: {
+            // 显示文件位置
+            termUtils.printInfo(_("svg.file_location") + ":");
+            std::cout << "  " << fs::absolute(fullPath).string() << std::endl;
+            std::cout << std::endl;
+            termUtils.printInfo(_("svg.copy_path_instruction"));
+            break;
+        }
+        case 3:
+            return;
+        default:
+            termUtils.printError(_("error.invalid_choice"));
+            break;
+    }
+
+    std::cout << std::endl;
+    std::cout << _("prompt.press_enter") << std::endl;
+    std::cin.get();
 }
 
 }}  // namespace neumann::cli

@@ -138,6 +138,9 @@ private:
     void showDataVisualization();
     void showStatisticsAnalysis();
 
+    // SVG 查看器
+    void showSVGViewer();
+
     // 询问用户输入数据
     std::vector<double> promptForData(const std::string &prompt);
 
