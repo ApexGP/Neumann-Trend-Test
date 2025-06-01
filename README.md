@@ -75,7 +75,7 @@ _简单到连你的老板都会用_ 😎
   <source src="docs/README/assets/zh_CN/startup.mp4" type="video/mp4">
 </video>
 
-![启动演示](docs/README/assets/zh_CN/startup.mp4)
+https://github.com/user-attachments/assets/1c2286bc-bd08-4dd2-b907-ede47b4e40c2
 
 <details>
 <summary>📋 <strong>启动演示内容说明</strong></summary>
@@ -95,7 +95,7 @@ _分层菜单，一键直达，专业数据分析师的最爱_ ⚡
   <source src="docs/README/assets/zh_CN/cli-interface.mp4" type="video/mp4">
 </video>
 
-![CLI界面](docs/README/assets/zh_CN/cli-interface.mp4)
+https://github.com/user-attachments/assets/59129d8d-25f2-4558-8cb3-a2d56b55b6a2
 
 <details>
 <summary>📋 <strong>CLI演示内容说明</strong></summary>
@@ -115,7 +115,7 @@ _颜值即正义，让数据分析变得赏心悦目_ ✨
   <source src="docs/README/assets/zh_CN/web-interface.mp4" type="video/mp4">
 </video>
 
-![Web界面](docs/README/assets/zh_CN/web-interface.mp4)
+https://github.com/user-attachments/assets/10787d10-9b9e-473b-853b-9d516a224c20
 
 <details>
 <summary>📋 <strong>Web演示内容说明</strong></summary>
@@ -135,7 +135,7 @@ _见证数据说话的神奇时刻_ 🔮
   <source src="docs/README/assets/zh_CN/data-analysis.mp4" type="video/mp4">
 </video>
 
-![数据分析](docs/README/assets/zh_CN/data-analysis.mp4)
+https://github.com/user-attachments/assets/61fa2714-9015-4f53-a02e-9bda550ec2cc
 
 <details>
 <summary>📋 <strong>分析演示内容说明</strong></summary>
@@ -155,7 +155,7 @@ _一次处理一整个文件夹，让重复工作见鬼去吧_ 🎯
   <source src="docs/README/assets/zh_CN/batch-processing.mp4" type="video/mp4">
 </video>
 
-![批量处理](docs/README/assets/zh_CN/batch-processing.mp4)
+https://github.com/user-attachments/assets/af3c8542-f1c7-40ba-852a-625bccbe95d4
 
 <details>
 <summary>📋 <strong>批量处理演示内容说明</strong></summary>
@@ -177,7 +177,7 @@ _中英文一键切换，国际范儿十足_ 🌏
   <source src="docs/README/assets/zh_CN/i18n.mp4" type="video/mp4">
 </video>
 
-![国际化支持](docs/README/assets/zh_CN/i18n.mp4)
+https://github.com/user-attachments/assets/cb455ee6-dd2e-411f-8ad6-776ac35370bf
 
 <details>
 <summary>📋 <strong>国际化演示内容说明</strong></summary>
@@ -197,7 +197,7 @@ _ASCII 艺术 + SVG 图表，双重视觉盛宴_ 📈
   <source src="docs/README/assets/zh_CN/visualization.mp4" type="video/mp4">
 </video>
 
-![数据可视化](docs/README/assets/zh_CN/visualization.mp4)
+https://github.com/user-attachments/assets/771c70a0-bec0-417c-ab7a-f08ef48cc9b8
 
 <details>
 <summary>📋 <strong>可视化演示内容说明</strong></summary>
@@ -217,7 +217,7 @@ _配置记忆，一劳永逸_ 💝
   <source src="docs/README/assets/zh_CN/config-management.mp4" type="video/mp4">
 </video>
 
-![配置管理](docs/README/assets/zh_CN/config-management.mp4)
+https://github.com/user-attachments/assets/af128832-268c-41ef-bbd7-c13a06287c6b
 
 <details>
 <summary>📋 <strong>配置管理演示内容说明</strong></summary>
