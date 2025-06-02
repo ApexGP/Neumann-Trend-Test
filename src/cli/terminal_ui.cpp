@@ -2,25 +2,36 @@
 
 #include <algorithm>
 #include <cctype>
-#include <cstddef>
+#include <chrono>
+#include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <memory>
+#include <set>
 #include <sstream>
+#include <string>
 #include <thread>
 
+#ifdef _WIN32
+#include <windows.h>  // Windows API函数
+#endif
+
+#include "cli/data_editor.h"
+#include "cli/file_browser.h"
 #include "cli/terminal_utils.h"
 #include "core/batch_processor.h"
 #include "core/config.h"
+#include "core/data_manager.h"
 #include "core/data_visualization.h"
+#include "core/error_handler.h"
 #include "core/excel_reader.h"
 #include "core/i18n.h"
+#include "core/neumann_calculator.h"
 #include "core/standard_values.h"
-
-// Web服务器头文件放在最后，避免与其他头文件冲突
 #include "web/web_server.h"
 
 namespace fs = std::filesystem;
@@ -34,6 +45,247 @@ static bool endsWith(const std::string &str, const std::string &suffix)
         return false;
     }
     return str.substr(str.length() - suffix.length()) == suffix;
+}
+
+// 获取浏览器实际安装路径的辅助函数
+static std::string getBrowserPath(const std::string &browserName)
+{
+#ifdef _WIN32
+    std::vector<std::string> commonPaths;
+    if (browserName == "msedge.exe") {
+        commonPaths = {"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+                       "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"};
+    } else if (browserName == "chrome.exe") {
+        commonPaths = {"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                       "$env:USERPROFILE\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"};
+    }
+
+    for (const auto &path : commonPaths) {
+        std::string checkCmd = "if exist \"" + path + "\" exit 0 else exit 1";
+        if (std::system(checkCmd.c_str()) == 0) {
+            return path;
+        }
+    }
+
+    // 如果都没找到，返回默认值
+    return browserName;
+#else
+    return browserName;
+#endif
+}
+
+// 检测浏览器是否安装的辅助函数
+static bool isBrowserInstalled(const std::string &browserName)
+{
+#ifdef _WIN32
+    // 先尝试 PATH 中查找
+    std::string whereCommand = "where.exe " + browserName + " >nul 2>&1";
+    int whereResult = std::system(whereCommand.c_str());
+
+    if (whereResult == 0) {
+        return true;
+    }
+
+    // PATH中没找到，检查常见安装路径
+    std::vector<std::string> commonPaths;
+    if (browserName == "msedge.exe") {
+        commonPaths = {"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+                       "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"};
+    } else if (browserName == "chrome.exe") {
+        commonPaths = {"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                       "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                       "$env:USERPROFILE\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"};
+    }
+
+    for (const auto &path : commonPaths) {
+        // 使用 if exist 命令检查文件是否存在
+        std::string checkCmd = "if exist \"" + path + "\" exit 0 else exit 1";
+        int pathResult = std::system(checkCmd.c_str());
+
+        if (pathResult == 0) {
+            return true;
+        }
+    }
+
+    return false;
+#else
+    std::string command = "which " + browserName + " >/dev/null 2>&1";
+    return std::system(command.c_str()) == 0;
+#endif
+}
+
+// 静默打开浏览器（不抢夺焦点）
+// 终极方案：使用AttachThreadInput技术 + 焦点恢复
+static int openBrowserSilently(const std::string &url)
+{
+#ifdef _WIN32
+    // 保存当前窗口句柄和线程ID
+    HWND currentWindow = GetForegroundWindow();
+    DWORD currentThreadId = GetCurrentThreadId();
+
+    // 方案：使用CreateProcess + STARTUPINFO控制窗口状态
+    if (isBrowserInstalled("msedge.exe")) {
+        // 使用动态获取的路径
+        std::string edgePath = getBrowserPath("msedge.exe");
+        std::string commandLine = "\"" + edgePath + "\" \"" + url + "\"";
+
+        STARTUPINFOA si;
+        PROCESS_INFORMATION pi;
+
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        si.dwFlags = STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_SHOWMINNOACTIVE;  // 最小化不激活
+
+        ZeroMemory(&pi, sizeof(pi));
+
+        // 创建进程
+        BOOL result = CreateProcessA(NULL, const_cast<char *>(commandLine.c_str()), NULL, NULL,
+                                     FALSE, 0, NULL, NULL, &si, &pi);
+
+        if (result) {
+            // 等待浏览器启动
+            Sleep(2000);
+
+            // 使用AttachThreadInput技术确保焦点控制
+            if (currentWindow) {
+                // 查找浏览器窗口
+                HWND browserWindow = NULL;
+                EnumWindows(
+                    [](HWND hwnd, LPARAM lParam) -> BOOL {
+                        DWORD windowPid;
+                        GetWindowThreadProcessId(hwnd, &windowPid);
+                        DWORD targetPid = *reinterpret_cast<DWORD *>(lParam);
+
+                        if (windowPid == targetPid && IsWindowVisible(hwnd)) {
+                            *reinterpret_cast<HWND *>(lParam) = hwnd;
+                            return FALSE;  // 停止枚举
+                        }
+                        return TRUE;  // 继续枚举
+                    },
+                    reinterpret_cast<LPARAM>(&pi.dwProcessId));
+
+                // 如果找到了浏览器窗口，使用AttachThreadInput技术
+                if (browserWindow) {
+                    DWORD browserThreadId = GetWindowThreadProcessId(browserWindow, NULL);
+
+                    // 附加线程输入队列
+                    if (AttachThreadInput(currentThreadId, browserThreadId, TRUE)) {
+                        // 设置焦点回当前窗口
+                        SetForegroundWindow(currentWindow);
+                        SetActiveWindow(currentWindow);
+                        SetFocus(currentWindow);
+
+                        // 确保浏览器窗口最小化
+                        ShowWindow(browserWindow, SW_MINIMIZE);
+
+                        // 分离线程输入队列
+                        AttachThreadInput(currentThreadId, browserThreadId, FALSE);
+                    }
+                } else {
+                    // 回退方案：直接设置焦点
+                    SetForegroundWindow(currentWindow);
+                }
+            }
+
+            // 清理句柄
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+            return 0;
+        }
+
+        // CreateProcess失败，使用回退方案
+        std::string command = "cmd /c start /MIN \"\" \"" + edgePath + "\" \"" + url + "\"";
+        return std::system(command.c_str());
+    } else if (isBrowserInstalled("chrome.exe")) {
+        // Chrome的完整实现（与Edge相同的逻辑）
+        std::string chromePath = getBrowserPath("chrome.exe");
+        std::string commandLine = "\"" + chromePath + "\" \"" + url + "\"";
+
+        STARTUPINFOA si;
+        PROCESS_INFORMATION pi;
+
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        si.dwFlags = STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_SHOWMINNOACTIVE;  // 最小化不激活
+
+        ZeroMemory(&pi, sizeof(pi));
+
+        // 创建进程
+        BOOL result = CreateProcessA(NULL, const_cast<char *>(commandLine.c_str()), NULL, NULL,
+                                     FALSE, 0, NULL, NULL, &si, &pi);
+
+        if (result) {
+            // 等待浏览器启动
+            Sleep(2000);
+
+            // 使用AttachThreadInput技术确保焦点控制
+            if (currentWindow) {
+                // 查找浏览器窗口
+                HWND browserWindow = NULL;
+                EnumWindows(
+                    [](HWND hwnd, LPARAM lParam) -> BOOL {
+                        DWORD windowPid;
+                        GetWindowThreadProcessId(hwnd, &windowPid);
+                        DWORD targetPid = *reinterpret_cast<DWORD *>(lParam);
+
+                        if (windowPid == targetPid && IsWindowVisible(hwnd)) {
+                            *reinterpret_cast<HWND *>(lParam) = hwnd;
+                            return FALSE;  // 停止枚举
+                        }
+                        return TRUE;  // 继续枚举
+                    },
+                    reinterpret_cast<LPARAM>(&pi.dwProcessId));
+
+                // 如果找到了浏览器窗口，使用AttachThreadInput技术
+                if (browserWindow) {
+                    DWORD browserThreadId = GetWindowThreadProcessId(browserWindow, NULL);
+
+                    // 附加线程输入队列
+                    if (AttachThreadInput(currentThreadId, browserThreadId, TRUE)) {
+                        // 设置焦点回当前窗口
+                        SetForegroundWindow(currentWindow);
+                        SetActiveWindow(currentWindow);
+                        SetFocus(currentWindow);
+
+                        // 确保浏览器窗口最小化
+                        ShowWindow(browserWindow, SW_MINIMIZE);
+
+                        // 分离线程输入队列
+                        AttachThreadInput(currentThreadId, browserThreadId, FALSE);
+                    }
+                } else {
+                    // 回退方案：直接设置焦点
+                    SetForegroundWindow(currentWindow);
+                }
+            }
+
+            // 清理句柄
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+            return 0;
+        }
+
+        // CreateProcess失败，使用回退方案
+        std::string command = "cmd /c start /MIN \"\" \"" + chromePath + "\" \"" + url + "\"";
+        return std::system(command.c_str());
+    } else {
+        // 回退方案：最小化启动
+        std::string command = "cmd /c start /MIN \"\" \"" + url + "\"";
+        return std::system(command.c_str());
+    }
+
+#elif __APPLE__
+    // macOS: 使用 -g 参数在后台启动，不抢夺焦点
+    std::string openCommand = "open -g \"" + url + "\"";
+    return std::system(openCommand.c_str());
+#else
+    // Linux: 在后台启动，不抢夺焦点
+    std::string openCommand = "nohup xdg-open \"" + url + "\" >/dev/null 2>&1 &";
+    return std::system(openCommand.c_str());
+#endif
 }
 
 TerminalUI::TerminalUI() : currentMenuId("main"), running(false), webServer(nullptr)
@@ -262,6 +514,24 @@ std::vector<double> TerminalUI::promptForTimePoints(const std::string &prompt, s
     return timePoints;
 }
 
+std::pair<std::vector<double>, std::vector<double>> TerminalUI::promptForDataModern(
+    const std::string &prompt)
+{
+    // 配置数据编辑器
+    DataEditor::EditorConfig config;
+    config.enableVimKeys = true;
+    config.showRowNumbers = true;
+    config.maxDisplayItems = 0;  // 自动计算
+    config.timeLabel = _("ui.time_column");
+    config.dataLabel = _("ui.data_column");
+
+    // 创建数据编辑器
+    DataEditor editor(config);
+
+    // 启动数据编辑界面
+    return editor.editData(prompt);
+}
+
 void TerminalUI::loadDataSet()
 {
     clearScreen();
@@ -344,14 +614,17 @@ void TerminalUI::importFromCSV()
     std::cout << "===== " << _("menu.import_csv") << " =====" << std::endl;
     std::cout << std::endl;
 
-    // 获取CSV文件路径
-    std::cout << _("input.filename") << " (" << _("input.exit_hint") << "): ";
-    std::string filePath;
-    std::getline(std::cin, filePath);
+    // 使用现代化文件浏览器
+    FileBrowser::BrowserConfig config;
+    config.enableVimKeys = true;     // 启用Vim快捷键
+    config.showFileSize = true;      // 显示文件大小
+    config.showHiddenFiles = false;  // 不显示隐藏文件
 
-    // 检查是否要退出
-    if (filePath.empty() || filePath == "q" || filePath == "Q" || filePath == "quit" ||
-        filePath == "exit") {
+    FileBrowser browser(config);
+    std::string filePath = browser.selectFile(_("menu.import_csv"), false, ".");
+
+    // 检查是否要退出 - 文件浏览器返回空字符串表示用户退出
+    if (filePath.empty()) {
         return;
     }
 
@@ -427,14 +700,19 @@ void TerminalUI::importFromExcel()
     std::cout << "===== " << _("menu.import_excel") << " =====" << std::endl;
     std::cout << std::endl;
 
-    // 获取Excel文件路径
-    std::cout << _("input.filename") << " (" << _("input.exit_hint") << "): ";
-    std::string filePath;
-    std::getline(std::cin, filePath);
+    // 获取Excel文件路径 - 使用tab补全
+    auto &termUtils = TerminalUtils::getInstance();
+    termUtils.printInfo(_("input.tab_completion_hint"));
+    std::string filePath =
+        termUtils.promptForFilePath(_("input.filename") + " (" + _("input.exit_hint") + "): ");
 
-    // 检查是否要退出
-    if (filePath.empty() || filePath == "q" || filePath == "Q" || filePath == "quit" ||
-        filePath == "exit") {
+    // 检查是否要退出 - 文件浏览器返回空字符串表示用户退出
+    if (filePath.empty()) {
+        return;
+    }
+
+    // 检查其他退出条件
+    if (filePath == "q" || filePath == "Q" || filePath == "quit" || filePath == "exit") {
         return;
     }
 
@@ -444,8 +722,6 @@ void TerminalUI::importFromExcel()
         std::cin.get();
         return;
     }
-
-    auto &termUtils = TerminalUtils::getInstance();
 
     // 检查文件类型
     if (!ExcelReader::isExcelFile(filePath)) {
@@ -584,14 +860,28 @@ void TerminalUI::runNeumannTest()
     std::cout << "===== " << _("menu.new_test") << " =====" << std::endl;
     std::cout << std::endl;
 
-    // 询问数据点
-    std::vector<double> dataPoints = promptForData(_("input.data_points"));
+    // 显示输入提示
+    std::cout << _("test.modern_input_hint") << std::endl;
+    std::cout << "• " << _("test.modern_input_navigation") << std::endl;
+    std::cout << "• " << _("test.modern_input_edit") << std::endl;
+    std::cout << "• " << _("test.modern_input_save") << std::endl;
+    std::cout << "• " << _("test.modern_input_exit") << std::endl;
+    std::cout << std::endl;
+    std::cout << _("prompt.press_enter_to_continue");
+    std::cin.get();
 
-    // 检查是否用户选择退出
-    if (dataPoints.empty()) {
+    // 使用现代化数据输入界面
+    auto result = promptForDataModern(_("input.enter_test_data"));
+
+    // 检查是否用户取消
+    if (result.first.empty() || result.second.empty()) {
         return;
     }
 
+    std::vector<double> timePoints = result.first;
+    std::vector<double> dataPoints = result.second;
+
+    // 检查数据点数量
     if (dataPoints.size() < 4) {
         std::cout << _("error.insufficient_data") << std::endl;
         std::cout << _("prompt.press_enter");
@@ -599,9 +889,15 @@ void TerminalUI::runNeumannTest()
         return;
     }
 
-    // 询问时间点
-    std::vector<double> timePoints =
-        promptForTimePoints(_("test.use_default_timepoints"), dataPoints.size());
+    // 显示输入的数据概览
+    std::cout << std::endl;
+    std::cout << "===== " << _("test.data_summary") << " =====" << std::endl;
+    std::cout << _("test.data_points_count") << ": " << dataPoints.size() << std::endl;
+    std::cout << _("test.time_range") << ": " << timePoints.front() << " - " << timePoints.back()
+              << std::endl;
+    std::cout << _("test.data_range") << ": "
+              << *std::min_element(dataPoints.begin(), dataPoints.end()) << " - "
+              << *std::max_element(dataPoints.begin(), dataPoints.end()) << std::endl;
 
     // 使用配置中的置信水平
     auto &config = Config::getInstance();
@@ -1108,7 +1404,7 @@ void TerminalUI::showAbout()
 
     // 程序信息
     termUtils.printColor(_("app.title"), Color::BRIGHT_GREEN, TextStyle::BOLD);
-    std::cout << " v2.9.0" << std::endl;
+    std::cout << " v3.0.0" << std::endl;
     std::cout << "Copyright © 2025" << std::endl;
     std::cout << std::endl;
 
@@ -1602,197 +1898,245 @@ void TerminalUI::displayStatusBar()
 
 void TerminalUI::runBatchProcessing()
 {
-    clearScreen();
-    std::cout << "===== " << _("menu.batch_process") << " =====" << std::endl;
-    std::cout << std::endl;
+    while (true) {  // 添加循环，确保用户取消操作时能重新回到菜单
+        clearScreen();
+        std::cout << "===== " << _("menu.batch_process") << " =====" << std::endl;
+        std::cout << std::endl;
 
-    // 询问处理模式
-    std::cout << _("batch.select_mode") << std::endl;
-    std::cout << "1. " << _("batch.process_directory") << std::endl;
-    std::cout << "2. " << _("batch.process_files") << std::endl;
-    std::cout << "3. " << _("menu.back") << std::endl;
-    std::cout << std::endl;
-    std::cout << _("prompt.select_option") << " [1-3]: ";
+        // 询问处理模式
+        std::cout << _("batch.select_mode") << std::endl;
+        std::cout << "1. " << _("batch.process_directory") << std::endl;
+        std::cout << "2. " << _("batch.process_files") << std::endl;
+        std::cout << "3. " << _("menu.back") << std::endl;
+        std::cout << std::endl;
+        std::cout << _("prompt.select_option") << " [1-3]: ";
 
-    int choice;
-    std::cin >> choice;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        int choice;
+        std::cin >> choice;
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    std::vector<BatchProcessResult> results;
-    auto &config = Config::getInstance();
-    BatchProcessor processor(config.getDefaultConfidenceLevel());
+        std::vector<BatchProcessResult> results;
+        auto &config = Config::getInstance();
+        BatchProcessor processor(config.getDefaultConfidenceLevel());
 
-    switch (choice) {
-        case 1: {
-            // 处理目录
-            std::cout << _("batch.enter_directory") << ": ";
-            std::string directory;
-            std::getline(std::cin, directory);
+        switch (choice) {
+            case 1: {
+                // 处理目录 - 使用tab补全
+                auto &termUtils = TerminalUtils::getInstance();
+                termUtils.printInfo(_("input.tab_completion_directory_hint"));
+                std::string directory =
+                    termUtils.promptForDirectory(_("batch.enter_directory") + ": ");
 
-            if (directory.empty()) {
-                return;
+                if (directory.empty()) {
+                    continue;  // 用户取消操作，重新显示菜单
+                }
+
+                std::cout << std::endl;
+                std::cout << _("batch.processing") << "..." << std::endl;
+
+                // 进度回调
+                auto progressCallback = [](int current, int total, const std::string &filename) {
+                    // 只显示文件名，不显示完整路径
+                    fs::path filePath(filename);
+                    std::string displayName = filePath.filename().string();
+
+                    // 如果文件名太长，进行截断
+                    const size_t maxDisplayLength = 50;
+                    if (displayName.length() > maxDisplayLength) {
+                        displayName = displayName.substr(0, maxDisplayLength - 3) + "...";
+                    }
+
+                    // 构建进度信息并显示在新行上
+                    std::string progressInfo = _("batch.progress") + ": " +
+                                               std::to_string(current) + "/" +
+                                               std::to_string(total) + " - " + displayName;
+
+                    // 每个文件的进度显示在新的一行上（竖直显示）
+                    std::cout << progressInfo << std::endl;
+                };
+
+                results = processor.processDirectory(directory, progressCallback);
+                std::cout << std::endl;
+                break;
             }
+            case 2: {
+                // 处理指定文件 - 使用tab补全
+                auto &termUtils = TerminalUtils::getInstance();
+                termUtils.printInfo(_("input.tab_completion_files_hint"));
+                std::cout << _("batch.enter_files") << " (" << _("prompt.separator_help") << "): ";
+                std::string filesInput;
+                std::getline(std::cin, filesInput);
 
-            std::cout << std::endl;
-            std::cout << _("batch.processing") << "..." << std::endl;
+                if (filesInput.empty()) {
+                    continue;  // 用户取消操作，重新显示菜单
+                }
 
-            // 进度回调
-            auto progressCallback = [](int current, int total, const std::string &filename) {
-                std::cout << "\r" << _("batch.progress") << ": " << current << "/" << total << " - "
-                          << filename << std::flush;
-            };
+                // 解析文件列表
+                std::vector<std::string> files;
+                std::stringstream ss(filesInput);
+                std::string file;
+                while (std::getline(ss, file, ',')) {
+                    // 去除前后空格
+                    file.erase(0, file.find_first_not_of(" \t"));
+                    file.erase(file.find_last_not_of(" \t") + 1);
+                    if (!file.empty()) {
+                        files.push_back(file);
+                    }
+                }
 
-            results = processor.processDirectory(directory, progressCallback);
-            std::cout << std::endl;
-            break;
+                std::cout << std::endl;
+                std::cout << _("batch.processing") << "..." << std::endl;
+
+                auto progressCallback = [](int current, int total, const std::string &filename) {
+                    // 只显示文件名，不显示完整路径
+                    fs::path filePath(filename);
+                    std::string displayName = filePath.filename().string();
+
+                    // 如果文件名太长，进行截断
+                    const size_t maxDisplayLength = 50;
+                    if (displayName.length() > maxDisplayLength) {
+                        displayName = displayName.substr(0, maxDisplayLength - 3) + "...";
+                    }
+
+                    // 构建进度信息
+                    std::string progressInfo = _("batch.progress") + ": " +
+                                               std::to_string(current) + "/" +
+                                               std::to_string(total) + " - " + displayName;
+
+                    // 每个文件的进度显示在新的一行上（竖直显示）
+                    std::cout << progressInfo << std::endl;
+                };
+
+                results = processor.processFiles(files, progressCallback);
+                std::cout << std::endl;
+                break;
+            }
+            case 3:
+                return;  // 用户选择返回主菜单
+            default:
+                std::cout << _("error.invalid_choice") << std::endl;
+                std::cout << _("prompt.press_enter") << std::endl;
+                std::cin.get();
+                continue;  // 重新显示菜单
         }
-        case 2: {
-            // 处理指定文件
-            std::cout << _("batch.enter_files") << " (" << _("prompt.separator_help") << "): ";
-            std::string filesInput;
-            std::getline(std::cin, filesInput);
 
-            if (filesInput.empty()) {
-                return;
-            }
+        // 显示处理结果
+        if (results.empty()) {
+            std::cout << _("batch.no_files_processed") << std::endl;
+        } else {
+            BatchProcessStats stats = BatchProcessor::generateStatistics(results);
 
-            // 解析文件列表
-            std::vector<std::string> files;
-            std::stringstream ss(filesInput);
-            std::string file;
-            while (std::getline(ss, file, ',')) {
-                // 去除前后空格
-                file.erase(0, file.find_first_not_of(" \t"));
-                file.erase(file.find_last_not_of(" \t") + 1);
-                if (!file.empty()) {
-                    files.push_back(file);
+            std::cout << std::endl;
+            std::cout << "===== " << _("batch.results_summary") << " =====" << std::endl;
+            std::cout << _("batch.total_files") << ": " << stats.totalFiles << std::endl;
+            std::cout << _("batch.successful_files") << ": " << stats.successfulFiles << std::endl;
+            std::cout << _("batch.error_files") << ": " << stats.errorFiles << std::endl;
+            std::cout << _("batch.files_with_trend") << ": " << stats.filesWithTrend << std::endl;
+            std::cout << _("batch.total_processing_time") << ": " << std::fixed
+                      << std::setprecision(2) << stats.totalProcessingTime << "s" << std::endl;
+
+            // 询问是否保存结果
+            std::cout << std::endl;
+            std::cout << _("batch.save_results_prompt") << " [y/n]: ";
+            std::string response;
+            std::getline(std::cin, response);
+
+            if (!response.empty() && std::tolower(response[0]) == 'y') {
+                std::cout << _("batch.select_format") << std::endl;
+                std::cout << "1. CSV" << std::endl;
+                std::cout << "2. HTML" << std::endl;
+                std::cout << _("prompt.select_option") << " [1-2]: ";
+
+                int formatChoice;
+                std::cin >> formatChoice;
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+                std::cout << _("batch.enter_output_filename") << ": ";
+                std::string filename;
+                std::getline(std::cin, filename);
+
+                if (!filename.empty()) {
+                    bool success = false;
+                    std::string fullPath;
+
+                    // 获取数据目录配置
+                    auto &config = Config::getInstance();
+                    std::string dataDir = config.getDataDirectory();
+
+                    if (formatChoice == 1) {
+                        // CSV格式 - 保存到 data/csv/ 目录
+                        if (!endsWith(filename, ".csv")) {
+                            filename += ".csv";
+                        }
+
+                        std::string csvDir = dataDir + "/csv";
+                        if (!fs::exists(csvDir)) {
+                            try {
+                                fs::create_directories(csvDir);
+                            }
+                            catch (const std::exception &e) {
+                                std::cout << _("batch.save_failed") << ": " << e.what()
+                                          << std::endl;
+                                std::cout << std::endl;
+                                std::cout << _("prompt.press_enter") << std::endl;
+                                std::cin.get();
+                                continue;  // 重新显示菜单而不是退出
+                            }
+                        }
+
+                        fullPath = csvDir + "/" + filename;
+                        success = BatchProcessor::exportResultsToCSV(results, fullPath);
+                    } else if (formatChoice == 2) {
+                        // HTML格式 - 保存到 data/html/ 目录
+                        if (!endsWith(filename, ".html")) {
+                            filename += ".html";
+                        }
+
+                        std::string htmlDir = dataDir + "/html";
+                        if (!fs::exists(htmlDir)) {
+                            try {
+                                fs::create_directories(htmlDir);
+                            }
+                            catch (const std::exception &e) {
+                                std::cout << _("batch.save_failed") << ": " << e.what()
+                                          << std::endl;
+                                std::cout << std::endl;
+                                std::cout << _("prompt.press_enter") << std::endl;
+                                std::cin.get();
+                                continue;  // 重新显示菜单而不是退出
+                            }
+                        }
+
+                        fullPath = htmlDir + "/" + filename;
+                        success = BatchProcessor::exportResultsToHTML(results, fullPath);
+                    }
+
+                    if (success) {
+                        std::cout << _("batch.results_saved") << ": " << fullPath << std::endl;
+                    } else {
+                        std::cout << _("batch.save_failed") << std::endl;
+                    }
                 }
             }
-
-            std::cout << std::endl;
-            std::cout << _("batch.processing") << "..." << std::endl;
-
-            auto progressCallback = [](int current, int total, const std::string &filename) {
-                std::cout << "\r" << _("batch.progress") << ": " << current << "/" << total << " - "
-                          << filename << std::flush;
-            };
-
-            results = processor.processFiles(files, progressCallback);
-            std::cout << std::endl;
-            break;
         }
-        case 3:
-            return;
-        default:
-            std::cout << _("error.invalid_choice") << std::endl;
-            std::cout << _("prompt.press_enter") << std::endl;
-            std::cin.get();
-            return;
-    }
-
-    // 显示处理结果
-    if (results.empty()) {
-        std::cout << _("batch.no_files_processed") << std::endl;
-    } else {
-        BatchProcessStats stats = BatchProcessor::generateStatistics(results);
 
         std::cout << std::endl;
-        std::cout << "===== " << _("batch.results_summary") << " =====" << std::endl;
-        std::cout << _("batch.total_files") << ": " << stats.totalFiles << std::endl;
-        std::cout << _("batch.successful_files") << ": " << stats.successfulFiles << std::endl;
-        std::cout << _("batch.error_files") << ": " << stats.errorFiles << std::endl;
-        std::cout << _("batch.files_with_trend") << ": " << stats.filesWithTrend << std::endl;
-        std::cout << _("batch.total_processing_time") << ": " << std::fixed << std::setprecision(2)
-                  << stats.totalProcessingTime << "s" << std::endl;
+        std::cout << _("prompt.press_enter") << std::endl;
+        std::cin.get();
 
-        // 询问是否保存结果
+        // 处理完成后，询问用户是否继续
         std::cout << std::endl;
-        std::cout << _("batch.save_results_prompt") << " [y/n]: ";
-        std::string response;
-        std::getline(std::cin, response);
+        std::cout << _("batch.continue_prompt") << " [y/n]: ";
+        std::string continueChoice;
+        std::getline(std::cin, continueChoice);
 
-        if (!response.empty() && std::tolower(response[0]) == 'y') {
-            std::cout << _("batch.select_format") << std::endl;
-            std::cout << "1. CSV" << std::endl;
-            std::cout << "2. HTML" << std::endl;
-            std::cout << _("prompt.select_option") << " [1-2]: ";
-
-            int formatChoice;
-            std::cin >> formatChoice;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-            std::cout << _("batch.enter_output_filename") << ": ";
-            std::string filename;
-            std::getline(std::cin, filename);
-
-            if (!filename.empty()) {
-                bool success = false;
-                std::string fullPath;
-
-                // 获取数据目录配置
-                auto &config = Config::getInstance();
-                std::string dataDir = config.getDataDirectory();
-
-                if (formatChoice == 1) {
-                    // CSV格式 - 保存到 data/csv/ 目录
-                    if (!endsWith(filename, ".csv")) {
-                        filename += ".csv";
-                    }
-
-                    std::string csvDir = dataDir + "/csv";
-                    if (!fs::exists(csvDir)) {
-                        try {
-                            fs::create_directories(csvDir);
-                        }
-                        catch (const std::exception &e) {
-                            std::cout << _("batch.save_failed") << ": " << e.what() << std::endl;
-                            std::cout << std::endl;
-                            std::cout << _("prompt.press_enter") << std::endl;
-                            std::cin.get();
-                            return;
-                        }
-                    }
-
-                    fullPath = csvDir + "/" + filename;
-                    success = BatchProcessor::exportResultsToCSV(results, fullPath);
-                } else if (formatChoice == 2) {
-                    // HTML格式 - 保存到 data/html/ 目录
-                    if (!endsWith(filename, ".html")) {
-                        filename += ".html";
-                    }
-
-                    std::string htmlDir = dataDir + "/html";
-                    if (!fs::exists(htmlDir)) {
-                        try {
-                            fs::create_directories(htmlDir);
-                        }
-                        catch (const std::exception &e) {
-                            std::cout << _("batch.save_failed") << ": " << e.what() << std::endl;
-                            std::cout << std::endl;
-                            std::cout << _("prompt.press_enter") << std::endl;
-                            std::cin.get();
-                            return;
-                        }
-                    }
-
-                    fullPath = htmlDir + "/" + filename;
-                    success = BatchProcessor::exportResultsToHTML(results, fullPath);
-                }
-
-                if (success) {
-                    std::cout << _("batch.results_saved") << ": " << fullPath << std::endl;
-                } else {
-                    std::cout << _("batch.save_failed") << std::endl;
-                }
-            }
+        if (continueChoice.empty() || std::tolower(continueChoice[0]) != 'y') {
+            return;  // 用户选择不继续，退出到主菜单
         }
+        // 如果用户选择继续，循环会重新开始，显示批量处理菜单
     }
-
-    std::cout << std::endl;
-    std::cout << _("prompt.press_enter") << std::endl;
-    std::cin.get();
 }
 
 void TerminalUI::showDataVisualization()
@@ -2587,22 +2931,14 @@ void TerminalUI::autoStartWebServerAndBrowser()
         }
     }
 
-    // 自动打开浏览器
-    termUtils.printInfo(_("web.opening_browser"));
+    // 自动打开浏览器（静默模式，不抢夺焦点）
+    termUtils.printInfo(_("web.opening_browser_silently"));
     std::string url = webServer->getUrl();
-    std::string openCommand;
 
-#ifdef _WIN32
-    openCommand = "start \"\" \"" + url + "\"";
-#elif __APPLE__
-    openCommand = "open \"" + url + "\"";
-#else
-    openCommand = "xdg-open \"" + url + "\"";
-#endif
-
-    int result = std::system(openCommand.c_str());
+    int result = openBrowserSilently(url);
     if (result == 0) {
-        termUtils.printSuccess(_("web.browser_opened"));
+        termUtils.printSuccess(_("web.browser_opened_silently"));
+        termUtils.printInfo(_("web.browser_background_info"));
     } else {
         termUtils.printWarning(_("web.browser_open_failed"));
         termUtils.printInfo(_("web.manual_access_instruction"));
@@ -2622,7 +2958,7 @@ void TerminalUI::autoStartWebServerAndBrowser()
     std::string response;
     std::getline(std::cin, response);
 
-    // 默认选择Web界面
+    // 默认选择CLI 和 Web界面同时使用
     if (response.empty()) {
         response = "1";
     }

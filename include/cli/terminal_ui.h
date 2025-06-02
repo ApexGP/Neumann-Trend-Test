@@ -1,11 +1,22 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+// 确保max_align_t定义可用
+#ifdef _WIN32
+#include <malloc.h>
+
+#include <cstdlib>
+
+#else
+#include <cstdlib>
+#endif
 
 #include "core/data_manager.h"
 #include "core/neumann_calculator.h"
@@ -141,19 +152,33 @@ private:
     // SVG 查看器
     void showSVGViewer();
 
-    // 询问用户输入数据
+    // 询问用户输入数据（传统方式）
     std::vector<double> promptForData(const std::string &prompt);
 
     // 询问用户输入时间点
     std::vector<double> promptForTimePoints(const std::string &prompt, size_t count);
 
+    // 现代化数据输入（Excel风格）
+    std::pair<std::vector<double>, std::vector<double>> promptForDataModern(
+        const std::string &prompt);
+
     // 显示测试结果
     void displayTestResults(const NeumannTestResults &results);
 
     /**
-   * @brief 管理自定义置信度水平
-   */
+     * @brief 管理自定义置信度水平
+     */
     void manageCustomConfidenceLevels();
+
+    /**
+     * @brief 使用现代化文件浏览器导入CSV文件
+     */
+    void importFromCSVModern();
+
+    /**
+     * @brief 使用现代化文件浏览器导入Excel文件
+     */
+    void importFromExcelModern();
 };
 
 }}  // namespace neumann::cli

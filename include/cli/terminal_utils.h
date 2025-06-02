@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -78,7 +79,7 @@ public:
      * @param style 文本样式
      * @return 格式化后的文本
      */
-    std::string colorText(const std::string& text, Color color,
+    std::string colorText(const std::string& text, Color color = Color::WHITE,
                           TextStyle style = TextStyle::NORMAL);
 
     /**
@@ -87,7 +88,8 @@ public:
      * @param color 文本颜色
      * @param style 文本样式
      */
-    void printColor(const std::string& text, Color color, TextStyle style = TextStyle::NORMAL);
+    void printColor(const std::string& text, Color color = Color::WHITE,
+                    TextStyle style = TextStyle::NORMAL);
 
     /**
      * @brief 打印成功消息
@@ -127,7 +129,7 @@ public:
      * @param message 加载消息
      * @param durationMs 持续时间（毫秒）
      */
-    void showSpinner(const std::string& message, int durationMs = 1000);
+    void showSpinner(const std::string& message, int durationMs = 2000);
 
     /**
      * @brief 清空当前行
@@ -172,13 +174,22 @@ public:
      * @return 格式化的行字符串
      */
     std::string formatTableRow(const std::vector<std::string>& columns,
-                               const std::vector<int>& widths, const std::string& alignment = "l");
+                               const std::vector<int>& widths,
+                               const std::string& alignment = "llllll");
 
     /**
      * @brief 获取终端宽度
      * @return 终端宽度（字符数）
      */
     int getTerminalWidth();
+
+    // 文件路径输入（支持tab补全）
+    std::string promptForFilePath(const std::string& prompt, bool directories_only = false);
+    std::string promptForDirectory(const std::string& prompt);
+
+    // 带真正tab补全的文件路径输入
+    std::string promptForFilePathWithTabCompletion(const std::string& prompt,
+                                                   bool directories_only = false);
 
 private:
     // 私有构造函数
@@ -196,6 +207,24 @@ private:
 
     // 检测终端是否支持彩色输出
     bool detectColorSupport();
+
+    // tab补全相关
+    std::vector<std::string> getFileCompletions(const std::string& partial_path,
+                                                bool directories_only = false);
+    std::string findCommonPrefix(const std::vector<std::string>& completions);
+    void showCompletions(const std::vector<std::string>& completions, const std::string& base_path);
+
+    // 简化版本的辅助方法
+    void showCurrentDirectoryContents(bool directories_only = false);
+    void showDirectoryContents(const std::string& dirPath, bool directories_only = false);
+    void showPathInputHelp();
+
+    // 平台特定的输入处理
+#ifdef _WIN32
+    std::string handleWindowsInput(const std::string& prompt, bool directories_only);
+#else
+    std::string handleUnixInput(const std::string& prompt, bool directories_only);
+#endif
 };
 
 // 便利宏定义

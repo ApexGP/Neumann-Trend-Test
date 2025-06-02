@@ -130,6 +130,13 @@ private:
      * @brief 获取目录中的所有支持文件
      */
     static std::vector<std::string> findSupportedFiles(const std::string& directoryPath);
+
+    /**
+     * @brief 智能检测CSV文件是否有表头
+     * @param filePath CSV文件路径
+     * @return true表示有表头，false表示没有表头
+     */
+    static bool detectCSVHeader(const std::string& filePath);
 };
 
 }  // namespace neumann

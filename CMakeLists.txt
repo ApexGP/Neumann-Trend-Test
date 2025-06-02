@@ -72,7 +72,7 @@ if(DEFINED VCPKG_TARGET_TRIPLET)
 endif()
 
 project(NeumannTrendTest 
-    VERSION 2.9.0
+    VERSION 3.0.0
     DESCRIPTION "诺依曼趋势测试工具"
     LANGUAGES CXX)
 
@@ -164,6 +164,21 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+
+# 查找依赖包
+message(STATUS "开始查找依赖包...")
+
+# 查找nlohmann/json
+find_package(nlohmann_json CONFIG REQUIRED)
+message(STATUS "找到nlohmann_json")
+
+# 查找Crow
+find_package(Crow CONFIG REQUIRED)
+message(STATUS "找到Crow")
+
+# 查找FTXUI
+find_package(ftxui CONFIG REQUIRED)
+message(STATUS "找到FTXUI")
 
 # 包含目录
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
