@@ -170,6 +170,12 @@ void I18n::initializeBuiltinTranslations()
     zh["input.confidence_level"] = "请选择置信水平:";
     zh["input.filename"] = "请输入文件路径";
     zh["input.exit_hint"] = "输入 'q' 或直接按回车退出";
+    zh["input.has_header"] = "文件是否包含表头";
+    zh["input.file_preview"] = "文件预览";
+    zh["input.tab_completion_hint"] = "💡 提示：使用方向键浏览文件，支持文件路径补全";
+    zh["input.tab_completion_directory_hint"] = "💡 提示：使用方向键浏览目录，支持目录路径补全";
+    zh["input.tab_completion_files_hint"] = "💡 提示：使用方向键浏览文件，多个文件用逗号分隔";
+    zh["input.enter_for_list"] = "💡 提示：使用方向键导航，Enter选择文件，q退出";
 
     zh["load.no_datasets"] = "没有可用的数据集。";
     zh["load.available_datasets"] = "可用数据集:";
@@ -236,6 +242,93 @@ void I18n::initializeBuiltinTranslations()
     zh["web.server_starting"] = "启动Web服务器，监听端口:";
     zh["web.server_url"] = "Web界面访问URL:";
     zh["web.server_stopping"] = "停止Web服务器";
+    zh["web.opening_browser_silently"] = "正在静默打开浏览器...";
+    zh["web.browser_opened_silently"] = "浏览器已在后台打开";
+    zh["web.browser_background_info"] = "💡 浏览器已在后台启动，不会抢夺终端焦点";
+
+    // 添加路径输入帮助的翻译
+    zh["help.path_input_title"] = "📝 路径输入帮助:";
+    zh["help.path_input_enter"] = "直接按回车: 显示当前目录内容";
+    zh["help.path_input_use_path"] = "输入路径后按回车: 使用该路径";
+    zh["help.path_input_browse_dir"] = "输入目录路径+'/': 显示该目录内容";
+    zh["help.path_input_quit"] = "输入 'q' 或 'quit': 退出";
+    zh["help.path_input_help"] = "输入 '?': 显示此帮助";
+
+    // 添加tab补全相关的翻译
+    zh["completion.no_matches"] = "没有匹配的文件或目录";
+    zh["completion.options"] = "可选项:";
+
+    // 添加目录相关的翻译
+    zh["directory.current"] = "📁 当前目录";
+    zh["error.cannot_read_directory"] = "无法读取当前目录";
+    zh["error.directory_not_exist"] = "目录不存在";
+    zh["directory.folders"] = "📁 目录:";
+    zh["directory.files"] = "📄 文件:";
+    zh["error.cannot_read_dir"] = "无法读取目录";
+
+    zh["load.no_datasets"] = "没有可用的数据集。";
+
+    // 添加更多tab补全相关的翻译
+    zh["input.tab_completion_instruction"] =
+        "💡 按 Tab 键进行自动补全，输入部分路径后按 Tab 可显示匹配的文件/目录";
+    zh["input.windows_tab_help"] = "💡 Windows提示：输入路径+回车浏览目录，输入 'tab' 显示补全选项";
+
+    // 文件浏览器相关翻译
+    zh["browser.title"] = "📁 文件浏览器";
+    zh["browser.current_path"] = "当前路径";
+    zh["browser.help"] = "操作：↑↓选择 ←返回上级 →进入目录 Enter确认 q退出";
+    zh["browser.no_files"] = "目录为空";
+    zh["browser.parent_dir"] = ".. (上级目录)";
+    zh["browser.selected"] = "已选择";
+    zh["browser.help_detailed"] =
+        "💡 提示：使用方向键导航，Enter选择，左键返回上级，右键进入目录，q退出";
+    zh["browser.scroll_info"] = "显示";
+    zh["browser.of_total"] = "/";
+
+    // 现代化数据输入相关翻译
+    zh["test.modern_input_hint"] = "现代化数据输入界面（类似Excel的双栏输入）：";
+    zh["test.modern_input_navigation"] = "使用↑↓键上下移动，←→键切换时间/数据栏";
+    zh["test.modern_input_edit"] = "按Enter键编辑单元格，输入数据后再按Enter确认";
+    zh["test.modern_input_save"] = "按Ctrl+S保存所有数据并继续测试";
+    zh["test.modern_input_exit"] = "按Esc键随时退出而不保存数据";
+    zh["input.enter_test_data"] = "请输入测试数据";
+    zh["prompt.press_enter_to_continue"] = "按Enter键继续...";
+
+    // 数据输入界面UI翻译
+    zh["ui.time_column"] = "时间点";
+    zh["ui.data_column"] = "数据值";
+    zh["ui.help_navigation"] = "上下移动";
+    zh["ui.help_switch"] = "切换区域";
+    zh["ui.help_edit"] = "编辑";
+    zh["ui.help_save"] = "保存";
+    zh["ui.help_exit"] = "退出";
+    zh["ui.current_area"] = "当前区域";
+    zh["ui.empty_cell"] = "---";
+    zh["ui.row_number"] = "行号";
+
+    // 文件浏览器详细翻译
+    zh["file_browser.parent_dir"] = "父目录";
+    zh["file_browser.current_dir"] = "当前目录";
+    zh["file_browser.preview"] = "预览";
+    zh["file_browser.empty_dir"] = "目录为空";
+    zh["file_browser.help_up"] = "↑上移";
+    zh["file_browser.help_down"] = "↓下移";
+    zh["file_browser.help_prev"] = "←返回";
+    zh["file_browser.help_next"] = "→进入";
+    zh["file_browser.help_select"] = "Enter选择";
+    zh["file_browser.help_preview_scroll"] = "PgUp/PgDn/鼠标滚轮预览滚动";
+    zh["file_browser.help_exit"] = "q退出";
+    zh["file_browser.file_info"] = "文件信息";
+    zh["file_browser.filename"] = "文件名";
+    zh["file_browser.filesize"] = "文件大小";
+    zh["file_browser.filetype"] = "文件类型";
+    zh["file_browser.unknown_type"] = "未知类型";
+    zh["file_browser.excel_file"] = "Excel文件";
+    zh["file_browser.json_file"] = "JSON文件";
+    zh["file_browser.csv_file"] = "CSV文件";
+    zh["file_browser.file_suffix"] = "文件";
+    zh["file_browser.supported_file"] = "✓ 支持的数据文件格式";
+    zh["file_browser.preview_error"] = "预览失败";
 
     // 英文翻译
     auto &en = translations[Language::ENGLISH];
@@ -258,6 +351,16 @@ void I18n::initializeBuiltinTranslations()
     en["input.confidence_level"] = "Please select confidence level:";
     en["input.filename"] = "Please enter filename:";
     en["input.exit_hint"] = "Enter 'q' or press Enter to exit";
+    en["input.has_header"] = "Does the file contain a header";
+    en["input.file_preview"] = "File Preview";
+    en["input.tab_completion_hint"] =
+        "💡 Tip: Use arrow keys to browse files, supports file path completion";
+    en["input.tab_completion_directory_hint"] =
+        "💡 Tip: Use arrow keys to browse directories, supports directory path completion";
+    en["input.tab_completion_files_hint"] =
+        "💡 Tip: Use arrow keys to browse files, separate multiple files with commas";
+    en["input.enter_for_list"] =
+        "💡 Tip: Use arrow keys to navigate, Enter to select file, q to quit";
 
     en["load.no_datasets"] = "No datasets available.";
     en["load.available_datasets"] = "Available datasets:";
@@ -325,6 +428,97 @@ void I18n::initializeBuiltinTranslations()
     en["web.server_starting"] = "Starting web server on port:";
     en["web.server_url"] = "Web interface URL:";
     en["web.server_stopping"] = "Stopping web server";
+    en["web.opening_browser_silently"] = "Opening browser silently...";
+    en["web.browser_opened_silently"] = "Browser opened in the background";
+    en["web.browser_background_info"] =
+        "💡 Browser started in the background, will not steal focus";
+
+    // 添加路径输入帮助的英文翻译
+    en["help.path_input_title"] = "📝 Path Input Help:";
+    en["help.path_input_enter"] = "Press Enter directly: Show current directory contents";
+    en["help.path_input_use_path"] = "Enter path then press Enter: Use that path";
+    en["help.path_input_browse_dir"] = "Enter directory path+'/': Show that directory contents";
+    en["help.path_input_quit"] = "Enter 'q' or 'quit': Exit";
+    en["help.path_input_help"] = "Enter '?': Show this help";
+
+    // 添加更多tab补全相关的英文翻译
+    en["input.tab_completion_instruction"] =
+        "💡 Press Tab for auto-completion, type partial path then Tab to show matching "
+        "files/directories";
+    en["input.windows_tab_help"] =
+        "💡 Windows tip: Enter path+Enter to browse directory, type 'tab' to show completion "
+        "options";
+
+    // 添加tab补全相关的英文翻译
+    en["completion.no_matches"] = "No matching files or directories";
+    en["completion.options"] = "Options:";
+
+    // 添加目录相关的英文翻译
+    en["directory.current"] = "📁 Current Directory";
+    en["error.cannot_read_directory"] = "Cannot read current directory";
+    en["error.directory_not_exist"] = "Directory does not exist";
+    en["directory.folders"] = "📁 Directories:";
+    en["directory.files"] = "📄 Files:";
+    en["error.cannot_read_dir"] = "Cannot read directory";
+
+    // 文件浏览器相关英文翻译
+    en["browser.title"] = "📁 File Browser";
+    en["browser.current_path"] = "Current Path";
+    en["browser.help"] = "Controls: ↑↓Select ←Back →Enter Dir Enter Confirm q Quit";
+    en["browser.no_files"] = "Directory is empty";
+    en["browser.parent_dir"] = ".. (Parent Directory)";
+    en["browser.selected"] = "Selected";
+    en["browser.help_detailed"] =
+        "💡 Tip: Use arrow keys to navigate, Enter to select, ← back, → enter dir, q quit";
+    en["browser.scroll_info"] = "Showing";
+    en["browser.of_total"] = "of";
+
+    // 现代化数据输入相关英文翻译
+    en["test.modern_input_hint"] = "Modern data input interface (Excel-like dual-column input):";
+    en["test.modern_input_navigation"] =
+        "Use ↑↓ keys to move up/down, ←→ keys to switch between time/data columns";
+    en["test.modern_input_edit"] =
+        "Press Enter to edit cell, input data then press Enter to confirm";
+    en["test.modern_input_save"] = "Press Ctrl+S to save all data and continue testing";
+    en["test.modern_input_exit"] = "Press Esc to exit anytime without saving data";
+    en["input.enter_test_data"] = "Please enter test data";
+    en["prompt.press_enter_to_continue"] = "Press Enter to continue...";
+
+    // 数据输入界面UI英文翻译
+    en["ui.time_column"] = "Time Points";
+    en["ui.data_column"] = "Data Values";
+    en["ui.help_navigation"] = "Navigate";
+    en["ui.help_switch"] = "Switch Area";
+    en["ui.help_edit"] = "Edit";
+    en["ui.help_save"] = "Save";
+    en["ui.help_exit"] = "Exit";
+    en["ui.current_area"] = "Current Area";
+    en["ui.empty_cell"] = "---";
+    en["ui.row_number"] = "Row Number";
+
+    // 文件浏览器详细英文翻译
+    en["file_browser.parent_dir"] = "Parent Directory";
+    en["file_browser.current_dir"] = "Current Directory";
+    en["file_browser.preview"] = "Preview";
+    en["file_browser.empty_dir"] = "Directory is empty";
+    en["file_browser.help_up"] = "↑Up";
+    en["file_browser.help_down"] = "↓Down";
+    en["file_browser.help_prev"] = "←Back";
+    en["file_browser.help_next"] = "→Enter";
+    en["file_browser.help_select"] = "Enter Select";
+    en["file_browser.help_preview_scroll"] = "PgUp/PgDn/MouseWheel Preview Scroll";
+    en["file_browser.help_exit"] = "q Quit";
+    en["file_browser.file_info"] = "File Information";
+    en["file_browser.filename"] = "Filename";
+    en["file_browser.filesize"] = "File Size";
+    en["file_browser.filetype"] = "File Type";
+    en["file_browser.unknown_type"] = "Unknown Type";
+    en["file_browser.excel_file"] = "Excel File";
+    en["file_browser.json_file"] = "JSON File";
+    en["file_browser.csv_file"] = "CSV File";
+    en["file_browser.file_suffix"] = "File";
+    en["file_browser.supported_file"] = "✓ Supported data file format";
+    en["file_browser.preview_error"] = "Preview failed";
 }
 
 // 显式实例化模板

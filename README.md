@@ -3,7 +3,7 @@
 > **Language / 语言**: [English](docs/README/README_en.md) | **中文**
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Xyf0606/Neumann-Trend-Test)
-[![Version](https://img.shields.io/badge/version-2.9.0-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
 [![Language](https://img.shields.io/badge/language-C%2B%2B-orange.svg)](https://isocpp.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -34,46 +34,92 @@
 
 ### 🎯 用户体验
 
+- **现代化数据输入**：Excel 风格的双栏数据编辑器，支持实时编辑和验证
 - **智能配置**：用户配置隔离，权限友好管理
 - **批量处理**：目录级批量分析，智能文件分类，双语导出
 - **可视化**：ASCII/SVG 图表，结果导出 (CSV/HTML)
-- **现代 UI**：彩色终端，状态栏，表格格式化
+- **现代 UI**：彩色终端，状态栏，表格格式化，动态终端适应
 
-### 🔧 v2.9.0 新特性
+### 🔧 v3.0.0 新特性
 
-- **Excel 文件支持完善**：真正的 Excel 文件导入功能
+- **现代化数据输入界面**：全新的 Excel 风格数据编辑器
 
-  - ✅ 完整支持 .xlsx 文件格式，实现真正的 Excel 文件读取
-  - ✅ 基于 ZIP 解压的 Excel 文件解析，支持复杂的 Excel 结构
-  - ✅ 智能工作表检测，支持多工作表文件和工作表选择
-  - ✅ 自动列类型识别，智能检测时间列和数据列
-  - ✅ 共享字符串表支持，正确处理 Excel 中的文本内容
-  - ✅ 数据预览功能，在导入前查看文件内容
-  - ✅ 完善的错误处理，支持降级到 CSV 格式建议
+  - ✅ 双栏并排输入：时间点和数据值同时显示，类似 Excel 工作表
+  - ✅ 现代化键盘导航：↑↓ 移动行，←→ 切换栏，Enter 编辑，Ctrl+S 保存
+  - ✅ 智能终端适应：动态调整显示行数，自动滚动浏览大数据集
+  - ✅ 实时状态反馈：可视化编辑状态，彩色界面提示当前操作
+  - ✅ 操作便利性：内置帮助系统，一目了然的操作指南
 
-- **用户体验优化**：Excel 导入流程完全重构
+- **用户体验优化**：数据输入流程完全重构
 
-  - ✅ 移除硬编码的"不支持"提示，提供真正的 Excel 支持
-  - ✅ 增强的文件格式检测，自动识别 .xlsx、.xls、.csv 格式
-  - ✅ 智能数据验证，确保导入数据的完整性和正确性
-  - ✅ 友好的错误提示，提供明确的解决建议
+  - ✅ 移除传统的命令行逐个输入模式，提供现代化编辑界面
+  - ✅ 增强的文件浏览器，修复动态显示行数限制问题
+  - ✅ 智能数据验证，确保输入数据的完整性和正确性
+  - ✅ 友好的快捷键操作，降低学习成本提高效率
 
-- **技术架构提升**：现代化的 Excel 处理引擎
+- **技术架构提升**：基于 FTXUI 的现代终端界面
 
-  - ✅ 无需第三方 Excel 库，使用标准 C++ 实现
+  - ✅ 无需第三方复杂库，使用标准 FTXUI 实现
   - ✅ 跨平台兼容性，支持 Windows、Linux、macOS
-  - ✅ 高效的内存管理，支持大型 Excel 文件处理
-  - ✅ 临时文件自动清理，避免磁盘空间占用
+  - ✅ 高效的内存管理，支持大型数据集流畅编辑
+  - ✅ 模块化设计，可配置和可扩展的架构
 
 ## 🎬 功能预览
+
+### 📋 现代化数据输入 - 喜欢 Excel 的福音
+
+_告别传统命令行输入，迎接类 Excel 的数据输入体验_ ⚡
+
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="docs/README/assets/zh_CN/editor.mp4" type="video/mp4">
+</video>
+
+https://github.com/user-attachments/assets/8382115a-d032-4bd2-a3fa-71074b3ec57b
+
+<details>
+<summary>📋 <strong>现代化数据输入演示内容说明</strong></summary>
+
+- **双栏并排输入**：时间点和数据值同时显示，类似 Excel 工作表
+- **现代化键盘导航**：↑↓ 移动行，←→ 切换栏，Enter 编辑，Ctrl+S 保存
+- **智能终端适应**：动态调整显示行数，自动滚动浏览大数据集
+- **实时状态反馈**：可视化编辑状态，彩色界面提示当前操作
+- **操作便利性**：内置帮助系统，一目了然的操作指南
+
+</details>
+
+---
+
+### 📁 智能文件浏览器 - 动态适应的现代化导航
+
+_文件浏览、选中一站式搞定，告别鼠标点点点_ 🗂️
+
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="docs/README/assets/zh_CN/file-browser.mp4" type="video/mp4">
+</video>
+
+https://github.com/user-attachments/assets/9a4461a6-d64a-4491-a2bc-2f87475af353
+
+<details>
+<summary>📋 <strong>智能文件浏览器演示内容说明</strong></summary>
+
+- **动态显示行数**：根据终端尺寸自动调整显示项目数（15-45 行）
+- **现代化键盘导航**：↑↓ 选择文件，←→ 目录导航，Enter 确认，q 退出
+- **文件类型识别**：彩色图标区分目录、文件、压缩包等不同类型
+- **滚动指示器**：清晰显示当前查看范围和总文件数量
+
+</details>
+
+---
 
 ### 🚀 一键启动 - 从零到分析只需 3 秒！
 
 _简单到连你的老板都会用_ 😎
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/startup.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/1c2286bc-bd08-4dd2-b907-ede47b4e40c2
 
 <details>
 <summary>📋 <strong>启动演示内容说明</strong></summary>
@@ -90,8 +136,10 @@ _简单到连你的老板都会用_ 😎
 _分层菜单，一键直达，专业数据分析师的最爱_ ⚡
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/cli-interface.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/59129d8d-25f2-4558-8cb3-a2d56b55b6a2
 
 <details>
 <summary>📋 <strong>CLI演示内容说明</strong></summary>
@@ -108,8 +156,10 @@ _分层菜单，一键直达，专业数据分析师的最爱_ ⚡
 _颜值即正义，让数据分析变得赏心悦目_ ✨
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/web-interface.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/10787d10-9b9e-473b-853b-9d516a224c20
 
 <details>
 <summary>📋 <strong>Web演示内容说明</strong></summary>
@@ -126,8 +176,10 @@ _颜值即正义，让数据分析变得赏心悦目_ ✨
 _见证数据说话的神奇时刻_ 🔮
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/data-analysis.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/61fa2714-9015-4f53-a02e-9bda550ec2cc
 
 <details>
 <summary>📋 <strong>分析演示内容说明</strong></summary>
@@ -144,8 +196,10 @@ _见证数据说话的神奇时刻_ 🔮
 _一次处理一整个文件夹，让重复工作见鬼去吧_ 🎯
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/batch-processing.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/af3c8542-f1c7-40ba-852a-625bccbe95d4
 
 <details>
 <summary>📋 <strong>批量处理演示内容说明</strong></summary>
@@ -164,8 +218,10 @@ _一次处理一整个文件夹，让重复工作见鬼去吧_ 🎯
 _中英文一键切换，国际范儿十足_ 🌏
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/i18n.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/cb455ee6-dd2e-411f-8ad6-776ac35370bf
 
 <details>
 <summary>📋 <strong>国际化演示内容说明</strong></summary>
@@ -182,8 +238,10 @@ _中英文一键切换，国际范儿十足_ 🌏
 _ASCII 艺术 + SVG 图表，双重视觉盛宴_ 📈
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/visualization.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/771c70a0-bec0-417c-ab7a-f08ef48cc9b8
 
 <details>
 <summary>📋 <strong>可视化演示内容说明</strong></summary>
@@ -200,8 +258,10 @@ _ASCII 艺术 + SVG 图表，双重视觉盛宴_ 📈
 _配置记忆，一劳永逸_ 💝
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.mp4" type="video/mp4">
+  <source src="docs/README/assets/zh_CN/config-management.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/af128832-268c-41ef-bbd7-c13a06287c6b
 
 <details>
 <summary>📋 <strong>配置管理演示内容说明</strong></summary>
@@ -348,6 +408,7 @@ brew install nlohmann-json             # macOS
 
 - **CSV 文件**：完全支持，推荐格式，兼容 Excel 导出
 - **Excel 文件**：✅ 完整支持 .xlsx 格式，⚠️ .xls 格式建议转换为 .xlsx
+- **现代化手动输入**：全新的 Excel 风格双栏数据编辑器
 
 ### 数据要求
 
@@ -381,25 +442,27 @@ brew install nlohmann-json             # macOS
 | CSV 文件中文乱码   | 使用 v2.8.0 版本，已添加 UTF-8 BOM 支持   |
 | 批量处理文件找不到 | 检查 `data/csv/` 和 `data/html/` 目录权限 |
 | Excel 文件无法导入 | 使用 v2.9.0 版本，已完整支持 .xlsx 格式   |
+| 数据编辑器无响应   | 使用 v3.0.0 版本，全新现代化输入界面      |
 
 ### 性能建议
 
 - **大数据集**：使用批量处理模式
 - **频繁分析**：保存常用数据集
 - **Web 性能**：大数据建议使用 CLI
+- **数据输入**：使用新的数据编辑器获得最佳体验
 
 更多问题请查看 [FAQ](docs/FAQ.md) 或提交 [Issue](https://github.com/Xyf0606/Neumann-Trend-Test/issues)。
 
-## �� 版本信息
+## 📦 版本信息
 
-**当前版本**：v2.9.0  
-**发布日期**：2025-01-02
+**当前版本**：v3.0.0  
+**发布日期**：2025-06-02
 
 **主要更新**：
 
-- 🔧 **完善 Excel 文件支持**：实现真正的 .xlsx 文件读取功能，支持复杂 Excel 结构
-- ✨ **增强用户体验**：移除硬编码限制，提供完整的 Excel 导入流程
-- 🛠️ **技术架构提升**：使用现代 C++ 实现跨平台 Excel 处理引擎
+- 🚀 **现代化数据输入革命**：引入类 Excel 的双栏数据输入界面，彻底改变数据输入体验
+- ✨ **用户体验重大提升**：现代化键盘导航、智能终端适应、实时状态反馈
+- 🛠️ **技术架构现代化**：基于 FTXUI 框架的新 DataEditor 组件，完整的国际化支持
 
 **更新历史**：[CHANGELOG.md](CHANGELOG.md)
 

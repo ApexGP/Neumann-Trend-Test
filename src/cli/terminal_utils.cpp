@@ -1,20 +1,38 @@
 #include "cli/terminal_utils.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <filesystem>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 
 #ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <conio.h>
 #include <io.h>
 #include <windows.h>
 
 #else
+#include <dirent.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <termios.h>
 #include <unistd.h>
 
 #endif
 
+#include "cli/file_browser.h"  // 引入新的文件浏览器模块
 #include "core/config.h"
+#include "core/i18n.h"
+
+namespace fs = std::filesystem;
 
 namespace neumann { namespace cli {
 
@@ -324,6 +342,275 @@ int TerminalUtils::getTerminalWidth()
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     return w.ws_col;
 #endif
+}
+
+std::string TerminalUtils::promptForFilePath(const std::string& prompt, bool directories_only)
+{
+    // 使用新的FileBrowser模块
+    FileBrowser browser;
+    return browser.selectFile(prompt, directories_only);
+}
+
+std::string TerminalUtils::promptForFilePathWithTabCompletion(const std::string& prompt,
+                                                              bool directories_only)
+{
+    std::cout << prompt << std::endl;
+    printInfo(_("input.enter_for_list"));
+#ifdef _WIN32
+    printInfo(_("input.windows_tab_help"));
+#else
+    printInfo(_("input.tab_completion_instruction"));
+#endif
+
+    std::string currentInput;
+
+    while (true) {
+        std::cout << "> ";
+
+#ifdef _WIN32
+        // Windows版本：使用简化的输入处理
+        std::string line;
+        std::getline(std::cin, line);
+
+        // 检查是否是特殊命令
+        if (line.empty()) {
+            // 显示当前目录内容
+            showCurrentDirectoryContents(directories_only);
+            continue;
+        } else if (line == "q" || line == "quit" || line == "exit") {
+            return "";
+        } else if (line == "?") {
+            showPathInputHelp();
+            continue;
+        } else {
+            return line;
+        }
+#else
+        // Unix版本的简化处理
+        std::string line;
+        std::getline(std::cin, line);
+
+        if (line.empty()) {
+            showCurrentDirectoryContents(directories_only);
+            continue;
+        } else if (line == "q" || line == "quit" || line == "exit") {
+            return "";
+        } else if (line == "?") {
+            showPathInputHelp();
+            continue;
+        } else {
+            return line;
+        }
+#endif
+    }
+
+    return "";
+}
+
+std::string TerminalUtils::promptForDirectory(const std::string& prompt)
+{
+    // 使用新的FileBrowser模块
+    FileBrowser browser;
+    return browser.selectDirectory(prompt);
+}
+
+std::vector<std::string> TerminalUtils::getFileCompletions(const std::string& partial_path,
+                                                           bool directories_only)
+{
+    std::vector<std::string> completions;
+
+    try {
+        fs::path searchPath;
+        std::string prefix;
+        std::string basePath;
+
+        if (partial_path.empty()) {
+            searchPath = fs::current_path();
+            basePath = "";
+        } else {
+            fs::path inputPath(partial_path);
+
+            if (partial_path.back() == '/' || partial_path.back() == '\\') {
+                // 用户输入的是目录路径
+                searchPath = inputPath;
+                basePath = partial_path;
+                prefix = "";
+            } else {
+                // 用户可能输入了部分文件名
+                if (fs::exists(inputPath) && fs::is_directory(inputPath)) {
+                    searchPath = inputPath;
+                    basePath = partial_path + "/";
+                    prefix = "";
+                } else {
+                    searchPath = inputPath.parent_path();
+                    prefix = inputPath.filename().string();
+                    basePath = searchPath.string();
+                    if (!basePath.empty() && basePath.back() != '/' && basePath.back() != '\\') {
+                        basePath += "/";
+                    }
+                }
+            }
+        }
+
+        if (searchPath.empty()) {
+            searchPath = fs::current_path();
+        }
+
+        if (fs::exists(searchPath) && fs::is_directory(searchPath)) {
+            for (const auto& entry : fs::directory_iterator(searchPath)) {
+                std::string filename = entry.path().filename().string();
+
+                // 跳过隐藏文件
+                if (filename.front() == '.') {
+                    continue;
+                }
+
+                // 检查前缀匹配
+                if (prefix.empty() ||
+                    filename.substr(0, std::min(prefix.length(), filename.length())) == prefix) {
+                    if (directories_only && !entry.is_directory()) {
+                        continue;
+                    }
+
+                    std::string fullPath = basePath + filename;
+                    if (entry.is_directory()) {
+                        fullPath += "/";
+                    }
+                    completions.push_back(fullPath);
+                }
+            }
+        }
+    }
+    catch (const std::exception&) {
+        // 忽略错误
+    }
+
+    std::sort(completions.begin(), completions.end());
+    return completions;
+}
+
+void TerminalUtils::showCurrentDirectoryContents(bool directories_only)
+{
+    try {
+        fs::path currentPath = fs::current_path();
+        printColor(_("directory.current") + ": " + currentPath.string(), Color::BRIGHT_CYAN,
+                   TextStyle::BOLD);
+        std::cout << std::endl;
+
+        showDirectoryContents(currentPath.string(), directories_only);
+    }
+    catch (const std::exception& e) {
+        printError(_("error.cannot_read_directory") + ": " + std::string(e.what()));
+    }
+}
+
+void TerminalUtils::showDirectoryContents(const std::string& dirPath, bool directories_only)
+{
+    try {
+        fs::path dir(dirPath);
+        if (!fs::exists(dir) || !fs::is_directory(dir)) {
+            printError(_("error.directory_not_exist") + ": " + dirPath);
+            return;
+        }
+
+        std::vector<std::string> dirs, files;
+
+        for (const auto& entry : fs::directory_iterator(dir)) {
+            std::string name = entry.path().filename().string();
+
+            // 跳过隐藏文件
+            if (name.front() == '.') {
+                continue;
+            }
+
+            if (entry.is_directory()) {
+                dirs.push_back(name + "/");
+            } else if (!directories_only) {
+                files.push_back(name);
+            }
+        }
+
+        // 显示目录
+        if (!dirs.empty()) {
+            printColor(_("directory.folders"), Color::BRIGHT_BLUE, TextStyle::BOLD);
+            std::cout << std::endl;
+            for (const auto& d : dirs) {
+                printColor("  " + d, Color::BRIGHT_BLUE);
+                std::cout << std::endl;
+            }
+        }
+
+        // 显示文件
+        if (!files.empty() && !directories_only) {
+            printColor(_("directory.files"), Color::BRIGHT_GREEN, TextStyle::BOLD);
+            std::cout << std::endl;
+            for (const auto& f : files) {
+                std::cout << "  " << f << std::endl;
+            }
+        }
+
+        std::cout << std::endl;
+    }
+    catch (const std::exception& e) {
+        printError(_("error.cannot_read_dir") + ": " + std::string(e.what()));
+    }
+}
+
+void TerminalUtils::showPathInputHelp()
+{
+    printColor(_("help.path_input_title"), Color::BRIGHT_YELLOW, TextStyle::BOLD);
+    std::cout << std::endl;
+    std::cout << "  - " << _("help.path_input_enter") << std::endl;
+    std::cout << "  - " << _("help.path_input_use_path") << std::endl;
+    std::cout << "  - " << _("help.path_input_browse_dir") << std::endl;
+    std::cout << "  - " << _("help.path_input_quit") << std::endl;
+    std::cout << "  - " << _("help.path_input_help") << std::endl;
+    std::cout << std::endl;
+}
+
+void TerminalUtils::showCompletions(const std::vector<std::string>& completions,
+                                    const std::string& base_path)
+{
+    // Not used in simplified implementation
+}
+
+#ifdef _WIN32
+std::string TerminalUtils::handleWindowsInput(const std::string& prompt, bool directories_only)
+{
+    return "";
+}
+#else
+std::string TerminalUtils::handleUnixInput(const std::string& prompt, bool directories_only)
+{
+    return "";
+}
+#endif
+
+// 实现findCommonPrefix函数
+std::string TerminalUtils::findCommonPrefix(const std::vector<std::string>& completions)
+{
+    if (completions.empty()) {
+        return "";
+    }
+
+    if (completions.size() == 1) {
+        return completions[0];
+    }
+
+    std::string prefix = completions[0];
+    for (size_t i = 1; i < completions.size(); ++i) {
+        size_t j = 0;
+        while (j < prefix.length() && j < completions[i].length() &&
+               prefix[j] == completions[i][j]) {
+            ++j;
+        }
+        prefix = prefix.substr(0, j);
+        if (prefix.empty()) {
+            break;
+        }
+    }
+
+    return prefix;
 }
 
 }}  // namespace neumann::cli

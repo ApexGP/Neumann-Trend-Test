@@ -3,7 +3,7 @@
 > **Language / 语言**: **English** | [中文](README_zh.md)
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/Xyf0606/Neumann-Trend-Test)
-[![Version](https://img.shields.io/badge/version-2.9.0-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/Xyf0606/Neumann-Trend-Test/releases)
 [![Language](https://img.shields.io/badge/language-C%2B%2B-orange.svg)](https://isocpp.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -34,46 +34,92 @@ A professional statistical analysis tool implementing the Neumann trend test for
 
 ### 🎯 User Experience
 
+- **Modern Data Input**: Excel-style dual-pane data editor with real-time editing and validation
 - **Intelligent Configuration**: Isolated user settings with permission-aware management
 - **Batch Processing**: Directory-level batch analysis with smart file organization and bilingual export
 - **Data Visualization**: ASCII/SVG charts with export capabilities (CSV/HTML)
-- **Modern UI**: Colorized terminal output, status bars, and formatted tables
+- **Modern UI**: Colorized terminal output, status bars, formatted tables, and dynamic terminal adaptation
 
-### 🔧 v2.9.0 New Features
+### 🔧 v3.0.0 New Features
 
-- **Enhanced Excel File Support**: True Excel file import functionality
+- **Modern Data Input Interface**: Brand new Excel-style data editor
 
-  - ✅ Complete support for .xlsx file format with real Excel file reading
-  - ✅ ZIP-based Excel file parsing supporting complex Excel structures
-  - ✅ Smart worksheet detection with multi-sheet file and worksheet selection support
-  - ✅ Automatic column type recognition with intelligent time and data column detection
-  - ✅ Shared string table support for proper handling of text content in Excel
-  - ✅ Data preview functionality to view file content before import
-  - ✅ Comprehensive error handling with fallback to CSV format suggestions
+  - ✅ Dual-pane input: Time points and data values displayed side by side, like Excel worksheets
+  - ✅ Modern keyboard navigation: ↑↓ move rows, ←→ switch panes, Enter to edit, Ctrl+S to save
+  - ✅ Smart terminal adaptation: Dynamic row count adjustment, auto-scroll for large datasets
+  - ✅ Real-time status feedback: Visual editing status, colorized interface showing current operations
+  - ✅ Operation convenience: Built-in help system with clear operation guidelines
 
-- **User Experience Optimization**: Complete reconstruction of Excel import workflow
+- **User Experience Optimization**: Complete reconstruction of data input workflow
 
-  - ✅ Removed hardcoded "unsupported" messages, providing true Excel support
-  - ✅ Enhanced file format detection automatically recognizing .xlsx, .xls, .csv formats
-  - ✅ Smart data validation ensuring import data integrity and correctness
-  - ✅ Friendly error messages with clear solution suggestions
+  - ✅ Removed traditional command-line individual input mode, providing modern editing interface
+  - ✅ Enhanced file browser with fixed dynamic display line limitations
+  - ✅ Smart data validation ensuring input data integrity and correctness
+  - ✅ Friendly shortcut operations reducing learning curve and improving efficiency
 
-- **Technical Architecture Enhancement**: Modern Excel processing engine
+- **Technical Architecture Enhancement**: Modern terminal interface based on FTXUI
 
-  - ✅ No third-party Excel libraries required, implemented with standard C++
+  - ✅ No complex third-party libraries required, implemented with standard FTXUI
   - ✅ Cross-platform compatibility supporting Windows, Linux, macOS
-  - ✅ Efficient memory management supporting large Excel file processing
-  - ✅ Automatic temporary file cleanup preventing disk space occupation
+  - ✅ Efficient memory management supporting smooth editing of large datasets
+  - ✅ Modular design with configurable and extensible architecture
 
 ## 🎬 Feature Preview
+
+### 📋 Modern Data Editor - Excel Lovers' Dream Come True
+
+_Say goodbye to traditional command-line input, embrace Excel-style data input experience_ ⚡
+
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="assets/zh_CN/editor.mp4" type="video/mp4">
+</video>
+
+https://github.com/user-attachments/assets/8382115a-d032-4bd2-a3fa-71074b3ec57b
+
+<details>
+<summary>📋 <strong>Modern Data Input Demo Details</strong></summary>
+
+- **Dual-pane side-by-side input**: Time points and data values displayed simultaneously, like Excel worksheets
+- **Modern keyboard navigation**: ↑↓ move rows, ←→ switch panes, Enter to edit, Ctrl+S to save
+- **Smart terminal adaptation**: Dynamic row count adjustment, auto-scroll browsing for large datasets
+- **Real-time status feedback**: Visualized editing state, colorized interface showing current operations
+- **Operation convenience**: Built-in help system with clear, intuitive operation guidelines
+
+</details>
+
+---
+
+### 📁 Smart File Browser - Dynamic Adaptive Modern Navigation
+
+_File browsing and selection made simple, say goodbye to endless clicking_ 🗂️
+
+<video width="100%" height="100%" autoplay loop muted>
+  <source src="assets/zh_CN/file-browser.mp4" type="video/mp4">
+</video>
+
+https://github.com/user-attachments/assets/9a4461a6-d64a-4491-a2bc-2f87475af353
+
+<details>
+<summary>📋 <strong>Smart File Browser Demo Details</strong></summary>
+
+- **Dynamic row count**: Automatically adjusts displayed items based on terminal size (15-45 rows)
+- **Modern keyboard navigation**: ↑↓ select files, ←→ navigate directories, Enter to confirm, q to quit
+- **File type recognition**: Colorized icons distinguish directories, files, archives, and other types
+- **Scroll indicators**: Clear display of current viewing range and total file count
+
+</details>
+
+---
 
 ### 🚀 One-Click Launch - Zero to Analysis in 3 Seconds!
 
 _So simple, even your boss can use it_ 😎
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/startup.mp4" type="video/mp4">
+  <source src="assets/zh_CN/startup.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/1c2286bc-bd08-4dd2-b907-ede47b4e40c2
 
 <details>
 <summary>📋 <strong>Startup Demo Details</strong></summary>
@@ -90,8 +136,10 @@ _So simple, even your boss can use it_ 😎
 _Hierarchical menus, one-click navigation, beloved by professional data analysts_ ⚡
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/cli-interface.mp4" type="video/mp4">
+  <source src="assets/zh_CN/cli-interface.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/59129d8d-25f2-4558-8cb3-a2d56b55b6a2
 
 <details>
 <summary>📋 <strong>CLI Demo Details</strong></summary>
@@ -108,8 +156,10 @@ _Hierarchical menus, one-click navigation, beloved by professional data analysts
 _Beauty meets functionality, making data analysis a visual delight_ ✨
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/web-interface.mp4" type="video/mp4">
+  <source src="assets/zh_CN/web-interface.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/10787d10-9b9e-473b-853b-9d516a224c20
 
 <details>
 <summary>📋 <strong>Web Demo Details</strong></summary>
@@ -126,8 +176,10 @@ _Beauty meets functionality, making data analysis a visual delight_ ✨
 _Witness the moment when data tells its story_ 🔮
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/data-analysis.mp4" type="video/mp4">
+  <source src="assets/zh_CN/data-analysis.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/61fa2714-9015-4f53-a02e-9bda550ec2cc
 
 <details>
 <summary>📋 <strong>Analysis Demo Details</strong></summary>
@@ -144,8 +196,10 @@ _Witness the moment when data tells its story_ 🔮
 _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/batch-processing.mp4" type="video/mp4">
+  <source src="assets/zh_CN/batch-processing.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/af3c8542-f1c7-40ba-852a-625bccbe95d4
 
 <details>
 <summary>📋 <strong>Batch Processing Demo Details</strong></summary>
@@ -164,8 +218,10 @@ _Process an entire folder at once, say goodbye to repetitive work_ 🎯
 _One-click Chinese/English switching, internationally sophisticated_ 🌏
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/i18n.mp4" type="video/mp4">
+  <source src="assets/zh_CN/i18n.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/cb455ee6-dd2e-411f-8ad6-776ac35370bf
 
 <details>
 <summary>📋 <strong>Internationalization Demo Details</strong></summary>
@@ -182,8 +238,10 @@ _One-click Chinese/English switching, internationally sophisticated_ 🌏
 _ASCII art + SVG charts, a dual visual feast_ 📈
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/visualization.mp4" type="video/mp4">
+  <source src="assets/zh_CN/visualization.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/771c70a0-bec0-417c-ab7a-f08ef48cc9b8
 
 <details>
 <summary>📋 <strong>Visualization Demo Details</strong></summary>
@@ -200,8 +258,10 @@ _ASCII art + SVG charts, a dual visual feast_ 📈
 _Set once, use forever_ 💝
 
 <video width="100%" height="100%" autoplay loop muted>
-  <source src="https://neumann-trend-test-assets.oss-cn-shenzhen.aliyuncs.com/assets/zh_CN/config-management.mp4" type="video/mp4">
+  <source src="assets/zh_CN/config-management.mp4" type="video/mp4">
 </video>
+
+https://github.com/user-attachments/assets/af128832-268c-41ef-bbd7-c13a06287c6b
 
 <details>
 <summary>📋 <strong>Configuration Management Demo Details</strong></summary>
@@ -348,6 +408,7 @@ For detailed build instructions, please refer to [Build Documentation](https://g
 
 - **CSV Files**: Fully supported, recommended format, compatible with Excel exports
 - **Excel Files**: ✅ Complete support for .xlsx format, ⚠️ .xls format recommended to convert to .xlsx
+- **Modern Manual Input**: Brand new Excel-style dual-pane data editor
 
 ### Data Requirements
 
@@ -381,25 +442,27 @@ Time,Drug Content
 | CSV Chinese character corruption | Use v2.8.0, UTF-8 BOM support added                      |
 | Batch processing files not found | Check `data/csv/` and `data/html/` directory permissions |
 | Excel file import failure        | Use v2.9.0, complete support for .xlsx format added      |
+| Data editor not responding       | Use v3.0.0, brand new modern input interface             |
 
 ### Performance Recommendations
 
 - **Large Datasets**: Use batch processing mode
 - **Frequent Analysis**: Save commonly used datasets
 - **Web Performance**: CLI recommended for large datasets
+- **Data Input**: Use the new data editor for the best experience
 
 For more issues, please check [FAQ](https://github.com/Xyf0606/Neumann-Trend-Test/blob/main/docs/FAQ.md) or submit an [Issue](https://github.com/Xyf0606/Neumann-Trend-Test/issues).
 
 ## 📦 Version Information
 
-**Current Version**: v2.9.0  
-**Release Date**: January 2, 2025
+**Current Version**: v3.0.0  
+**Release Date**: June 2, 2025
 
 **Major Updates**:
 
-- 🔧 **Enhanced Excel File Support**: Implemented true .xlsx file reading functionality supporting complex Excel structures
-- ✨ **Enhanced User Experience**: Removed hardcoded limitations providing complete Excel import workflow
-- 🛠️ **Technical Architecture Enhancement**: Modern cross-platform Excel processing engine using C++
+- 🚀 **Modern Data Input Revolution**: Introduced Excel-style dual-pane data input interface, completely transforming data input experience
+- ✨ **Significant User Experience Enhancement**: Modern keyboard navigation, smart terminal adaptation, real-time status feedback
+- 🛠️ **Technical Architecture Modernization**: New DataEditor component based on FTXUI framework with complete internationalization support
 
 **Update History**: [CHANGELOG.md](CHANGELOG.md)
 

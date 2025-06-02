@@ -45,6 +45,9 @@ data/html/*.html
 # 资源文件
 # docs/README/assets/
 
+# 调试文件
+debug.txt
+
 # 临时文件
 *.tmp
 *.log

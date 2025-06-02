@@ -80,10 +80,24 @@ BatchProcessResult BatchProcessor::processSingleFile(const std::string& filePath
         std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
         if (extension == ".csv") {
-            dataSet = DataManager::getInstance().importFromCSV(filePath, true);  // 假设有表头
+            // 智能检测CSV文件是否有表头
+            bool hasHeader = detectCSVHeader(filePath);
+            dataSet = DataManager::getInstance().importFromCSV(filePath, hasHeader);
         } else if (extension == ".xlsx" || extension == ".xls") {
             ExcelReader reader;
             dataSet = reader.importFromExcel(filePath, "", true);  // 假设有表头
+        } else if (extension == ".json") {
+            // 加载JSON数据集文件
+            fs::path jsonPath(filePath);
+            std::string datasetName = jsonPath.stem().string();
+            dataSet = DataManager::getInstance().loadDataSet(datasetName);
+
+            // 检查是否成功加载
+            if (dataSet.dataPoints.empty()) {
+                result.status = "error";
+                result.errorMessage = "Failed to load JSON dataset or dataset is empty";
+                return result;
+            }
         } else {
             result.status = "error";
             result.errorMessage = "Unsupported file format: " + extension;
@@ -373,7 +387,7 @@ bool BatchProcessor::exportResultsToHTML(const std::vector<BatchProcessResult>& 
 
 std::vector<std::string> BatchProcessor::getSupportedFormats()
 {
-    return {".csv", ".xlsx", ".xls"};
+    return {".csv", ".xlsx", ".xls", ".json"};
 }
 
 bool BatchProcessor::isSupportedFile(const std::string& filePath)
@@ -409,6 +423,41 @@ std::vector<std::string> BatchProcessor::findSupportedFiles(const std::string& d
     }
 
     return supportedFiles;
+}
+
+bool BatchProcessor::detectCSVHeader(const std::string& filePath)
+{
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        return false;  // 默认假设没有表头
+    }
+
+    std::string firstLine;
+    if (!std::getline(file, firstLine)) {
+        return false;  // 空文件，没有表头
+    }
+
+    // 检查第一行是否包含数字
+    std::stringstream ss(firstLine);
+    std::string cell;
+    int numericCells = 0;
+    int totalCells = 0;
+
+    while (std::getline(ss, cell, ',')) {
+        totalCells++;
+        // 尝试解析为数字
+        try {
+            std::stod(cell);
+            numericCells++;
+        }
+        catch (...) {
+            // 不是数字，可能是文本表头
+        }
+    }
+
+    // 如果第一行大部分是文本（非数字），则认为是表头
+    // 至少有一半以上的单元格不是数字才认为是表头
+    return totalCells > 0 && (numericCells < totalCells / 2);
 }
 
 }  // namespace neumann
